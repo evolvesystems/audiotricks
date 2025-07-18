@@ -4,17 +4,21 @@ import {
   DocumentTextIcon, 
   StarIcon,
   ArrowDownTrayIcon,
-  MicrophoneIcon
+  MicrophoneIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 import { AudioProcessingResponse } from '../types'
 import PodcastsTab from './PodcastsTab'
+import TranscriptDisplay from './TranscriptDisplay'
+import CostEstimate from './CostEstimate'
 
 interface ResultsDisplayProps {
   results: AudioProcessingResponse
   onExport: (format: 'txt' | 'json') => void
+  showCostEstimates?: boolean
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport, showCostEstimates = true }) => {
   const [activeTab, setActiveTab] = useState<'transcript' | 'summary' | 'podcasts'>('summary')
 
   const getImportanceColor = (importance: string) => {
@@ -34,27 +38,41 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Processing Results</h2>
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <div className="flex items-center space-x-1">
-              <ClockIcon className="h-4 w-4" />
-              <span>Duration: {formatDuration(results.summary.total_duration)}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <DocumentTextIcon className="h-4 w-4" />
-              <span>{results.summary.word_count} words</span>
+    <div className="w-full max-w-5xl mx-auto space-y-6">
+      {/* Results Header Card */}
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-white">Processing Complete</h2>
+            <div className="flex items-center space-x-4 text-sm text-blue-100">
+              <div className="flex items-center space-x-1">
+                <ClockIcon className="h-4 w-4" />
+                <span>{formatDuration(results.summary.total_duration)}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <DocumentTextIcon className="h-4 w-4" />
+                <span>{results.summary.word_count} words</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Cost Estimate */}
+        {showCostEstimates && results.summary.total_duration && (
+          <div className="px-6 py-3 bg-blue-50 border-t border-blue-200">
+            <CostEstimate 
+              duration={results.summary.total_duration}
+              showDetailed={true}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Tabs */}
-      <div className="px-6 pt-4">
-        <div className="flex space-x-1 border-b border-gray-200">
+      {/* Main Content Card */}
+      <div className="bg-white rounded-lg shadow-lg">
+        {/* Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex space-x-1 px-6 pt-4">
           <button
             onClick={() => setActiveTab('summary')}
             className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
@@ -86,17 +104,20 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
             <MicrophoneIcon className="h-4 w-4" />
             <span>Podcasts</span>
           </button>
+          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="p-6">
+        {/* Content */}
+        <div className="p-6">
         {activeTab === 'summary' ? (
           <div className="space-y-6">
             {/* Summary */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Summary</h3>
-              <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                <SparklesIcon className="h-5 w-5 mr-2 text-blue-600" />
+                Summary
+              </h3>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {results.summary.summary}
                 </p>
@@ -132,24 +153,32 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
             </div>
           </div>
         ) : activeTab === 'transcript' ? (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Full Transcript</h3>
-            <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {results.transcript.text}
-              </p>
-            </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Full Transcript</h3>
+            <TranscriptDisplay 
+              transcript={results.transcript.text}
+              duration={results.transcript.duration}
+            />
           </div>
         ) : (
           <PodcastsTab results={results} />
         )}
+        </div>
       </div>
 
-      {/* Export Actions */}
-      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+      {/* Export Actions Card */}
+      <div className="bg-white rounded-lg shadow-lg">
+        <div className="px-6 py-4 bg-gray-50 rounded-lg">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Processing completed in {results.processing_time}s
+          <div className="space-y-1">
+            <div className="text-sm text-gray-500">
+              Processing completed in {results.processing_time}s
+            </div>
+            {showCostEstimates && results.summary.total_duration && (
+              <div className="text-xs text-gray-500">
+                Estimated API cost based on {formatDuration(results.summary.total_duration)} of audio
+              </div>
+            )}
           </div>
           <div className="flex space-x-2">
             <button
@@ -167,6 +196,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
               Export JSON
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>

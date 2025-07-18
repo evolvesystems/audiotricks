@@ -32,6 +32,7 @@ export interface SummaryResponse {
   key_moments: KeyMoment[]
   total_duration?: number
   word_count: number
+  language?: string
 }
 
 export interface AudioProcessingResponse {

@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles for formatted content */
+@layer components {
+  .formatted-content h4 {
+    @apply font-semibold text-gray-900 mt-4 mb-2 text-base;
+  }
+  
+  .formatted-content strong {
+    @apply font-semibold text-gray-900;
+  }
+  
+  .formatted-content p {
+    @apply mb-2 text-gray-700;
+  }
+  
+  .formatted-content ul {
+    @apply list-disc ml-4 mb-4;
+  }
+  
+  .formatted-content li {
+    @apply mb-1 text-gray-700;
+  }
+}
