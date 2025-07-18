@@ -17,6 +17,14 @@ const ElevenLabsKeyInput: React.FC<ElevenLabsKeyInputProps> = ({ apiKey, onApiKe
   const [isValid, setIsValid] = useState<boolean | null>(null)
   const [isValidating, setIsValidating] = useState(false)
 
+  // Initialize with environment variable if available
+  React.useEffect(() => {
+    const envKey = import.meta.env.VITE_ELEVENLABS_API_KEY
+    if (envKey && envKey !== 'your_elevenlabs_api_key_here' && !apiKey) {
+      onApiKeyChange(envKey)
+    }
+  }, [])
+
   const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newKey = e.target.value
     onApiKeyChange(newKey)
