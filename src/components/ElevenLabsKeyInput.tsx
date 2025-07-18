@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { EyeIcon, EyeSlashIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, SpeakerWaveIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 
 interface ElevenLabsKeyInputProps {
   apiKey: string
@@ -10,6 +10,7 @@ interface ElevenLabsKeyInputProps {
 const ElevenLabsKeyInput: React.FC<ElevenLabsKeyInputProps> = ({ apiKey, onApiKeyChange, isGuest = false }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [tempKey, setTempKey] = useState(apiKey)
 
   const handleSave = () => {
@@ -40,6 +41,31 @@ const ElevenLabsKeyInput: React.FC<ElevenLabsKeyInputProps> = ({ apiKey, onApiKe
             Change
           </button>
         )}
+        <div className="relative">
+          <button
+            onClick={() => setShowHelp(!showHelp)}
+            className="text-gray-400 hover:text-gray-600"
+            title="How to get ElevenLabs API key"
+          >
+            <QuestionMarkCircleIcon className="h-4 w-4" />
+          </button>
+          {showHelp && (
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
+              <h4 className="font-semibold text-gray-900 mb-2">How to get ElevenLabs API Key</h4>
+              <ol className="text-sm text-gray-700 space-y-1">
+                <li>1. Go to <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">elevenlabs.io</a></li>
+                <li>2. Sign up or log in to your account</li>
+                <li>3. Click your profile icon (top right)</li>
+                <li>4. Select "Profile + API Key"</li>
+                <li>5. Copy your API key</li>
+                <li>6. Paste it here</li>
+              </ol>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Free tier: 10K characters/month. Optional for voice synthesis.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     )
   }

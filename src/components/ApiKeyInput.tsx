@@ -42,6 +42,31 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
             Change
           </button>
         )}
+        <div className="relative">
+          <button
+            onClick={() => setShowHelp(!showHelp)}
+            className="text-gray-400 hover:text-gray-600"
+            title="How to get OpenAI API key"
+          >
+            <QuestionMarkCircleIcon className="h-4 w-4" />
+          </button>
+          {showHelp && (
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
+              <h4 className="font-semibold text-gray-900 mb-2">How to get OpenAI API Key</h4>
+              <ol className="text-sm text-gray-700 space-y-1">
+                <li>1. Go to <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">platform.openai.com</a></li>
+                <li>2. Sign up or log in to your account</li>
+                <li>3. Navigate to "API Keys" section</li>
+                <li>4. Click "Create new secret key"</li>
+                <li>5. Copy the key (starts with "sk-")</li>
+                <li>6. Paste it here</li>
+              </ol>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Your key is stored locally and never sent to our servers
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
@@ -85,6 +110,32 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
           Cancel
         </button>
       )}
+      
+      <div className="relative">
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-gray-400 hover:text-gray-600"
+          title="How to get OpenAI API key"
+        >
+          <QuestionMarkCircleIcon className="h-4 w-4" />
+        </button>
+        {showHelp && (
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
+            <h4 className="font-semibold text-gray-900 mb-2">How to get OpenAI API Key</h4>
+            <ol className="text-sm text-gray-700 space-y-1">
+              <li>1. Go to <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">platform.openai.com</a></li>
+              <li>2. Sign up or log in to your account</li>
+              <li>3. Navigate to "API Keys" section</li>
+              <li>4. Click "Create new secret key"</li>
+              <li>5. Copy the key (starts with "sk-")</li>
+              <li>6. Paste it here</li>
+            </ol>
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Your key is stored locally and never sent to our servers
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
