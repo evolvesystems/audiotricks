@@ -30,6 +30,7 @@ function App() {
   const [showHelp, setShowHelp] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [showQuickActions, setShowQuickActions] = useState(true)
   const { settings, updateSettings } = useSettings()
   const { history, addToHistory, removeFromHistory, clearHistory, refreshHistory } = useHistory()
   
@@ -318,15 +319,18 @@ function App() {
             <UseCasesSection />
             
             {/* Quick Actions Sidebar - Now as a floating element */}
-            <div className="fixed bottom-6 right-6 space-y-4 z-40 hidden lg:block">
-              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
-                <QuickActions 
-                  onShowHistory={() => setShowHistory(true)}
-                  onShowHelp={() => setShowHelp(true)}
-                  historyCount={history.length}
-                />
+            {showQuickActions && (
+              <div className="fixed bottom-6 right-6 space-y-4 z-40 hidden lg:block">
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
+                  <QuickActions 
+                    onShowHistory={() => setShowHistory(true)}
+                    onShowHelp={() => setShowHelp(true)}
+                    historyCount={history.length}
+                    onClose={() => setShowQuickActions(false)}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </>
         ) : (
           <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">

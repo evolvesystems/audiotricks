@@ -5,7 +5,8 @@ import {
   SparklesIcon,
   CurrencyDollarIcon,
   ShieldCheckIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 interface QuickActionsProps {
@@ -60,9 +61,20 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="text-center pb-2 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-        <p className="text-sm text-gray-500">Get help and access your history</p>
+      <div className="flex items-center justify-between pb-2 border-b border-gray-200">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+          <p className="text-sm text-gray-500">Get help and access your history</p>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+            title="Close"
+          >
+            <XMarkIcon className="h-5 w-5 text-gray-400" />
+          </button>
+        )}
       </div>
 
       {/* History */}
