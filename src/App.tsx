@@ -7,6 +7,9 @@ import Login from './components/Login'
 import LoginCard from './components/LoginCard'
 import Settings from './components/Settings'
 import HeroSection from './components/HeroSection'
+import HeroUploadSection from './components/HeroUploadSection'
+import FeaturesSection from './components/FeaturesSection'
+import UseCasesSection from './components/UseCasesSection'
 import HelpCenter from './components/HelpCenter'
 import History from './components/History'
 import HistoryDropdown from './components/HistoryDropdown'
@@ -272,47 +275,56 @@ function App() {
       <main>
         {!results ? (
           <>
-            <HeroSection />
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content - Upload Area */}
-                <div className="lg:col-span-2 space-y-6">
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                      <div className="flex">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-red-800">
-                            Processing Error
-                          </h3>
-                          <div className="mt-2 text-sm text-red-700">
-                            {error}
-                          </div>
+            <HeroSection onGetStarted={() => {
+              // Scroll to upload section
+              const uploadSection = document.getElementById('upload-section')
+              if (uploadSection) {
+                uploadSection.scrollIntoView({ behavior: 'smooth' })
+              }
+            }} />
+            
+            <div id="upload-section">
+              {error && (
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">
+                          Processing Error
+                        </h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          {error}
                         </div>
                       </div>
                     </div>
-                  )}
-
-                  <AudioUploader 
-                    apiKey={apiKey}
-                    onProcessingComplete={handleProcessingComplete}
-                    onError={handleError}
-                    defaultSettings={settings}
-                  />
+                  </div>
                 </div>
-                
-                {/* Sidebar - Quick Actions */}
-                <div className="space-y-6">
-                  <QuickActions 
-                    onShowHistory={() => setShowHistory(true)}
-                    onShowHelp={() => setShowHelp(true)}
-                    historyCount={history.length}
-                  />
-                </div>
+              )}
+              
+              <HeroUploadSection 
+                apiKey={apiKey}
+                onProcessingComplete={handleProcessingComplete}
+                onError={handleError}
+                defaultSettings={settings}
+              />
+            </div>
+            
+            <FeaturesSection />
+            <UseCasesSection />
+            
+            {/* Quick Actions Sidebar - Now as a floating element */}
+            <div className="fixed bottom-6 right-6 space-y-4 z-40">
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
+                <QuickActions 
+                  onShowHistory={() => setShowHistory(true)}
+                  onShowHelp={() => setShowHelp(true)}
+                  historyCount={history.length}
+                />
               </div>
             </div>
           </>
