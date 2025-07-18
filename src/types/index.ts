@@ -39,4 +39,6 @@ export interface AudioProcessingResponse {
   transcript: TranscriptionResponse
   summary: SummaryResponse
   processing_time: number
+  audioUrl?: string
+  audioFile?: File
 }
