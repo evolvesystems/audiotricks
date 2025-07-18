@@ -1522,11 +1522,11 @@ The recovery tool searches for data in multiple formats:
 5. **Copy data and contact support**
 
 ### localStorage Keys to Check
-- `audioTricks_history`
-- `audioTricksResults`
-- `openai_results`
-- `transcription_history`
-- `audio_history`
+- \`audioTricks_history\`
+- \`audioTricksResults\`
+- \`openai_results\`
+- \`transcription_history\`
+- \`audio_history\`
 
 ### Data Export
 Before recovery:
@@ -1591,10 +1591,10 @@ For technical users:
 4. **Check system backups**: Time Machine, System Restore
 
 ### Data Locations
-- **Chrome**: `%APPDATA%/Google/Chrome/User Data/Default/Local Storage`
-- **Firefox**: `%APPDATA%/Mozilla/Firefox/Profiles/[profile]/storage/default`
-- **Safari**: `~/Library/Safari/LocalStorage`
-- **Edge**: `%APPDATA%/Microsoft/Edge/User Data/Default/Local Storage`
+- **Chrome**: \`%APPDATA%/Google/Chrome/User Data/Default/Local Storage\`
+- **Firefox**: \`%APPDATA%/Mozilla/Firefox/Profiles/[profile]/storage/default\`
+- **Safari**: \`~/Library/Safari/LocalStorage\`
+- **Edge**: \`%APPDATA%/Microsoft/Edge/User Data/Default/Local Storage\`
 
 ### Third-Party Tools
 - **Browser data recovery**: Specialized software

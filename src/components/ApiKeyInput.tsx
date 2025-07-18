@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { EyeIcon, EyeSlashIcon, KeyIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 
 interface ApiKeyInputProps {
@@ -12,7 +12,24 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
   const [isEditing, setIsEditing] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [tempKey, setTempKey] = useState(apiKey)
+  const helpRef = useRef<HTMLDivElement>(null)
   const isEnvKey = import.meta.env.VITE_OPENAI_API_KEY
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (helpRef.current && !helpRef.current.contains(event.target as Node)) {
+        setShowHelp(false)
+      }
+    }
+
+    if (showHelp) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showHelp])
 
   const handleSave = () => {
     onApiKeyChange(tempKey)
@@ -42,7 +59,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
             Change
           </button>
         )}
-        <div className="relative">
+        <div className="relative" ref={helpRef}>
           <button
             onClick={() => setShowHelp(!showHelp)}
             className="text-gray-400 hover:text-gray-600"
