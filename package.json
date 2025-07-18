@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build --outDir ../static/dist",
+    "build": "vite build",
     "dev": "vite --port 3001",
     "preview": "vite preview"
   },
