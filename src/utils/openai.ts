@@ -101,7 +101,8 @@ export async function processAudioWithOpenAI(
   return {
     transcript,
     summary,
-    processing_time: Number(processingTime.toFixed(2))
+    processing_time: Number(processingTime.toFixed(2)),
+    audioUrl: url
   }
 }
 
