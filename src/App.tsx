@@ -100,6 +100,8 @@ function App() {
   const handleLogin = (guestMode: boolean = false) => {
     setIsAuthenticated(true)
     setIsGuest(guestMode)
+    sessionStorage.setItem('authenticated', 'true')
+    sessionStorage.setItem('isGuest', guestMode.toString())
   }
 
   const handleLogout = () => {
@@ -108,21 +110,15 @@ function App() {
     sessionStorage.removeItem('isGuest')
     
     // Reset state
-    setIsAuthenticated(false)
-    setIsGuest(false)
+    setIsAuthenticated(true) // Stay authenticated but go back to guest mode
+    setIsGuest(true)
     setResults(null)
     setError('')
     
-    // For guest users, also clear local storage
-    if (isGuest) {
-      localStorage.removeItem('openai_api_key')
-      localStorage.removeItem('elevenlabs_api_key')
-      setApiKey('')
-    }
-  }
-
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />
+    // Clear local storage
+    localStorage.removeItem('openai_api_key')
+    localStorage.removeItem('elevenlabs_api_key')
+    setApiKey('')
   }
 
   return (
