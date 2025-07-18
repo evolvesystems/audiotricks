@@ -26,6 +26,42 @@ export const useHistory = () => {
           const parsed = JSON.parse(stored)
           setHistory(parsed)
         }
+        
+        // Migration: Check for old audioTricksResults and migrate
+        const oldResults = localStorage.getItem('audioTricksResults')
+        if (oldResults && (!stored || JSON.parse(stored).length === 0)) {
+          try {
+            const oldData = JSON.parse(oldResults)
+            if (Array.isArray(oldData) && oldData.length > 0) {
+              // Convert old format to new history format
+              const migratedHistory = oldData.map((item: any, index: number) => ({
+                id: item.id || Date.now().toString() + index,
+                timestamp: item.timestamp || new Date().toISOString(),
+                title: item.transcript?.text?.substring(0, 100) + '...' || 'Migrated Audio',
+                duration: item.summary?.total_duration,
+                wordCount: item.summary?.word_count || 0,
+                language: item.summary?.language || 'en',
+                results: {
+                  transcript: item.transcript || { text: '' },
+                  summary: item.summary || { summary: '', key_moments: [], word_count: 0 },
+                  processing_time: item.processing_time || 0,
+                  audioUrl: item.audioUrl,
+                  audioFile: undefined // Remove any file references
+                }
+              }))
+              
+              setHistory(migratedHistory)
+              // Save migrated data
+              localStorage.setItem(HISTORY_KEY, JSON.stringify(migratedHistory))
+              console.log('Migrated', migratedHistory.length, 'items from old storage format')
+              
+              // Optional: Remove old data after successful migration
+              // localStorage.removeItem('audioTricksResults')
+            }
+          } catch (migrationError) {
+            console.error('Error migrating old data:', migrationError)
+          }
+        }
       } catch (error) {
         console.error('Error loading history:', error)
       }
@@ -36,6 +72,9 @@ export const useHistory = () => {
   // Save history to localStorage whenever it changes
   useEffect(() => {
     try {
+      if (history.length > 0) {
+        console.log('Saving', history.length, 'items to history')
+      }
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
     } catch (error) {
       console.error('Error saving history:', error)
@@ -48,6 +87,12 @@ export const useHistory = () => {
   }, [history])
 
   const addToHistory = (results: AudioProcessingResponse) => {
+    // Remove File object before storing (can't be serialized)
+    const sanitizedResults = {
+      ...results,
+      audioFile: undefined  // Remove File object
+    }
+    
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
@@ -55,7 +100,7 @@ export const useHistory = () => {
       duration: results.summary.total_duration,
       wordCount: results.summary.word_count,
       language: results.summary.language || 'en',
-      results
+      results: sanitizedResults
     }
 
     setHistory(prev => {

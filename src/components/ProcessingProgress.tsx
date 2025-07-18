@@ -53,8 +53,10 @@ const ProcessingProgress: React.FC<ProcessingProgressProps> = ({ stage, fileName
                   )}
                 </div>
                 {isActive && (
-                  <div className="mt-1 w-full bg-gray-200 rounded-full h-1">
-                    <div className="bg-blue-600 h-1 rounded-full animate-progress" />
+                  <div className="mt-1 w-full bg-gray-200 rounded-full h-1 overflow-hidden">
+                    <div className="bg-blue-600 h-1 rounded-full" style={{
+                      animation: 'progress 3s ease-in-out infinite'
+                    }} />
                   </div>
                 )}
               </div>
@@ -62,16 +64,6 @@ const ProcessingProgress: React.FC<ProcessingProgressProps> = ({ stage, fileName
           )
         })}
       </div>
-      
-      <style jsx>{`
-        @keyframes progress {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-        .animate-progress {
-          animation: progress 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   )
 }

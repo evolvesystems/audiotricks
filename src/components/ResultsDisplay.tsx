@@ -11,6 +11,7 @@ import { AudioProcessingResponse } from '../types'
 import PodcastsTab from './PodcastsTab'
 import TranscriptDisplay from './TranscriptDisplay'
 import CostEstimate from './CostEstimate'
+import AudioPlayer from './AudioPlayer'
 
 interface ResultsDisplayProps {
   results: AudioProcessingResponse
@@ -67,6 +68,17 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport, show
           </div>
         )}
       </div>
+
+      {/* Audio Player */}
+      {(results.audioUrl || results.audioFile) && (
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <AudioPlayer 
+            audioUrl={results.audioUrl}
+            audioFile={results.audioFile}
+            title="Original Audio"
+          />
+        </div>
+      )}
 
       {/* Main Content Card */}
       <div className="bg-white rounded-lg shadow-lg">

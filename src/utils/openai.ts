@@ -102,7 +102,7 @@ export async function processAudioWithOpenAI(
     transcript,
     summary,
     processing_time: Number(processingTime.toFixed(2)),
-    audioUrl: url
+    audioFile: file
   }
 }
 
