@@ -306,6 +306,30 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
           onEnded={() => setIsPlaying(false)}
         />
 
+        {/* Audio Progress Bar */}
+        <div className="mb-4">
+          <div 
+            className="relative h-2 bg-gray-300 rounded-full cursor-pointer overflow-hidden"
+            onClick={(e) => {
+              const audio = audioRef.current
+              if (!audio) return
+              
+              const rect = e.currentTarget.getBoundingClientRect()
+              const x = e.clientX - rect.left
+              const percentage = x / rect.width
+              const newTime = percentage * (results.summary.total_duration || 0)
+              
+              audio.currentTime = newTime
+              setCurrentTime(newTime)
+            }}
+          >
+            <div 
+              className="absolute h-full bg-blue-600 rounded-full transition-all duration-100"
+              style={{ width: `${(results.summary.total_duration || 0) > 0 ? (currentTime / (results.summary.total_duration || 0)) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+
         <div className="flex items-center space-x-4">
           <button
             onClick={togglePlayPause}
