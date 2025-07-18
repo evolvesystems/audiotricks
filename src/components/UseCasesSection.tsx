@@ -113,8 +113,11 @@ const UseCasesSection: React.FC = () => {
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
               Loved by Thousands of Users
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 mb-2">
               See what our customers are saying about their experience with AudioTricks
+            </p>
+            <p className="text-sm text-gray-500 italic">
+              (Mockup testimonials - but people would definitely say this for sure!)
             </p>
           </div>
 
@@ -146,22 +149,25 @@ const UseCasesSection: React.FC = () => {
 
         {/* Stats */}
         <div className="mt-16 text-center">
+          <p className="text-sm text-gray-500 mb-6 italic">
+            *Projected capabilities based on OpenAI Whisper & GPT-4 technology
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-3xl font-bold text-blue-600 mb-2">10k+</div>
-              <div className="text-gray-600">Hours Transcribed</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">Ready</div>
+              <div className="text-gray-600">To Scale</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="text-3xl font-bold text-green-600 mb-2">99.5%</div>
-              <div className="text-gray-600">Accuracy Rate</div>
+              <div className="text-gray-600">Whisper Accuracy*</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="text-3xl font-bold text-purple-600 mb-2">100+</div>
-              <div className="text-gray-600">Languages</div>
+              <div className="text-gray-600">Languages*</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">Processing</div>
+              <div className="text-gray-600">Processing*</div>
             </div>
           </div>
         </div>

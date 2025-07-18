@@ -56,15 +56,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
             <div className="text-3xl font-bold text-white mb-2">99.5%</div>
-            <div className="text-blue-100">Transcription Accuracy</div>
+            <div className="text-blue-100">Whisper Accuracy</div>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
             <div className="text-3xl font-bold text-white mb-2">100+</div>
             <div className="text-blue-100">Languages Supported</div>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-            <div className="text-3xl font-bold text-white mb-2">10x</div>
-            <div className="text-blue-100">Faster Than Manual</div>
+            <div className="text-3xl font-bold text-white mb-2">AI</div>
+            <div className="text-blue-100">Powered</div>
           </div>
         </div>
       </div>
