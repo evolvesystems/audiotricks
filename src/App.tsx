@@ -318,7 +318,7 @@ function App() {
             <UseCasesSection />
             
             {/* Quick Actions Sidebar - Now as a floating element */}
-            <div className="fixed bottom-6 right-6 space-y-4 z-40">
+            <div className="fixed bottom-6 right-6 space-y-4 z-40 hidden lg:block">
               <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
                 <QuickActions 
                   onShowHistory={() => setShowHistory(true)}

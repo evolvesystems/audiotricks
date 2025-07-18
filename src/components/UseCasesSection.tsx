@@ -87,8 +87,8 @@ const UseCasesSection: React.FC = () => {
             return (
               <div key={index} className="group bg-gray-50 rounded-2xl p-8 hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-gray-200">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-4 rounded-xl bg-${useCase.color}-100 group-hover:bg-${useCase.color}-600 transition-colors duration-300`}>
-                    <Icon className={`h-8 w-8 text-${useCase.color}-600 group-hover:text-white transition-colors duration-300`} />
+                  <div className="p-4 rounded-xl bg-blue-100 group-hover:bg-blue-600 transition-colors duration-300">
+                    <Icon className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors duration-300" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{useCase.title}</h3>

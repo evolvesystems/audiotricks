@@ -107,8 +107,8 @@ const FeaturesSection: React.FC = () => {
             return (
               <div key={index} className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-3 rounded-xl bg-${feature.color}-100 flex-shrink-0`}>
-                    <Icon className={`h-8 w-8 text-${feature.color}-600`} />
+                  <div className="p-3 rounded-xl bg-blue-100 flex-shrink-0">
+                    <Icon className="h-8 w-8 text-blue-600" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
@@ -116,7 +116,7 @@ const FeaturesSection: React.FC = () => {
                     <ul className="space-y-2">
                       {feature.details.map((detail, idx) => (
                         <li key={idx} className="flex items-center text-sm text-gray-500">
-                          <CheckCircleIcon className={`h-4 w-4 text-${feature.color}-500 mr-2 flex-shrink-0`} />
+                          <CheckCircleIcon className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
                           {detail}
                         </li>
                       ))}
