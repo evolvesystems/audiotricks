@@ -3,9 +3,11 @@ import {
   ClockIcon, 
   DocumentTextIcon, 
   StarIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  MicrophoneIcon
 } from '@heroicons/react/24/outline'
 import { AudioProcessingResponse } from '../types'
+import PodcastsTab from './PodcastsTab'
 
 interface ResultsDisplayProps {
   results: AudioProcessingResponse
@@ -13,7 +15,7 @@ interface ResultsDisplayProps {
 }
 
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) => {
-  const [activeTab, setActiveTab] = useState<'transcript' | 'summary'>('summary')
+  const [activeTab, setActiveTab] = useState<'transcript' | 'summary' | 'podcasts'>('summary')
 
   const getImportanceColor = (importance: string) => {
     switch (importance) {
@@ -73,6 +75,17 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
           >
             Full Transcript
           </button>
+          <button
+            onClick={() => setActiveTab('podcasts')}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg inline-flex items-center space-x-1 ${
+              activeTab === 'podcasts'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <MicrophoneIcon className="h-4 w-4" />
+            <span>Podcasts</span>
+          </button>
         </div>
       </div>
 
@@ -118,7 +131,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
               </div>
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'transcript' ? (
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">Full Transcript</h3>
             <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
@@ -127,6 +140,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport }) =>
               </p>
             </div>
           </div>
+        ) : (
+          <PodcastsTab results={results} />
         )}
       </div>
 
