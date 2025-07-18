@@ -5,9 +5,11 @@ import {
   ScissorsIcon,
   ArrowDownTrayIcon,
   TrashIcon,
-  ArrowUturnLeftIcon
+  ArrowUturnLeftIcon,
+  SpeakerWaveIcon
 } from '@heroicons/react/24/outline'
 import { AudioProcessingResponse } from '../types'
+import VoiceSynthesis from './VoiceSynthesis'
 
 interface WordTimestamp {
   word: string
@@ -30,6 +32,7 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
   const [dragStartIndex, setDragStartIndex] = useState<number | null>(null)
+  const [activeTab, setActiveTab] = useState<'edit' | 'synthesis'>('edit')
   
   const audioRef = useRef<HTMLAudioElement>(null)
   const editorRef = useRef<HTMLDivElement>(null)
@@ -124,6 +127,13 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
       audio.currentTime = words[wordIndex].start
       setCurrentTime(words[wordIndex].start)
     }
+  }
+
+  const getEditedWords = () => {
+    return words.map(word => ({
+      word: word.word,
+      deleted: word.deleted
+    }))
   }
 
   const handleWordClick = (wordIndex: number, isCtrlClick: boolean = false, isShiftClick: boolean = false, event: React.MouseEvent) => {
@@ -290,14 +300,47 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
 
   return (
     <div className="space-y-6">
-      {/* Audio Player Controls */}
+      {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-gray-900">Audio Editor</h3>
           <div className="text-sm text-gray-500">
             {formatTime(currentTime)} / {formatTime(results.summary.total_duration || 0)}
           </div>
         </div>
+
+        {/* Tab Buttons */}
+        <div className="flex space-x-2 mb-6">
+          <button
+            onClick={() => setActiveTab('edit')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'edit' 
+                ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <ScissorsIcon className="h-5 w-5" />
+            <span>Edit Transcript</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveTab('synthesis')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'synthesis' 
+                ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <SpeakerWaveIcon className="h-5 w-5" />
+            <span>Voice Synthesis</span>
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'edit' ? (
+        <>
+          {/* Audio Player Controls */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
 
         <audio
           ref={audioRef}
@@ -429,29 +472,37 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
         </div>
       </div>
 
-      {/* Statistics */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-gray-900">
-              {words.filter(w => !w.deleted).length}
+          {/* Statistics */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {words.filter(w => !w.deleted).length}
+                </div>
+                <div className="text-sm text-gray-600">Words Remaining</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-red-600">
+                  {words.filter(w => w.deleted).length}
+                </div>
+                <div className="text-sm text-gray-600">Words Deleted</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {selectedWords.size}
+                </div>
+                <div className="text-sm text-gray-600">Words Selected</div>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">Words Remaining</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-red-600">
-              {words.filter(w => w.deleted).length}
-            </div>
-            <div className="text-sm text-gray-600">Words Deleted</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-blue-600">
-              {selectedWords.size}
-            </div>
-            <div className="text-sm text-gray-600">Words Selected</div>
-          </div>
-        </div>
-      </div>
+        </>
+      ) : (
+        /* Voice Synthesis Tab */
+        <VoiceSynthesis 
+          results={results} 
+          editedWords={getEditedWords()}
+        />
+      )}
     </div>
   )
 }

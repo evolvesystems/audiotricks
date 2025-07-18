@@ -76,7 +76,7 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
       'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.mp4', '.mpeg', '.mpga', '.webm']
     },
     multiple: false,
-    maxSize: 25 * 1024 * 1024, // 25MB
+    maxSize: 100 * 1024 * 1024, // 100MB
   })
 
   const handleUrlSubmit = async () => {
