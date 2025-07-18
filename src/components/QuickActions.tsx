@@ -46,6 +46,8 @@ const QuickActions: React.FC<QuickActionsProps> = ({
   const features = [
     '🎯 Accurate transcription with Whisper',
     '✨ AI-powered summaries with GPT-4',
+    '🗣️ Voice synthesis with ElevenLabs',
+    '✂️ Word-level audio editing',
     '🌍 Multi-language support',
     '📊 Key moments extraction',
     '💾 Automatic history saving',

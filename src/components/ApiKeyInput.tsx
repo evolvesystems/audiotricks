@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { EyeIcon, EyeSlashIcon, KeyIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, KeyIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 
 interface ApiKeyInputProps {
   apiKey: string
@@ -10,6 +10,7 @@ interface ApiKeyInputProps {
 const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGuest = false }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [tempKey, setTempKey] = useState(apiKey)
   const isEnvKey = import.meta.env.VITE_OPENAI_API_KEY
 

@@ -334,6 +334,7 @@ function App() {
                   showCostEstimates={settings.showCostEstimates}
                   onReprocess={handleReprocess}
                   elevenLabsKey={elevenLabsKey}
+                  currentSettings={settings}
                 />
               </div>
             </div>

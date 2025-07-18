@@ -1,5 +1,5 @@
 import React from 'react'
-import { MicrophoneIcon, SparklesIcon, LanguageIcon } from '@heroicons/react/24/outline'
+import { MicrophoneIcon, SparklesIcon, LanguageIcon, SpeakerWaveIcon, ScissorsIcon } from '@heroicons/react/24/outline'
 
 const HeroSection: React.FC = () => {
   const features = [
@@ -14,6 +14,16 @@ const HeroSection: React.FC = () => {
       description: 'GPT-4 creates comprehensive summaries with key takeaways'
     },
     {
+      icon: SpeakerWaveIcon,
+      title: 'Voice Synthesis',
+      description: 'Transform transcripts into natural speech with ElevenLabs AI'
+    },
+    {
+      icon: ScissorsIcon,
+      title: 'Audio Editor',
+      description: 'Word-level editing with timestamps and audio splicing'
+    },
+    {
       icon: LanguageIcon,
       title: 'Multi-Language',
       description: 'Transcribe any language, summarize in 10+ languages'
@@ -26,12 +36,13 @@ const HeroSection: React.FC = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Transform Audio into Actionable Insights
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
           Upload or link to any audio file and get accurate transcripts, 
-          comprehensive summaries, and key moments extracted automatically.
+          comprehensive summaries, and key moments. Then edit with precision, 
+          create audio clips, and generate natural speech from your text.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-6xl mx-auto">
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (

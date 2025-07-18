@@ -31,9 +31,10 @@ interface ResultsDisplayProps {
   showCostEstimates?: boolean
   onReprocess?: (newResults: AudioProcessingResponse) => void
   elevenLabsKey: string
+  currentSettings?: any // Pass current user settings
 }
 
-const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, showCostEstimates = true, onReprocess, elevenLabsKey }) => {
+const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, showCostEstimates = true, onReprocess, elevenLabsKey, currentSettings }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'transcript' | 'podcasts' | 'editor'>('overview')
   const [expandedMoment, setExpandedMoment] = useState<number | null>(null)
   const [showReprocessModal, setShowReprocessModal] = useState(false)
@@ -438,11 +439,11 @@ const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, sho
         onReprocess={handleReprocess}
         isProcessing={isReprocessing}
         currentSettings={{
-          summaryStyle: 'formal' as SummaryStyle,
-          language: results.summary.language || 'en',
+          summaryStyle: (currentSettings?.summaryStyle || 'formal') as SummaryStyle,
+          language: currentSettings?.language || results.summary.language || 'en',
           gptSettings: {
-            temperature: 0.3,
-            maxTokens: 2000
+            temperature: currentSettings?.gptSettings?.temperature || 0.3,
+            maxTokens: currentSettings?.gptSettings?.maxTokens || 2000
           }
         }}
       />
