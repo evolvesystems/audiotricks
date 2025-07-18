@@ -54,7 +54,7 @@ npm run build
 ## Usage
 
 1. Enter your OpenAI API key (stored locally in your browser)
-2. Upload an audio file (max 25MB)
+2. Upload an audio file (max 100MB)
 3. Wait for transcription and summarization
 4. View results with key moments and timestamps
 5. Export as TXT or JSON

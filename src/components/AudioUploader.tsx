@@ -212,7 +212,7 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
                 {isDragActive ? 'Drop the audio file here' : 'Drop audio file here, or click to select'}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Supports MP3, WAV, M4A, FLAC, OGG (max 25MB)
+                Supports MP3, WAV, M4A, FLAC, OGG (max 100MB)
               </p>
             </div>
           </div>
@@ -249,7 +249,7 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
           )}
           
           <p className="text-sm text-gray-500">
-            Supports direct links to MP3, WAV, M4A, FLAC, OGG files (max 25MB)
+            Supports direct links to MP3, WAV, M4A, FLAC, OGG files (max 100MB)
           </p>
           
           {/* CORS Notice */}

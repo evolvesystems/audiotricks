@@ -65,8 +65,8 @@ export async function processAudioFromUrl(
     const file = new File([blob!], url.split('/').pop() || 'audio.mp3', { type: blob!.type || 'audio/mpeg' })
     
     // Check file size
-    if (file.size > 25 * 1024 * 1024) {
-      throw new Error('Audio file is too large. Maximum size is 25MB.')
+    if (file.size > 100 * 1024 * 1024) {
+      throw new Error('Audio file is too large. Maximum size is 100MB.')
     }
     
     // Step 2: Process with existing function

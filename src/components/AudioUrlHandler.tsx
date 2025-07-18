@@ -36,8 +36,8 @@ const AudioUrlHandler: React.FC<AudioUrlHandlerProps> = ({ onFileReady, disabled
       const fileName = url.split('/').pop() || 'audio.mp3'
       const file = new File([blob], fileName, { type: blob.type || 'audio/mpeg' })
 
-      if (file.size > 25 * 1024 * 1024) {
-        throw new Error('File is too large. Maximum size is 25MB.')
+      if (file.size > 100 * 1024 * 1024) {
+        throw new Error('File is too large. Maximum size is 100MB.')
       }
 
       onFileReady(file)
@@ -118,7 +118,7 @@ const AudioUrlHandler: React.FC<AudioUrlHandlerProps> = ({ onFileReady, disabled
       )}
 
       <div className="text-xs text-gray-500">
-        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG (max 25MB)</p>
+        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG (max 100MB)</p>
         <p>Note: Some URLs may be blocked by CORS. We'll offer alternatives if needed.</p>
       </div>
     </div>
