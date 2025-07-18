@@ -24,7 +24,7 @@ interface AudioEditorProps {
   elevenLabsKey: string
 }
 
-const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
+const AudioEditor: React.FC<AudioEditorProps> = ({ results, elevenLabsKey }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [words, setWords] = useState<WordTimestamp[]>([])
@@ -502,6 +502,7 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {
         <VoiceSynthesis 
           results={results} 
           editedWords={getEditedWords()}
+          elevenLabsKey={elevenLabsKey}
         />
       )}
     </div>
