@@ -10,8 +10,8 @@ interface CostEstimateProps {
 const CostEstimate: React.FC<CostEstimateProps> = ({ fileSize, duration, showDetailed = false }) => {
   // OpenAI pricing estimates (as of 2024)
   const WHISPER_COST_PER_MINUTE = 0.006 // $0.006 per minute
-  const GPT4_COST_PER_1K_TOKENS = 0.03 // Rough estimate for GPT-4
-  const AVERAGE_TOKENS_PER_MINUTE = 150 // Rough estimate
+  const GPT4_COST_PER_1K_TOKENS = 0.01 // GPT-4o mini pricing
+  const AVERAGE_TOKENS_PER_MINUTE = 200 // More accurate estimate for transcripts
   
   const calculateCost = () => {
     if (!duration && !fileSize) return null
@@ -37,37 +37,35 @@ const CostEstimate: React.FC<CostEstimateProps> = ({ fileSize, duration, showDet
   if (!cost) return null
   
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-      <div className="flex items-center space-x-2">
-        <CurrencyDollarIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+    <div className="text-white">
+      <div className="flex items-center space-x-3">
+        <div className="p-2 bg-white/20 rounded-lg">
+          <CurrencyDollarIcon className="h-6 w-6" />
+        </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-900">
+            <span className="text-sm font-medium opacity-90">
               Estimated API Cost
             </span>
-            <span className="text-sm font-semibold text-blue-900">
-              ${cost.total.toFixed(3)}
+            <span className="text-2xl font-bold">
+              ${cost.total.toFixed(2)}
             </span>
           </div>
           
           {showDetailed && (
-            <div className="mt-2 space-y-1 text-xs text-blue-700">
+            <div className="mt-2 grid grid-cols-2 gap-x-4 text-xs opacity-80">
               <div className="flex justify-between">
-                <span>Transcription ({cost.minutes.toFixed(1)} min):</span>
+                <span>Transcription:</span>
                 <span>${cost.whisper.toFixed(3)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Summary generation:</span>
+                <span>AI Summary:</span>
                 <span>${cost.gpt.toFixed(3)}</span>
               </div>
             </div>
           )}
         </div>
       </div>
-      
-      <p className="mt-2 text-xs text-blue-600">
-        Actual costs may vary based on audio content
-      </p>
     </div>
   )
 }

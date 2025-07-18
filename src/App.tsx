@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import AudioUploader from './components/AudioUploader'
-import ResultsDisplay from './components/ResultsDisplay'
+import ResultsDisplay2 from './components/ResultsDisplay2'
 import ApiKeyInput from './components/ApiKeyInput'
 import Login from './components/Login'
 import Settings from './components/Settings'
 import HeroSection from './components/HeroSection'
 import HelpCenter from './components/HelpCenter'
 import History from './components/History'
+import HistoryDropdown from './components/HistoryDropdown'
 import QuickActions from './components/QuickActions'
 import { AudioProcessingResponse } from './types'
 import { useSettings } from './hooks/useSettings'
@@ -39,6 +40,14 @@ function App() {
     
     // Always add to history
     addToHistory(result)
+  }
+
+  const handleReprocess = (newResults: AudioProcessingResponse) => {
+    setResults(newResults)
+    setError('')
+    
+    // Update the existing history item instead of creating a new one
+    addToHistory(newResults, true) // isReprocess = true
   }
 
   const handleError = (errorMessage: string) => {
@@ -92,31 +101,43 @@ function App() {
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
             <div className="flex items-center space-x-4">
-              {results && (
-                <button
-                  onClick={handleNewUpload}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                  title="New Upload"
-                >
-                  <HomeIcon className="h-5 w-5" />
-                </button>
-              )}
               <button
-                onClick={() => setShowHistory(!showHistory)}
-                className={`p-2 rounded-md relative ${
-                  showHistory 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-                title="History"
+                onClick={handleNewUpload}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                title="New Upload"
               >
-                <ClockIcon className="h-5 w-5" />
-                {history.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-600 rounded-full text-xs text-white flex items-center justify-center min-w-[0.75rem] h-3 px-1">
-                    {history.length > 99 ? '99+' : history.length}
-                  </span>
-                )}
+                <HomeIcon className="h-5 w-5" />
               </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className={`p-2 rounded-md relative ${
+                    showHistory 
+                      ? 'text-blue-600 bg-blue-50' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                  title="History"
+                >
+                  <ClockIcon className="h-5 w-5" />
+                  {history.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-blue-600 rounded-full text-xs text-white flex items-center justify-center min-w-[0.75rem] h-3 px-1">
+                      {history.length > 99 ? '99+' : history.length}
+                    </span>
+                  )}
+                </button>
+                
+                <HistoryDropdown
+                  history={history}
+                  onSelectItem={(item) => {
+                    setResults(item)
+                    setShowHistory(false)
+                  }}
+                  onDeleteItem={removeFromHistory}
+                  onClearHistory={clearHistory}
+                  isOpen={showHistory}
+                  onClose={() => setShowHistory(false)}
+                />
+              </div>
               <button
                 onClick={() => setShowHelp(true)}
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
@@ -141,92 +162,70 @@ function App() {
       <main>
         {!results ? (
           <>
-            {!showHistory && <HeroSection />}
+            <HeroSection />
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-              {showHistory ? (
-                <History
-                  history={history}
-                  onSelectItem={(item) => {
-                    setResults(item)
-                    setShowHistory(false)
-                  }}
-                  onDeleteItem={removeFromHistory}
-                  onClearHistory={clearHistory}
-                />
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Main Content - Upload Area */}
-                  <div className="lg:col-span-2 space-y-6">
-                    {error && (
-                      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                        <div className="flex">
-                          <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <h3 className="text-sm font-medium text-red-800">
-                              Processing Error
-                            </h3>
-                            <div className="mt-2 text-sm text-red-700">
-                              {error}
-                            </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content - Upload Area */}
+                <div className="lg:col-span-2 space-y-6">
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-red-800">
+                            Processing Error
+                          </h3>
+                          <div className="mt-2 text-sm text-red-700">
+                            {error}
                           </div>
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    <AudioUploader 
-                      apiKey={apiKey}
-                      onProcessingComplete={handleProcessingComplete}
-                      onError={handleError}
-                      defaultSettings={settings}
-                    />
-                  </div>
-                  
-                  {/* Sidebar - Quick Actions */}
-                  <div className="space-y-6">
-                    <QuickActions 
-                      onShowHistory={() => setShowHistory(true)}
-                      onShowHelp={() => setShowHelp(true)}
-                      historyCount={history.length}
-                    />
-                  </div>
+                  <AudioUploader 
+                    apiKey={apiKey}
+                    onProcessingComplete={handleProcessingComplete}
+                    onError={handleError}
+                    defaultSettings={settings}
+                  />
                 </div>
-              )}
+                
+                {/* Sidebar - Quick Actions */}
+                <div className="space-y-6">
+                  <QuickActions 
+                    onShowHistory={() => setShowHistory(true)}
+                    onShowHelp={() => setShowHelp(true)}
+                    historyCount={history.length}
+                  />
+                </div>
+              </div>
             </div>
           </>
         ) : (
-          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div className="space-y-6">
-              {/* History Section - Also shown in results view */}
-              {showHistory && (
-                <History
-                  history={history}
-                  onSelectItem={(item) => {
-                    setResults(item)
-                  }}
-                  onDeleteItem={removeFromHistory}
-                  onClearHistory={clearHistory}
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+              <div className="space-y-6">
+                <div className="text-center mb-8 animate-fadeIn">
+                  <h1 className="text-4xl font-bold gradient-text mb-2">
+                    Your Audio Analysis
+                  </h1>
+                  <p className="text-gray-600">
+                    Comprehensive insights extracted from your audio content
+                  </p>
+                </div>
+                
+                <ResultsDisplay2 
+                  results={results}
+                  onExport={handleExport}
+                  showCostEstimates={settings.showCostEstimates}
+                  onReprocess={handleReprocess}
                 />
-              )}
-              
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Results</h2>
-                <button
-                  onClick={handleNewUpload}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Process New Audio
-                </button>
               </div>
-              
-              <ResultsDisplay 
-                results={results}
-                onExport={handleExport}
-                showCostEstimates={settings.showCostEstimates}
-              />
             </div>
           </div>
         )}

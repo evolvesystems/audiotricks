@@ -11,15 +11,17 @@ interface RichTextEditorProps {
   onChange: (content: string) => void
   placeholder?: string
   height?: string
+  defaultViewMode?: 'edit' | 'preview' | 'html'
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
   content, 
   onChange, 
   placeholder = 'Enter text...',
-  height = 'h-48'
+  height = 'h-48',
+  defaultViewMode = 'edit'
 }) => {
-  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'html'>('edit')
+  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'html'>(defaultViewMode)
 
   // Convert markdown to HTML
   const markdownToHtml = (markdown: string): string => {
@@ -221,21 +223,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <div className="flex items-center bg-white border border-gray-300 rounded">
             <button
               onClick={() => setViewMode('edit')}
-              className={`px-2 py-1 text-xs ${viewMode === 'edit' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+              className={`px-3 py-1 text-xs flex items-center space-x-1 ${viewMode === 'edit' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              title="Edit Mode"
             >
-              <DocumentTextIcon className="h-4 w-4" />
+              <DocumentTextIcon className="h-3 w-3" />
+              <span>Edit</span>
             </button>
             <button
               onClick={() => setViewMode('preview')}
-              className={`px-2 py-1 text-xs ${viewMode === 'preview' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+              className={`px-3 py-1 text-xs flex items-center space-x-1 ${viewMode === 'preview' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              title="Preview Mode"
             >
-              <EyeIcon className="h-4 w-4" />
+              <EyeIcon className="h-3 w-3" />
+              <span>Preview</span>
             </button>
             <button
               onClick={() => setViewMode('html')}
-              className={`px-2 py-1 text-xs ${viewMode === 'html' ? 'bg-blue-500 text-white' : 'text-gray-600'}`}
+              className={`px-3 py-1 text-xs flex items-center space-x-1 ${viewMode === 'html' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+              title="HTML Code"
             >
-              <CodeBracketIcon className="h-4 w-4" />
+              <CodeBracketIcon className="h-3 w-3" />
+              <span>HTML</span>
             </button>
           </div>
         </div>
@@ -253,10 +261,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       )}
 
       {viewMode === 'preview' && (
-        <div className={`w-full ${height} p-3 border border-gray-300 rounded-b-md overflow-y-auto`}>
+        <div className={`w-full ${height} p-3 border border-gray-300 rounded-b-md overflow-y-auto relative`}>
+          {/* Edit hint overlay */}
+          <div className="absolute top-2 right-2 bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs opacity-75">
+            Click "Edit" to modify content
+          </div>
           <div 
-            className="formatted-content"
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
+            className="formatted-content prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ 
+              __html: content.includes('<') ? content : markdownToHtml(content) 
+            }}
           />
         </div>
       )}

@@ -156,7 +156,7 @@ async function transcribeAudio(file: File, apiKey: string): Promise<Transcriptio
   }
 }
 
-async function generateSummary(
+export async function generateSummary(
   transcript: TranscriptionResponse, 
   apiKey: string, 
   summaryStyle: SummaryStyle = 'formal',

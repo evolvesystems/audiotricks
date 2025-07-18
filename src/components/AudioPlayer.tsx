@@ -7,20 +7,25 @@ import {
   ForwardIcon,
   BackwardIcon
 } from '@heroicons/react/24/solid'
+import AudioWaveform from './AudioWaveform'
 
 interface AudioPlayerProps {
   audioUrl?: string
   audioFile?: File
   title?: string
+  transcript?: string
+  showSubtitles?: boolean
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title }) => {
+const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title, transcript, showSubtitles = false }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [audioSrc, setAudioSrc] = useState<string>('')
+  const [showSubtitlePanel, setShowSubtitlePanel] = useState(showSubtitles)
+  const [currentSubtitle, setCurrentSubtitle] = useState<string>('')
   
   const audioRef = useRef<HTMLAudioElement>(null)
   const progressRef = useRef<HTMLDivElement>(null)
@@ -82,6 +87,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title })
     setCurrentTime(newTime)
   }
 
+  const handleWaveformSeek = (seekTime: number) => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    audio.currentTime = seekTime
+    setCurrentTime(seekTime)
+  }
+
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value)
     setVolume(newVolume)
@@ -123,6 +136,33 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title })
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
+  // Extract subtitle for current time
+  const getSubtitleForTime = (time: number): string => {
+    if (!transcript || !showSubtitlePanel) return ''
+    
+    // Simple subtitle extraction - split transcript into sentences
+    // and estimate timing based on duration
+    const sentences = transcript.split(/[.!?]+/).filter(s => s.trim())
+    if (sentences.length === 0) return ''
+    
+    const timePerSentence = duration / sentences.length
+    const currentSentenceIndex = Math.floor(time / timePerSentence)
+    
+    if (currentSentenceIndex < sentences.length) {
+      return sentences[currentSentenceIndex].trim()
+    }
+    
+    return ''
+  }
+
+  // Update subtitle when time changes
+  useEffect(() => {
+    if (transcript && showSubtitlePanel) {
+      const subtitle = getSubtitleForTime(currentTime)
+      setCurrentSubtitle(subtitle)
+    }
+  }, [currentTime, transcript, showSubtitlePanel, duration])
+
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0
 
   if (!audioSrc) return null
@@ -137,19 +177,18 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title })
         </div>
       )}
 
-      {/* Progress Bar */}
+      {/* Waveform Visualization */}
       <div className="mb-4">
-        <div 
-          ref={progressRef}
-          className="relative h-2 bg-gray-300 rounded-full cursor-pointer overflow-hidden"
-          onClick={handleProgressClick}
-        >
-          <div 
-            className="absolute h-full bg-blue-600 rounded-full transition-all duration-100"
-            style={{ width: `${progressPercentage}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1 text-xs text-gray-500">
+        <AudioWaveform
+          audioUrl={audioUrl}
+          audioFile={audioFile}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleWaveformSeek}
+          height={80}
+          className="mb-2"
+        />
+        <div className="flex justify-between text-xs text-gray-500">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
@@ -208,14 +247,63 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl, audioFile, title })
             type="range"
             min="0"
             max="1"
-            step="0.1"
+            step="0.05"
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-20 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+            className="w-32 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer volume-slider"
             title="Volume"
           />
         </div>
+
+        {/* Subtitle Toggle */}
+        {transcript && (
+          <button
+            onClick={() => setShowSubtitlePanel(!showSubtitlePanel)}
+            className={`ml-2 px-3 py-1 text-xs rounded-md transition-colors ${
+              showSubtitlePanel 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            title="Toggle Subtitles"
+          >
+            CC
+          </button>
+        )}
       </div>
+
+      {/* Subtitle Panel */}
+      {showSubtitlePanel && transcript && (
+        <div className="mt-4 p-3 bg-black rounded-lg text-white text-center min-h-[60px] flex items-center justify-center">
+          <p className="text-sm leading-relaxed">
+            {currentSubtitle || 'Subtitles will appear here during playback...'}
+          </p>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          }
+          
+          .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          }
+        `
+      }} />
     </div>
   )
 }

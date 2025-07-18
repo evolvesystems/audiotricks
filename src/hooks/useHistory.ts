@@ -86,7 +86,7 @@ export const useHistory = () => {
     }
   }, [history])
 
-  const addToHistory = (results: AudioProcessingResponse) => {
+  const addToHistory = (results: AudioProcessingResponse, isReprocess: boolean = false) => {
     // Remove File object before storing (can't be serialized)
     const sanitizedResults = {
       ...results,
@@ -104,9 +104,23 @@ export const useHistory = () => {
     }
 
     setHistory(prev => {
-      const updated = [newItem, ...prev]
-      // Keep only the most recent items
-      return updated.slice(0, MAX_HISTORY_ITEMS)
+      if (isReprocess && prev.length > 0) {
+        // Update the most recent item (which should be the original)
+        const updated = [...prev]
+        updated[0] = {
+          ...updated[0],
+          title: generateTitle(results),
+          wordCount: results.summary.word_count,
+          language: results.summary.language || 'en',
+          results: sanitizedResults,
+          timestamp: new Date().toISOString() // Update timestamp to show it was reprocessed
+        }
+        return updated
+      } else {
+        // Add new item for original processing
+        const updated = [newItem, ...prev]
+        return updated.slice(0, MAX_HISTORY_ITEMS)
+      }
     })
   }
 
