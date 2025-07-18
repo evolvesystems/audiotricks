@@ -25,66 +25,60 @@ export async function splitAudioFile(file: File): Promise<SplitAudioResult> {
   
   // If file is already under limit, return as single chunk
   if (file.size <= MAX_CHUNK_SIZE) {
-    const audioContext = new AudioContext()
-    const arrayBuffer = await file.arrayBuffer()
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-    
-    return {
-      chunks: [{
-        blob: file,
-        startTime: 0,
-        endTime: audioBuffer.duration,
-        chunkIndex: 0,
-        totalChunks: 1
-      }],
-      totalDuration: audioBuffer.duration,
-      originalSize: file.size
+    try {
+      const audioContext = new AudioContext()
+      const arrayBuffer = await file.arrayBuffer()
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+      
+      return {
+        chunks: [{
+          blob: file,
+          startTime: 0,
+          endTime: audioBuffer.duration,
+          chunkIndex: 0,
+          totalChunks: 1
+        }],
+        totalDuration: audioBuffer.duration,
+        originalSize: file.size
+      }
+    } catch (error) {
+      console.error('Failed to decode audio for single chunk:', error)
+      // Fallback: treat as single chunk without duration info
+      return {
+        chunks: [{
+          blob: file,
+          startTime: 0,
+          endTime: 0, // Unknown duration
+          chunkIndex: 0,
+          totalChunks: 1
+        }],
+        totalDuration: 0,
+        originalSize: file.size
+      }
     }
   }
 
-  // For large files, we need to split them
-  const audioContext = new AudioContext()
-  const arrayBuffer = await file.arrayBuffer()
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-  
-  // Estimate how many chunks we need based on file size
+  // For large files, use simple byte-based splitting
+  // This is more reliable than trying to decode huge audio files
   const estimatedChunks = Math.ceil(file.size / MAX_CHUNK_SIZE)
-  const chunkDuration = audioBuffer.duration / estimatedChunks
-  
   const chunks: AudioChunk[] = []
-  const sampleRate = audioBuffer.sampleRate
-  const numberOfChannels = audioBuffer.numberOfChannels
   
   for (let i = 0; i < estimatedChunks; i++) {
+    const startByte = i * MAX_CHUNK_SIZE
+    const endByte = Math.min((i + 1) * MAX_CHUNK_SIZE, file.size)
+    
+    // Create chunk from file slice
+    const chunkBlob = file.slice(startByte, endByte, file.type)
+    
+    // Estimate timing (rough calculation)
+    const chunkRatio = (endByte - startByte) / file.size
+    const estimatedDuration = await estimateAudioDuration(file)
+    const chunkDuration = estimatedDuration * chunkRatio
     const startTime = i * chunkDuration
-    const endTime = Math.min((i + 1) * chunkDuration, audioBuffer.duration)
-    
-    const startSample = Math.floor(startTime * sampleRate)
-    const endSample = Math.floor(endTime * sampleRate)
-    const chunkLength = endSample - startSample
-    
-    // Create new audio buffer for this chunk
-    const chunkBuffer = audioContext.createBuffer(
-      numberOfChannels,
-      chunkLength,
-      sampleRate
-    )
-    
-    // Copy audio data for this chunk
-    for (let channel = 0; channel < numberOfChannels; channel++) {
-      const originalChannelData = audioBuffer.getChannelData(channel)
-      const chunkChannelData = chunkBuffer.getChannelData(channel)
-      
-      for (let sample = 0; sample < chunkLength; sample++) {
-        chunkChannelData[sample] = originalChannelData[startSample + sample]
-      }
-    }
-    
-    // Convert audio buffer to blob
-    const blob = await audioBufferToBlob(chunkBuffer, file.type)
+    const endTime = startTime + chunkDuration
     
     chunks.push({
-      blob,
+      blob: chunkBlob,
       startTime,
       endTime,
       chunkIndex: i,
@@ -92,10 +86,44 @@ export async function splitAudioFile(file: File): Promise<SplitAudioResult> {
     })
   }
   
+  const totalDuration = await estimateAudioDuration(file)
+  
   return {
     chunks,
-    totalDuration: audioBuffer.duration,
+    totalDuration,
     originalSize: file.size
+  }
+}
+
+/**
+ * Estimate audio duration without fully decoding the file
+ */
+async function estimateAudioDuration(file: File): Promise<number> {
+  try {
+    // Try to get duration from audio element
+    const audio = new Audio()
+    const url = URL.createObjectURL(file)
+    
+    return new Promise((resolve) => {
+      audio.addEventListener('loadedmetadata', () => {
+        const duration = audio.duration || 0
+        URL.revokeObjectURL(url)
+        resolve(duration)
+      })
+      
+      audio.addEventListener('error', () => {
+        URL.revokeObjectURL(url)
+        // Fallback: estimate based on file size and typical bitrate
+        const estimatedDuration = file.size / (128 * 1024 / 8) // Assume 128kbps
+        resolve(estimatedDuration)
+      })
+      
+      audio.src = url
+    })
+  } catch (error) {
+    console.error('Failed to estimate audio duration:', error)
+    // Fallback: estimate based on file size and typical bitrate
+    return file.size / (128 * 1024 / 8) // Assume 128kbps
   }
 }
 

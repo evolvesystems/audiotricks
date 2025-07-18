@@ -4,9 +4,10 @@ import { EyeIcon, EyeSlashIcon, KeyIcon } from '@heroicons/react/24/outline'
 interface ApiKeyInputProps {
   apiKey: string
   onApiKeyChange: (key: string) => void
+  isGuest?: boolean
 }
 
-const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange }) => {
+const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGuest = false }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [tempKey, setTempKey] = useState(apiKey)
@@ -28,7 +29,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange }) => 
       <div className="flex items-center space-x-2">
         <KeyIcon className="h-5 w-5 text-green-500" />
         <span className="text-sm text-green-600">
-          API Key Set {isEnvKey ? '(from environment)' : ''}
+          API Key Set {isEnvKey ? '(from environment)' : isGuest ? '(stored locally)' : ''}
         </span>
         {!isEnvKey && (
           <button
@@ -47,7 +48,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange }) => 
       <div className="relative">
         <input
           type={isVisible ? 'text' : 'password'}
-          placeholder="Enter OpenAI API Key"
+          placeholder={isGuest ? "Enter OpenAI API Key (stored locally)" : "Enter OpenAI API Key"}
           value={tempKey}
           onChange={(e) => setTempKey(e.target.value)}
           className="pr-10 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

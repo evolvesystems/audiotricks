@@ -12,13 +12,14 @@ import QuickActions from './components/QuickActions'
 import { AudioProcessingResponse } from './types'
 import { useSettings } from './hooks/useSettings'
 import { useHistory } from './hooks/useHistory'
-import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 
 function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
   const [error, setError] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key') || '')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [isGuest, setIsGuest] = useState<boolean>(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -28,9 +29,11 @@ function App() {
   useEffect(() => {
     // Check if already authenticated
     const isAuthed = sessionStorage.getItem('authenticated') === 'true'
+    const guestMode = sessionStorage.getItem('isGuest') === 'true'
     
     if (isAuthed) {
       setIsAuthenticated(true)
+      setIsGuest(guestMode)
     }
   }, [])
 
@@ -89,8 +92,32 @@ function App() {
     URL.revokeObjectURL(url)
   }
 
+  const handleLogin = (guestMode: boolean = false) => {
+    setIsAuthenticated(true)
+    setIsGuest(guestMode)
+  }
+
+  const handleLogout = () => {
+    // Clear session storage
+    sessionStorage.removeItem('authenticated')
+    sessionStorage.removeItem('isGuest')
+    
+    // Reset state
+    setIsAuthenticated(false)
+    setIsGuest(false)
+    setResults(null)
+    setError('')
+    
+    // For guest users, also clear local storage
+    if (isGuest) {
+      localStorage.removeItem('openai_api_key')
+      localStorage.removeItem('elevenlabs_api_key')
+      setApiKey('')
+    }
+  }
+
   if (!isAuthenticated) {
-    return <Login onLogin={() => setIsAuthenticated(true)} />
+    return <Login onLogin={handleLogin} />
   }
 
   return (
@@ -99,7 +126,14 @@ function App() {
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
+            <div className="flex items-center space-x-3">
+              <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
+              {isGuest && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                  Guest Mode
+                </span>
+              )}
+            </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={handleNewUpload}
@@ -152,7 +186,14 @@ function App() {
               >
                 <Cog6ToothIcon className="h-5 w-5" />
               </button>
-              <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} />
+              <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} isGuest={isGuest} />
+              <button
+                onClick={handleLogout}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                title={isGuest ? "Logout (will clear local API keys)" : "Logout"}
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+              </button>
             </div>
           </div>
         </div>

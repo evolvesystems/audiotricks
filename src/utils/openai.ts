@@ -117,13 +117,27 @@ async function transcribeAudio(file: File, apiKey: string): Promise<Transcriptio
       const splitResult = await splitAudioFile(file)
       const transcriptionResults = []
       
-      // Process each chunk
+      console.log(`Split into ${splitResult.chunks.length} chunks, total duration: ${splitResult.totalDuration.toFixed(2)}s`)
+      
+      // Process each chunk with better error handling
       for (let i = 0; i < splitResult.chunks.length; i++) {
         const chunk = splitResult.chunks[i]
         console.log(`Processing chunk ${i + 1}/${splitResult.chunks.length} (${(chunk.blob.size / 1024 / 1024).toFixed(2)}MB)`)
         
-        const chunkResult = await transcribeAudioChunk(chunk.blob, apiKey)
-        transcriptionResults.push(chunkResult)
+        try {
+          const chunkResult = await transcribeAudioChunk(chunk.blob, apiKey)
+          transcriptionResults.push(chunkResult)
+          console.log(`✓ Chunk ${i + 1} completed successfully`)
+        } catch (chunkError) {
+          console.error(`✗ Chunk ${i + 1} failed:`, chunkError)
+          // For now, we'll skip failed chunks and continue
+          // In the future, we could implement retry logic
+          transcriptionResults.push({
+            text: `[Chunk ${i + 1} failed to process]`,
+            segments: [],
+            duration: chunk.endTime - chunk.startTime
+          })
+        }
       }
       
       // Merge results
@@ -136,7 +150,15 @@ async function transcribeAudio(file: File, apiKey: string): Promise<Transcriptio
       }
     } catch (error) {
       console.error('Error splitting/processing large audio file:', error)
-      throw new Error('Failed to process large audio file. Please try a smaller file or compress your audio.')
+      
+      // More specific error messages
+      if (error.message && error.message.includes('decode')) {
+        throw new Error('Failed to decode audio file. Please ensure the file is a valid audio format and try again.')
+      } else if (error.message && error.message.includes('memory')) {
+        throw new Error('File too large for browser memory. Please try a smaller file or compress your audio.')
+      } else {
+        throw new Error('Failed to process large audio file. Please try a smaller file or compress your audio.')
+      }
     }
   }
   

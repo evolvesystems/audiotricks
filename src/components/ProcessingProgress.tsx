@@ -4,9 +4,10 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid'
 interface ProcessingProgressProps {
   stage: 'uploading' | 'transcribing' | 'summarizing' | 'complete'
   fileName?: string
+  chunkProgress?: { current: number; total: number }
 }
 
-const ProcessingProgress: React.FC<ProcessingProgressProps> = ({ stage, fileName }) => {
+const ProcessingProgress: React.FC<ProcessingProgressProps> = ({ stage, fileName, chunkProgress }) => {
   const stages = [
     { id: 'uploading', label: 'Uploading Audio', time: '~5s' },
     { id: 'transcribing', label: 'Transcribing with Whisper', time: '~10s' },
