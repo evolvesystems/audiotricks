@@ -129,16 +129,16 @@ function App() {
     // Reset state to guest mode
     setIsAuthenticated(true)
     setIsGuest(true)
-    setResults(null)
-    setError('')
-    
-    // Clear API key (force user to enter their own)
-    setApiKey('')
+    // Don't clear results - keep current work
+    // Don't clear error - keep current state
     
     // Keep any locally stored keys for when they return to guest mode
     const localKey = localStorage.getItem('openai_api_key')
     if (localKey) {
       setApiKey(localKey)
+    } else {
+      // If no local keys, clear API key so they need to enter their own
+      setApiKey('')
     }
   }
 
