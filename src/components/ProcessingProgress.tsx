@@ -48,6 +48,11 @@ const ProcessingProgress: React.FC<ProcessingProgressProps> = ({ stage, fileName
                     isComplete ? 'text-gray-900' : isActive ? 'text-blue-600' : 'text-gray-500'
                   }`}>
                     {s.label}
+                    {s.id === 'transcribing' && chunkProgress && chunkProgress.total > 1 && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        (Chunk {chunkProgress.current}/{chunkProgress.total})
+                      </span>
+                    )}
                   </span>
                   {s.time && !isComplete && (
                     <span className="text-xs text-gray-500">{s.time}</span>
