@@ -23,4 +23,26 @@
   .formatted-content li {
     @apply mb-1 text-gray-700;
   }
+  
+  /* Prose styling for key moments */
+  .prose-sm strong {
+    @apply font-semibold text-gray-900;
+  }
+  
+  .prose-sm em {
+    @apply italic text-gray-800;
+  }
+  
+  .prose-sm code {
+    @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800;
+  }
+  
+  /* Remove default prose margins for compact display */
+  .prose-sm p:first-child {
+    @apply mt-0;
+  }
+  
+  .prose-sm p:last-child {
+    @apply mb-0;
+  }
 }

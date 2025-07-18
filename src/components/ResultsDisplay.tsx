@@ -142,8 +142,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport, show
                             {moment.importance}
                           </span>
                         </div>
-                        <h4 className="font-medium text-gray-900 mb-1">{moment.title}</h4>
-                        <p className="text-sm text-gray-600">{moment.description}</p>
+                        <h4 
+                          className="font-medium text-gray-900 mb-1"
+                          dangerouslySetInnerHTML={{ __html: moment.title }}
+                        />
+                        <div 
+                          className="text-sm text-gray-600 prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: moment.description }}
+                        />
                       </div>
                       <StarIcon className="h-5 w-5 text-gray-400" />
                     </div>

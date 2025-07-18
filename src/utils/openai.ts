@@ -209,8 +209,12 @@ Instructions:
 3. KEY MOMENTS (5-8 timestamps):
    For each significant moment provide:
    - timestamp: Exact time in format "MM:SS" or "HH:MM:SS"
-   - title: Descriptive headline (5-10 words)
-   - description: 2-3 sentences explaining the significance
+   - title: Descriptive headline (5-10 words) - can include HTML tags like <strong>, <em> for emphasis
+   - description: 2-3 sentences explaining the significance - use HTML formatting:
+     * Use <strong> for important terms or emphasis
+     * Use <em> for italics
+     * Use <code> for technical terms or quotes
+     * Format as proper HTML paragraphs
    - importance: "high" (critical insights), "medium" (supporting points), or "low" (interesting details)
 
 IMPORTANT: Generate your entire response in ${languageMap[language] || 'English'}.

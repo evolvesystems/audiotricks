@@ -9,11 +9,29 @@ interface PodcastsTabProps {
 const PodcastsTab: React.FC<PodcastsTabProps> = ({ results }) => {
   const [summaryContent, setSummaryContent] = useState(results.summary.summary)
   const [showTimestamps, setShowTimestamps] = useState(true)
+  
+  // Helper function to convert HTML to markdown-like format for editing
+  const htmlToEditableFormat = (html: string): string => {
+    return html
+      .replace(/<strong>/g, '**')
+      .replace(/<\/strong>/g, '**')
+      .replace(/<em>/g, '*')
+      .replace(/<\/em>/g, '*')
+      .replace(/<code>/g, '`')
+      .replace(/<\/code>/g, '`')
+      .replace(/<[^>]+>/g, '') // Remove any other HTML tags
+  }
+  
   const [keyMomentsContent, setKeyMomentsContent] = useState(
     results.summary.key_moments
-      .map(moment => showTimestamps 
-        ? `**${moment.timestamp}** - ${moment.title}\n${moment.description}`
-        : `**${moment.title}**\n${moment.description}`)
+      .map(moment => {
+        const titleText = htmlToEditableFormat(moment.title)
+        const descText = htmlToEditableFormat(moment.description)
+        
+        return showTimestamps 
+          ? `**${titleText}** [${moment.timestamp}]\n${descText}`
+          : `**${titleText}**\n${descText}`
+      })
       .join('\n\n')
   )
 
@@ -22,10 +40,13 @@ const PodcastsTab: React.FC<PodcastsTabProps> = ({ results }) => {
     setKeyMomentsContent(
       results.summary.key_moments
         .map(moment => {
+          const titleText = htmlToEditableFormat(moment.title)
+          const descText = htmlToEditableFormat(moment.description)
+          
           if (showTimestamps) {
-            return `**${moment.title}** [${moment.timestamp}]\n${moment.description}`
+            return `**${titleText}** [${moment.timestamp}]\n${descText}`
           } else {
-            return `**${moment.title}**\n${moment.description}`
+            return `**${titleText}**\n${descText}`
           }
         })
         .join('\n\n')

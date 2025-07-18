@@ -39,6 +39,11 @@ export const useHistory = () => {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
     } catch (error) {
       console.error('Error saving history:', error)
+      
+      // Check if it's a quota exceeded error
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.error('localStorage quota exceeded!')
+      }
     }
   }, [history])
 

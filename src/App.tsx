@@ -11,7 +11,7 @@ import QuickActions from './components/QuickActions'
 import { AudioProcessingResponse } from './types'
 import { useSettings } from './hooks/useSettings'
 import { useHistory } from './hooks/useHistory'
-import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon } from '@heroicons/react/24/outline'
 
 function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
@@ -49,6 +49,7 @@ function App() {
   const handleNewUpload = () => {
     setResults(null)
     setError('')
+    setShowHistory(false)
   }
 
   const handleExport = (format: 'txt' | 'json') => {
@@ -91,6 +92,15 @@ function App() {
           <div className="flex justify-between items-center py-4">
             <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
             <div className="flex items-center space-x-4">
+              {results && (
+                <button
+                  onClick={handleNewUpload}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                  title="New Upload"
+                >
+                  <HomeIcon className="h-5 w-5" />
+                </button>
+              )}
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 className={`p-2 rounded-md relative ${
