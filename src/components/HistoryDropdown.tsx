@@ -6,16 +6,19 @@ import {
   EyeIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import { HistoryItem } from '../hooks/useHistory'
 import { AudioProcessingResponse } from '../types'
+import HistoryRecovery from './HistoryRecovery'
 
 interface HistoryDropdownProps {
   history: HistoryItem[]
   onSelectItem: (results: AudioProcessingResponse) => void
   onDeleteItem: (id: string) => void
   onClearHistory: () => void
+  onRecoverHistory: (items: HistoryItem[]) => void
   isOpen: boolean
   onClose: () => void
 }
@@ -25,11 +28,13 @@ const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
   onSelectItem, 
   onDeleteItem, 
   onClearHistory,
+  onRecoverHistory,
   isOpen,
   onClose
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showConfirmClear, setShowConfirmClear] = useState(false)
+  const [showRecovery, setShowRecovery] = useState(false)
   const [visibleItems, setVisibleItems] = useState(10)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -223,16 +228,36 @@ const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
                 </div>
               </div>
             ) : (
-              <button
-                onClick={() => setShowConfirmClear(true)}
-                className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
-              >
-                Clear All History
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowRecovery(true)}
+                  className="w-full px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md flex items-center justify-center space-x-2"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                  <span>Recover Lost History</span>
+                </button>
+                <button
+                  onClick={() => setShowConfirmClear(true)}
+                  className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                >
+                  Clear All History
+                </button>
+              </div>
             )}
           </div>
         )}
       </div>
+      
+      {/* History Recovery Modal */}
+      {showRecovery && (
+        <HistoryRecovery
+          onRecoveredItems={(items) => {
+            onRecoverHistory(items)
+            setShowRecovery(false)
+          }}
+          onClose={() => setShowRecovery(false)}
+        />
+      )}
     </div>
   )
 }

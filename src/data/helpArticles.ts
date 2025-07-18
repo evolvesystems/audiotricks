@@ -32,10 +32,11 @@ When you first visit AudioTricks, you'll be prompted for a password:
 - The password is case-sensitive
 - Your session will remain active until you close the browser
 
-### Step 2: Add Your API Key
-1. Click the key icon in the top-right corner
-2. Paste your OpenAI API key
-3. The key is saved locally in your browser
+### Step 2: Add Your API Keys
+1. **OpenAI API Key**: Click the key icon in the top-right corner
+2. **ElevenLabs API Key**: Click the purple speaker icon for voice synthesis
+3. Both keys are saved locally in your browser
+4. Only add ElevenLabs key if you want to use voice synthesis features
 
 ### Step 3: Process Your First Audio
 1. Choose between uploading a file or providing a URL
@@ -44,12 +45,14 @@ When you first visit AudioTricks, you'll be prompted for a password:
 4. Wait for the magic to happen!
 
 ## Quick Tips
-- Your API key is never sent to our servers
-- All processing happens directly with OpenAI
+- Your API keys are never sent to our servers
+- All processing happens directly with OpenAI/ElevenLabs
 - Results are automatically saved to your history
 - Use the clock icon to access previous transcripts
+- Try the Audio Editor for advanced word-level editing
+- Use Voice Synthesis to create speech from your transcripts
     `,
-    relatedArticles: ['api-key-setup', 'uploading-audio', 'understanding-results']
+    relatedArticles: ['api-key-setup', 'uploading-audio', 'understanding-results', 'audio-editor', 'voice-synthesis']
   },
   {
     id: 'api-key-setup',
@@ -280,7 +283,7 @@ After processing, AudioTricks provides comprehensive results in multiple formats
 - **Processing Time**: How long it took
 - **Cost Estimate**: Approximate API cost
 
-## Three Main Tabs
+## Four Main Tabs
 
 ### 1. Summary & Key Moments Tab
 
@@ -332,6 +335,18 @@ A comprehensive overview including:
 - Convert between HTML and Markdown
 - Save your edits
 
+### 4. Audio Editor Tab
+
+#### Advanced Features
+- **Word-level editing**: Click words to jump to audio position
+- **Audio splicing**: Create clips from selected word ranges
+- **Voice synthesis**: Generate speech from edited transcript
+- **Precision editing**: Remove unwanted words with timestamps
+
+#### Two Sub-tabs
+- **Edit Mode**: Interactive transcript with audio sync
+- **Voice Synthesis**: Transform text to speech with ElevenLabs
+
 ## Exporting Results
 
 ### Export Formats
@@ -376,7 +391,7 @@ Look for these signs of good processing:
 - Relevant key moments
 - Proper names and terms captured
     `,
-    relatedArticles: ['exporting-sharing', 'using-history', 'podcasts-tab']
+    relatedArticles: ['exporting-sharing', 'using-history', 'podcasts-tab', 'audio-editor', 'voice-synthesis']
   },
   {
     id: 'api-costs',
@@ -660,6 +675,12 @@ Search looks through:
 2. Immediate deletion
 3. Cannot be undone
 
+### Recover Lost History
+1. Click **Recover Lost History** button
+2. Tool searches for lost data automatically
+3. Found items are restored to history
+4. Duplicates are automatically removed
+
 ### Clear All History
 1. Click **Clear All** button
 2. Confirm in dialog
@@ -715,7 +736,7 @@ Search looks through:
 3. **Progress Tracking**: See your processing over time
 4. **Mistake Recovery**: Access accidentally closed results
     `,
-    relatedArticles: ['understanding-results', 'exporting-sharing', 'privacy-security']
+    relatedArticles: ['understanding-results', 'exporting-sharing', 'privacy-security', 'history-recovery']
   },
   {
     id: 'podcasts-tab',
@@ -1087,6 +1108,538 @@ All standard formats support splitting:
 Large files use more API credits as they require multiple transcription calls. Monitor your usage in the OpenAI dashboard.
     `,
     relatedArticles: ['getting-started', 'troubleshooting', 'api-costs']
+  },
+  {
+    id: 'voice-synthesis',
+    title: 'Voice Synthesis with ElevenLabs',
+    category: 'features',
+    tags: ['voice synthesis', 'elevenlabs', 'text-to-speech', 'ai voice'],
+    content: `
+# Voice Synthesis with ElevenLabs
+
+Transform your transcripts into natural-sounding speech using ElevenLabs' advanced AI voice technology.
+
+## Getting Started
+
+### API Key Setup
+1. **Get ElevenLabs API Key**:
+   - Visit [ElevenLabs](https://elevenlabs.io)
+   - Sign up for an account
+   - Navigate to your profile settings
+   - Generate a new API key
+
+2. **Add Key to AudioTricks**:
+   - **Guest Mode**: Enter your key in the header (purple input field)
+   - **Admin Mode**: Key is provided by administrator
+
+### Accessing Voice Synthesis
+1. Process any audio file to get a transcript
+2. Click the **Audio Editor** tab in results
+3. Switch to **Voice Synthesis** tab
+4. Configure voice settings and generate
+
+## Voice Selection
+
+### Available Voices
+- **Pre-built voices**: Over 50 professional voices
+- **Multiple languages**: English, Spanish, French, German, and more
+- **Various styles**: Narration, conversational, dramatic, etc.
+- **Gender options**: Male, female, and neutral voices
+
+### Voice Categories
+- **Narration**: Perfect for audiobooks and documentaries
+- **Conversational**: Natural dialogue and explanations
+- **News**: Professional broadcast style
+- **Characters**: Unique personalities and accents
+
+## Voice Settings
+
+### Stability (0.0 - 1.0)
+- **Low (0.0-0.3)**: More expressive, variable
+- **Medium (0.4-0.7)**: Balanced (recommended)
+- **High (0.8-1.0)**: Consistent, stable
+
+### Similarity Boost (0.0 - 1.0)
+- **Low**: More creative interpretation
+- **High**: Closer to original voice characteristics
+
+### Style (0.0 - 1.0)
+- **Natural (0.0-0.3)**: Conversational tone
+- **Expressive (0.7-1.0)**: Dramatic, emotional
+
+### Speaker Boost
+- Enable for longer texts (over 1000 words)
+- Improves voice consistency
+- Uses additional processing power
+
+## Generation Process
+
+### Before Generation
+1. **Review transcript**: Edit any unwanted words
+2. **Select voice**: Preview different options
+3. **Adjust settings**: Fine-tune voice parameters
+4. **Check cost estimate**: Based on word count
+
+### During Generation
+- Progress indicator shows completion
+- Process cannot be interrupted
+- Large texts take longer (up to several minutes)
+
+### After Generation
+- **Play immediately**: Built-in audio player
+- **Download**: Save as MP3 file
+- **Regenerate**: Try different settings
+
+## Best Practices
+
+### For Best Results
+1. **Clean transcript**: Remove filler words, errors
+2. **Choose appropriate voice**: Match content style
+3. **Test settings**: Try different voices/parameters
+4. **Break long content**: Process in segments for better quality
+
+### Voice Selection Tips
+- **Narration**: Use dedicated narration voices
+- **Conversation**: Choose conversational styles
+- **Technical content**: Use clear, articulate voices
+- **Entertainment**: Experiment with character voices
+
+### Cost Management
+- **Word count affects cost**: ~$0.30 per 1000 words
+- **Preview first**: Test with shorter segments
+- **Batch processing**: Group similar content
+- **Monitor usage**: Check ElevenLabs dashboard
+
+## Troubleshooting
+
+### Common Issues
+1. **"No voice selected"**: Choose a voice from the dropdown
+2. **"API key invalid"**: Verify your ElevenLabs API key
+3. **"Generation failed"**: Check internet connection
+4. **"Poor quality"**: Try different voice or settings
+
+### Quality Issues
+- **Robotic sound**: Reduce stability, increase style
+- **Inconsistent**: Enable speaker boost
+- **Wrong pronunciation**: Edit transcript before generation
+- **Choppy audio**: Check source transcript quality
+
+### Performance Tips
+- **Faster generation**: Use shorter texts
+- **Better quality**: Use higher-quality voices
+- **Consistent results**: Use same voice and settings
+- **Cost optimization**: Remove unnecessary words
+
+## Advanced Features
+
+### Batch Processing
+- Process multiple segments separately
+- Maintain consistent voice across parts
+- Combine results manually if needed
+
+### Custom Voices
+- ElevenLabs offers voice cloning
+- Train on sample audio
+- Create unique voice profiles
+- Enterprise feature
+
+### Integration
+- Generated audio can be downloaded
+- Compatible with video editing software
+- Use for podcasts, audiobooks, presentations
+- Export in standard MP3 format
+
+## Supported Languages
+
+- English (US, UK, Australian)
+- Spanish
+- French
+- German
+- Italian
+- Portuguese
+- Dutch
+- Polish
+- And more...
+
+## Pricing
+
+ElevenLabs pricing (approximate):
+- **Free tier**: 10,000 characters/month
+- **Starter**: $5/month for 30,000 characters
+- **Creator**: $22/month for 100,000 characters
+- **Pro**: $99/month for 500,000 characters
+
+*Check ElevenLabs website for current pricing*
+    `,
+    relatedArticles: ['audio-editor', 'api-costs', 'advanced-features']
+  },
+  {
+    id: 'audio-editor',
+    title: 'Audio Editor and Word-Level Editing',
+    category: 'features',
+    tags: ['audio editor', 'word editing', 'timestamps', 'splicing'],
+    content: `
+# Audio Editor and Word-Level Editing
+
+Edit your transcripts with precision using AudioTricks' advanced audio editor with word-level timestamp support.
+
+## Overview
+
+The Audio Editor provides:
+- **Word-level timestamps**: Each word linked to audio position
+- **Visual transcript**: Interactive text with audio sync
+- **Precise editing**: Remove unwanted words/sections
+- **Audio splicing**: Create custom audio clips
+- **Voice synthesis**: Generate speech from edited text
+
+## Accessing the Editor
+
+1. **Process audio** to get transcript and summary
+2. **Click Audio Editor tab** in results view
+3. **Two modes available**:
+   - **Edit Mode**: Word-level editing and audio splicing
+   - **Voice Synthesis**: Generate speech from edited text
+
+## Edit Mode Features
+
+### Word-Level Interaction
+- **Click words**: Jump to that point in audio
+- **Select words**: Choose single or multiple words
+- **Drag selection**: Select word ranges
+- **Delete words**: Remove unwanted content
+- **Restore words**: Undo deletions
+
+### Audio Playback
+- **Play/Pause**: Standard audio controls
+- **Word sync**: Highlights current word during playback
+- **Seek**: Click timeline to jump to position
+- **Speed control**: Adjust playback speed
+
+### Selection Tools
+- **Click**: Select single word
+- **Shift+Click**: Extend selection
+- **Ctrl+Click**: Add to selection
+- **Drag**: Select word range
+- **Select All**: Keyboard shortcut (Ctrl+A)
+
+## Word Editing
+
+### Deleting Words
+1. **Select target words** (click/drag)
+2. **Press Delete** or use Delete button
+3. **Words marked as deleted** (red strikethrough)
+4. **Audio timeline updates** automatically
+
+### Restoring Words
+1. **Select deleted words** (shown in red)
+2. **Press Restore** or use Restore button
+3. **Words return to transcript**
+4. **Timeline recalculates**
+
+### Advanced Selection
+- **Sentence selection**: Double-click to select sentence
+- **Paragraph selection**: Triple-click for paragraph
+- **Time range**: Select by audio position
+- **Pattern matching**: Find similar words/phrases
+
+## Audio Splicing
+
+### Creating Clips
+1. **Select word range** for your clip
+2. **Click "Create Clip"** button
+3. **Audio segment extracted** automatically
+4. **Download clip** as MP3 file
+
+### Clip Features
+- **Precise timing**: Based on word boundaries
+- **Fade in/out**: Automatic smooth transitions
+- **Quality preservation**: No audio degradation
+- **Multiple formats**: MP3, WAV export options
+
+### Use Cases
+- **Highlight extraction**: Pull key quotes
+- **Content creation**: Create social media clips
+- **Presentation prep**: Extract important segments
+- **Quality control**: Remove problematic sections
+
+## Voice Synthesis Integration
+
+### From Edited Text
+1. **Edit transcript** as desired
+2. **Switch to Voice Synthesis tab**
+3. **Text automatically updated** with your edits
+4. **Generate speech** from clean transcript
+
+### Benefits
+- **Clean output**: Remove filler words, errors
+- **Custom content**: Create ideal version
+- **Multiple voices**: Try different speakers
+- **Professional results**: Polished final audio
+
+## Keyboard Shortcuts
+
+### Navigation
+- **Space**: Play/Pause
+- **←/→**: Skip words
+- **↑/↓**: Adjust volume
+- **Home/End**: Go to start/end
+
+### Editing
+- **Delete**: Remove selected words
+- **Ctrl+Z**: Undo last action
+- **Ctrl+Y**: Redo action
+- **Ctrl+A**: Select all
+- **Escape**: Clear selection
+
+### Advanced
+- **Shift+Click**: Extend selection
+- **Ctrl+Click**: Add to selection
+- **Ctrl+S**: Save current state
+- **F**: Find text
+
+## Technical Details
+
+### Timestamp Precision
+- **Word-level accuracy**: ±100ms typical
+- **Whisper-based**: Uses OpenAI's timestamp data
+- **Automatic alignment**: Syncs text with audio
+- **Cross-platform**: Works in all browsers
+
+### Audio Processing
+- **Web Audio API**: Real-time processing
+- **No server upload**: Client-side processing
+- **Format support**: MP3, WAV, M4A, FLAC
+- **Quality preservation**: Lossless editing
+
+### Performance
+- **Efficient rendering**: Handles long transcripts
+- **Smooth playback**: Optimized audio engine
+- **Responsive UI**: Real-time updates
+- **Memory management**: Automatic cleanup
+
+## Best Practices
+
+### For Accuracy
+1. **Use high-quality audio**: Clear speech improves timestamps
+2. **Check alignment**: Verify word timing before editing
+3. **Small edits first**: Test with minor changes
+4. **Save frequently**: Preserve your work
+
+### For Efficiency
+1. **Plan edits**: Know what you want to remove
+2. **Use keyboard shortcuts**: Faster than mouse
+3. **Work in sections**: Break up long transcripts
+4. **Preview changes**: Listen before finalizing
+
+### For Quality
+1. **Natural flow**: Maintain sentence structure
+2. **Smooth transitions**: Avoid abrupt cuts
+3. **Context preservation**: Keep meaning intact
+4. **Final review**: Listen to complete result
+
+## Troubleshooting
+
+### Common Issues
+1. **Words not syncing**: Check audio quality
+2. **Timestamps off**: Regenerate with better audio
+3. **Selection not working**: Clear cache, refresh
+4. **Audio won't play**: Check browser compatibility
+
+### Performance Issues
+- **Slow loading**: Large files take time
+- **Memory usage**: Close other tabs
+- **Playback stuttering**: Reduce browser load
+- **Sync drift**: Refresh and try again
+
+### Browser Compatibility
+- **Chrome**: Full support (recommended)
+- **Firefox**: Good support
+- **Safari**: Basic support
+- **Edge**: Full support
+
+## Future Features
+
+Coming soon:
+- **Real-time collaboration**: Share editing sessions
+- **Advanced audio effects**: Noise reduction, EQ
+- **Batch processing**: Edit multiple files
+- **Export options**: More formats and quality levels
+    `,
+    relatedArticles: ['voice-synthesis', 'understanding-results', 'advanced-features']
+  },
+  {
+    id: 'history-recovery',
+    title: 'Recovering Lost History',
+    category: 'troubleshooting',
+    tags: ['history', 'recovery', 'lost data', 'backup'],
+    content: `
+# Recovering Lost History
+
+If you've lost your AudioTricks history, this guide will help you recover your previous transcripts and summaries.
+
+## Quick Recovery
+
+### Using Built-in Recovery Tool
+1. **Open History dropdown** (clock icon in header)
+2. **Click "Recover Lost History"** button
+3. **Tool searches** all localStorage keys
+4. **Recovered items** automatically added to history
+
+### What Gets Recovered
+- **Transcripts**: Complete text from audio
+- **Summaries**: AI-generated summaries
+- **Key moments**: Timestamped highlights
+- **Metadata**: Duration, word count, processing info
+
+## How Recovery Works
+
+### Search Process
+The recovery tool searches for data in multiple formats:
+- **Current format**: audioTricks_history
+- **Legacy formats**: audioTricksResults, openai_results
+- **Alternative keys**: Various naming conventions
+- **Backup locations**: Multiple storage attempts
+
+### Data Conversion
+- **Format migration**: Old formats converted to new
+- **Duplicate removal**: Prevents multiple copies
+- **Quality check**: Validates recovered data
+- **Metadata reconstruction**: Rebuilds missing info
+
+### Recovery Sources
+1. **Primary storage**: audioTricks_history
+2. **Legacy storage**: Old AudioTricks versions
+3. **Session backup**: Temporary session data
+4. **Browser cache**: Cached processing results
+
+## Manual Recovery
+
+### Browser Developer Tools
+1. **Open Developer Tools** (F12)
+2. **Go to Application/Storage tab**
+3. **Check localStorage section**
+4. **Look for AudioTricks-related keys**
+5. **Copy data and contact support**
+
+### localStorage Keys to Check
+- `audioTricks_history`
+- `audioTricksResults`
+- `openai_results`
+- `transcription_history`
+- `audio_history`
+
+### Data Export
+Before recovery:
+1. **Export current data** (if any exists)
+2. **Save important transcripts** as TXT/JSON
+3. **Backup browser data** regularly
+4. **Use cloud storage** for critical files
+
+## Common Scenarios
+
+### Browser Cache Cleared
+- **Recovery possible**: Data might still exist
+- **Check recovery tool**: Often finds cached data
+- **Look for exports**: Previously saved files
+- **Contact support**: For complex recovery
+
+### Browser Updated/Crashed
+- **High success rate**: localStorage usually preserved
+- **Run recovery tool**: First step
+- **Check browser backup**: Some browsers auto-backup
+- **Session restore**: May contain recent data
+
+### Switched Browsers
+- **Data not transferred**: Each browser separate
+- **Export/import needed**: Manual transfer required
+- **Recovery tool won't help**: Only searches current browser
+- **Use sync services**: For future prevention
+
+### Accidental Deletion
+- **Immediate recovery**: Best success rate
+- **Don't close browser**: Data might still be cached
+- **Run recovery tool**: Check for backups
+- **Check recycle bin**: For exported files
+
+## Prevention Tips
+
+### Regular Backups
+1. **Export frequently**: Save important transcripts
+2. **Use cloud storage**: Google Drive, Dropbox
+3. **Multiple formats**: TXT and JSON exports
+4. **Browser sync**: Enable if available
+
+### Best Practices
+1. **Don't clear browser data**: Without export first
+2. **Use bookmarks**: Save important sessions
+3. **Regular maintenance**: Clean up old items
+4. **Test recovery**: Verify backup process
+
+### Alternative Storage
+- **Cloud notes**: Copy to Google Docs, Notion
+- **Email yourself**: Important transcripts
+- **Use version control**: Git for developers
+- **Physical backup**: Print critical content
+
+## Advanced Recovery
+
+### Browser Forensics
+For technical users:
+1. **Check browser profiles**: Multiple user accounts
+2. **Look for backup files**: Browser-specific locations
+3. **Use recovery software**: Undelete tools
+4. **Check system backups**: Time Machine, System Restore
+
+### Data Locations
+- **Chrome**: `%APPDATA%/Google/Chrome/User Data/Default/Local Storage`
+- **Firefox**: `%APPDATA%/Mozilla/Firefox/Profiles/[profile]/storage/default`
+- **Safari**: `~/Library/Safari/LocalStorage`
+- **Edge**: `%APPDATA%/Microsoft/Edge/User Data/Default/Local Storage`
+
+### Third-Party Tools
+- **Browser data recovery**: Specialized software
+- **localStorage extractors**: Developer tools
+- **System file recovery**: After drive issues
+- **Cloud sync recovery**: If sync was enabled
+
+## Support and Help
+
+### When to Contact Support
+1. **Recovery tool fails**: No data found
+2. **Corrupted data**: Found but can't parse
+3. **Partial recovery**: Missing important items
+4. **Technical issues**: Browser compatibility
+
+### Information to Provide
+- **Browser and version**: Chrome 91, Firefox 89, etc.
+- **Operating system**: Windows, Mac, Linux
+- **Error messages**: Exact text from console
+- **Data size**: Approximate amount lost
+- **Timeline**: When data was last seen
+
+### Self-Help Resources
+- **Browser console**: Check for error messages
+- **Community forums**: User experiences
+- **Documentation**: This help system
+- **Video tutorials**: Step-by-step guides
+
+## Recovery Success Rates
+
+### Typical Success Rates
+- **Recent loss**: 90-95% recovery
+- **Browser cleared**: 70-80% recovery
+- **System issues**: 50-60% recovery
+- **Multiple browsers**: 30-40% recovery
+
+### Factors Affecting Recovery
+- **Time since loss**: Sooner is better
+- **Browser activity**: Less activity = better chance
+- **System changes**: Updates may affect recovery
+- **Storage method**: How data was originally stored
+
+Remember: The recovery tool is your best first step. It's designed to handle most common recovery scenarios automatically.
+    `,
+    relatedArticles: ['using-history', 'troubleshooting-api', 'best-practices']
   }
 ]
 
