@@ -1,134 +1,87 @@
 import React, { useState } from 'react'
-import { 
-  KeyIcon, 
-  EyeIcon, 
-  EyeSlashIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon
-} from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline'
 
 interface ElevenLabsKeyInputProps {
   apiKey: string
   onApiKeyChange: (key: string) => void
+  isGuest?: boolean
 }
 
-const ElevenLabsKeyInput: React.FC<ElevenLabsKeyInputProps> = ({ apiKey, onApiKeyChange }) => {
+const ElevenLabsKeyInput: React.FC<ElevenLabsKeyInputProps> = ({ apiKey, onApiKeyChange, isGuest = false }) => {
   const [isVisible, setIsVisible] = useState(false)
-  const [isValid, setIsValid] = useState<boolean | null>(null)
-  const [isValidating, setIsValidating] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [tempKey, setTempKey] = useState(apiKey)
 
-  // Initialize with environment variable if available
-  React.useEffect(() => {
-    const envKey = import.meta.env.VITE_ELEVENLABS_API_KEY
-    if (envKey && envKey !== 'your_elevenlabs_api_key_here' && !apiKey) {
-      onApiKeyChange(envKey)
+  const handleSave = () => {
+    onApiKeyChange(tempKey)
+    if (isGuest) {
+      localStorage.setItem('elevenlabs_api_key', tempKey)
     }
-  }, [])
-
-  const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newKey = e.target.value
-    onApiKeyChange(newKey)
-    localStorage.setItem('elevenlabs_api_key', newKey)
-    setIsValid(null) // Reset validation when key changes
+    setIsEditing(false)
   }
 
-  const validateKey = async () => {
-    if (!apiKey.trim()) {
-      setIsValid(false)
-      return
-    }
-
-    setIsValidating(true)
-    try {
-      const response = await fetch('https://api.elevenlabs.io/v1/user', {
-        headers: {
-          'xi-api-key': apiKey
-        }
-      })
-      
-      setIsValid(response.ok)
-    } catch (error) {
-      setIsValid(false)
-    } finally {
-      setIsValidating(false)
-    }
+  const handleCancel = () => {
+    setTempKey(apiKey)
+    setIsEditing(false)
   }
 
-  const getStatusIcon = () => {
-    if (isValidating) {
-      return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-    }
-    if (isValid === true) {
-      return <CheckCircleIcon className="h-4 w-4 text-green-600" />
-    }
-    if (isValid === false) {
-      return <ExclamationCircleIcon className="h-4 w-4 text-red-600" />
-    }
-    return null
+  if (!isEditing && apiKey) {
+    return (
+      <div className="flex items-center space-x-2">
+        <SpeakerWaveIcon className="h-5 w-5 text-purple-500" />
+        <span className="text-sm text-purple-600">
+          ElevenLabs Key Set {!isGuest ? '(admin)' : '(your key)'}
+        </span>
+        {isGuest && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            Change
+          </button>
+        )}
+      </div>
+    )
   }
 
   return (
-    <div className="relative">
-      <div className="flex items-center space-x-2">
-        <div className="relative">
-          <input
-            type={isVisible ? 'text' : 'password'}
-            value={apiKey}
-            onChange={handleKeyChange}
-            placeholder="ElevenLabs API Key"
-            className="w-48 pl-8 pr-10 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <KeyIcon className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-          <button
-            onClick={() => setIsVisible(!isVisible)}
-            className="absolute right-2 top-2.5 p-0.5 hover:bg-gray-100 rounded"
-            type="button"
-          >
-            {isVisible ? (
-              <EyeSlashIcon className="h-4 w-4 text-gray-400" />
-            ) : (
-              <EyeIcon className="h-4 w-4 text-gray-400" />
-            )}
-          </button>
-        </div>
-        
-        {apiKey && (
-          <button
-            onClick={validateKey}
-            disabled={isValidating}
-            className="px-3 py-2 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          >
-            Test
-          </button>
-        )}
-        
-        {getStatusIcon()}
+    <div className="flex items-center space-x-2">
+      <div className="relative">
+        <input
+          type={isVisible ? 'text' : 'password'}
+          placeholder={isGuest ? "Enter Your ElevenLabs API Key" : "Admin ElevenLabs Key Active"}
+          value={tempKey}
+          onChange={(e) => setTempKey(e.target.value)}
+          className="pr-10 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+        />
+        <button
+          type="button"
+          onClick={() => setIsVisible(!isVisible)}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center"
+        >
+          {isVisible ? (
+            <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+          ) : (
+            <EyeIcon className="h-4 w-4 text-gray-400" />
+          )}
+        </button>
       </div>
       
-      {isValid === false && (
-        <p className="mt-1 text-xs text-red-600">
-          Invalid API key. Please check your ElevenLabs API key.
-        </p>
-      )}
+      <button
+        onClick={handleSave}
+        disabled={!tempKey.trim()}
+        className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Save
+      </button>
       
-      {isValid === true && (
-        <p className="mt-1 text-xs text-green-600">
-          API key is valid!
-        </p>
-      )}
-      
-      {!apiKey && (
-        <p className="mt-1 text-xs text-gray-500">
-          Get your API key from{' '}
-          <a 
-            href="https://elevenlabs.io/app/speech-synthesis" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            ElevenLabs
-          </a>
-        </p>
+      {isEditing && (
+        <button
+          onClick={handleCancel}
+          className="px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400"
+        >
+          Cancel
+        </button>
       )}
     </div>
   )

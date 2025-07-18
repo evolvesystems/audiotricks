@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AudioUploader from './components/AudioUploader'
 import ResultsDisplay2 from './components/ResultsDisplay2'
 import ApiKeyInput from './components/ApiKeyInput'
+import ElevenLabsKeyInput from './components/ElevenLabsKeyInput'
 import Login from './components/Login'
 import LoginCard from './components/LoginCard'
 import Settings from './components/Settings'
@@ -19,6 +20,7 @@ function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
   const [error, setError] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>(localStorage.getItem('openai_api_key') || '')
+  const [elevenLabsKey, setElevenLabsKey] = useState<string>(localStorage.getItem('elevenlabs_api_key') || '')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true) // Default to authenticated
   const [isGuest, setIsGuest] = useState<boolean>(true) // Default to guest mode
   const [showSettings, setShowSettings] = useState(false)
@@ -37,8 +39,12 @@ function App() {
       setIsAuthenticated(true)
       setIsGuest(false)
       const envKey = import.meta.env.VITE_OPENAI_API_KEY
+      const envElevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY
       if (envKey) {
         setApiKey(envKey)
+      }
+      if (envElevenLabsKey) {
+        setElevenLabsKey(envElevenLabsKey)
       }
     } else {
       // Default to guest mode (must use own keys)
@@ -46,8 +52,12 @@ function App() {
       setIsGuest(true)
       // Only use localStorage keys for guests
       const localKey = localStorage.getItem('openai_api_key')
+      const localElevenLabsKey = localStorage.getItem('elevenlabs_api_key')
       if (localKey) {
         setApiKey(localKey)
+      }
+      if (localElevenLabsKey) {
+        setElevenLabsKey(localElevenLabsKey)
       }
     }
   }, [])
@@ -116,8 +126,12 @@ function App() {
     if (!guestMode) {
       localStorage.setItem('admin_authenticated', 'true')
       const envKey = import.meta.env.VITE_OPENAI_API_KEY
+      const envElevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY
       if (envKey) {
         setApiKey(envKey)
+      }
+      if (envElevenLabsKey) {
+        setElevenLabsKey(envElevenLabsKey)
       }
     }
   }
@@ -134,11 +148,18 @@ function App() {
     
     // Keep any locally stored keys for when they return to guest mode
     const localKey = localStorage.getItem('openai_api_key')
+    const localElevenLabsKey = localStorage.getItem('elevenlabs_api_key')
     if (localKey) {
       setApiKey(localKey)
     } else {
       // If no local keys, clear API key so they need to enter their own
       setApiKey('')
+    }
+    if (localElevenLabsKey) {
+      setElevenLabsKey(localElevenLabsKey)
+    } else {
+      // If no local keys, clear ElevenLabs key so they need to enter their own
+      setElevenLabsKey('')
     }
   }
 
@@ -214,6 +235,7 @@ function App() {
                 <Cog6ToothIcon className="h-5 w-5" />
               </button>
               <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} isGuest={isGuest} />
+              <ElevenLabsKeyInput apiKey={elevenLabsKey} onApiKeyChange={setElevenLabsKey} isGuest={isGuest} />
               
               {isGuest ? (
                 <button

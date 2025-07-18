@@ -10,19 +10,14 @@ import {
 import { AudioProcessingResponse } from '../types'
 import { ElevenLabsVoice, ElevenLabsSettings, DEFAULT_ELEVENLABS_SETTINGS, generateSpeechFromTranscript } from '../utils/elevenlabs'
 import VoiceSelector from './VoiceSelector'
-import ElevenLabsKeyInput from './ElevenLabsKeyInput'
 
 interface VoiceSynthesisProps {
   results: AudioProcessingResponse
   editedWords: Array<{word: string, deleted: boolean}>
+  elevenLabsKey: string
 }
 
-const VoiceSynthesis: React.FC<VoiceSynthesisProps> = ({ results, editedWords }) => {
-  const [elevenLabsKey, setElevenLabsKey] = useState<string>(() => {
-    const stored = localStorage.getItem('elevenlabs_api_key')
-    const envKey = import.meta.env.VITE_ELEVENLABS_API_KEY
-    return stored || (envKey && envKey !== 'your_elevenlabs_api_key_here' ? envKey : '')
-  })
+const VoiceSynthesis: React.FC<VoiceSynthesisProps> = ({ results, editedWords, elevenLabsKey }) => {
   const [selectedVoice, setSelectedVoice] = useState<ElevenLabsVoice | null>(null)
   const [settings, setSettings] = useState<ElevenLabsSettings>(DEFAULT_ELEVENLABS_SETTINGS)
   const [isGenerating, setIsGenerating] = useState(false)
