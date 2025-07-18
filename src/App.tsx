@@ -28,7 +28,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const { settings, updateSettings } = useSettings()
-  const { history, addToHistory, removeFromHistory, clearHistory } = useHistory()
+  const { history, addToHistory, removeFromHistory, clearHistory, refreshHistory } = useHistory()
   
   const handleRecoverHistory = (items: any[]) => {
     // Add recovered items to history
@@ -224,6 +224,7 @@ function App() {
                   onDeleteItem={removeFromHistory}
                   onClearHistory={clearHistory}
                   onRecoverHistory={handleRecoverHistory}
+                  onHistoryChange={refreshHistory}
                   isOpen={showHistory}
                   onClose={() => setShowHistory(false)}
                 />

@@ -7,11 +7,13 @@ import {
   MagnifyingGlassIcon,
   XMarkIcon,
   ChevronDownIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline'
 import { HistoryItem } from '../hooks/useHistory'
 import { AudioProcessingResponse } from '../types'
 import HistoryRecovery from './HistoryRecovery'
+import HistoryDiagnostic from './HistoryDiagnostic'
 
 interface HistoryDropdownProps {
   history: HistoryItem[]
@@ -19,6 +21,7 @@ interface HistoryDropdownProps {
   onDeleteItem: (id: string) => void
   onClearHistory: () => void
   onRecoverHistory: (items: HistoryItem[]) => void
+  onHistoryChange: () => void
   isOpen: boolean
   onClose: () => void
 }
@@ -29,12 +32,14 @@ const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
   onDeleteItem, 
   onClearHistory,
   onRecoverHistory,
+  onHistoryChange,
   isOpen,
   onClose
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [showConfirmClear, setShowConfirmClear] = useState(false)
   const [showRecovery, setShowRecovery] = useState(false)
+  const [showDiagnostic, setShowDiagnostic] = useState(false)
   const [visibleItems, setVisibleItems] = useState(10)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -237,6 +242,13 @@ const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
                   <span>Recover Lost History</span>
                 </button>
                 <button
+                  onClick={() => setShowDiagnostic(true)}
+                  className="w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-md flex items-center justify-center space-x-2"
+                >
+                  <WrenchScrewdriverIcon className="h-4 w-4" />
+                  <span>Run Diagnostic</span>
+                </button>
+                <button
                   onClick={() => setShowConfirmClear(true)}
                   className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
                 >
@@ -256,6 +268,15 @@ const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
             setShowRecovery(false)
           }}
           onClose={() => setShowRecovery(false)}
+        />
+      )}
+      
+      {/* History Diagnostic Modal */}
+      {showDiagnostic && (
+        <HistoryDiagnostic
+          isOpen={showDiagnostic}
+          onClose={() => setShowDiagnostic(false)}
+          onHistoryChange={onHistoryChange}
         />
       )}
     </div>

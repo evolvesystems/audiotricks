@@ -136,12 +136,25 @@ export const useHistory = () => {
     return history.find(item => item.id === id)
   }
 
+  const refreshHistory = () => {
+    try {
+      const stored = localStorage.getItem(HISTORY_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        setHistory(parsed)
+      }
+    } catch (error) {
+      console.error('Error refreshing history:', error)
+    }
+  }
+
   return {
     history,
     addToHistory,
     removeFromHistory,
     clearHistory,
-    getHistoryItem
+    getHistoryItem,
+    refreshHistory
   }
 }
 
