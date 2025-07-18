@@ -116,7 +116,7 @@ AudioTricks offers two ways to process audio files: direct upload or URL input.
 - M4A
 - FLAC
 - OGG
-- Maximum file size: 100MB
+- Maximum file size: 100MB (files over 25MB are automatically split)
 
 ### How to Upload
 1. Click the **Upload File** tab
@@ -536,7 +536,7 @@ Having issues with API calls? Here are common problems and solutions.
 4. **Network timeout**
 
 **Solutions**:
-- Compress audio to under 100MB
+- Compress audio to under 100MB (files over 25MB are automatically split)
 - Convert to supported format (MP3 recommended)
 - Check file plays in normal player
 - Try again with stable connection
@@ -998,6 +998,93 @@ Before processing sensitive audio:
 4. Should I use a separate API key?
     `,
     relatedArticles: ['api-key-setup', 'using-history', 'best-practices']
+  },
+  {
+    id: 'large-files',
+    title: 'Processing Large Audio Files',
+    category: 'advanced',
+    tags: ['large files', 'splitting', 'chunks', 'processing'],
+    content: `
+# Processing Large Audio Files
+
+AudioTricks can handle audio files up to 100MB by automatically splitting them into smaller chunks for processing.
+
+## How It Works
+
+### Automatic Splitting
+- Files over 25MB are automatically split into chunks
+- Each chunk is processed separately using OpenAI's Whisper API
+- Results are intelligently merged back together
+- Timestamps are preserved and adjusted correctly
+
+### What You'll See
+1. **Upload**: Normal upload process (up to 100MB)
+2. **Processing**: Console shows "splitting into chunks" message
+3. **Progress**: Each chunk is processed individually
+4. **Results**: Merged transcript with correct timestamps
+
+## Benefits
+
+### No Quality Loss
+- Audio is split at natural boundaries
+- No compression or quality reduction
+- Full fidelity maintained
+
+### Accurate Timestamps
+- Timestamps are preserved from original file
+- Segments are properly aligned
+- Timeline remains accurate
+
+### Seamless Experience
+- No additional steps required
+- Automatic detection and handling
+- Same output format as smaller files
+
+## Technical Details
+
+### File Size Limits
+- Maximum upload: 100MB
+- Auto-split threshold: 25MB
+- Chunk size: ~24MB (safe margin)
+
+### Supported Formats
+All standard formats support splitting:
+- MP3
+- WAV
+- M4A
+- FLAC
+- OGG
+
+### Processing Time
+- Larger files take longer to process
+- Each chunk is processed sequentially
+- Total time depends on file size and content
+
+## Tips for Large Files
+
+### Best Practices
+1. **Use compressed formats** (MP3 recommended)
+2. **Remove silence** from beginning/end
+3. **Split manually** if you need specific segments
+4. **Check audio quality** before upload
+
+### Troubleshooting
+- **Slow processing**: Normal for large files
+- **Memory issues**: Try refreshing the page
+- **Network timeouts**: Use stable connection
+- **Quality issues**: Check source audio
+
+### Alternative Solutions
+- **Manual splitting**: Use audio editing software
+- **Compression**: Reduce file size with audio tools
+- **URL method**: Upload to cloud storage and use URL
+- **Batch processing**: Process sections separately
+
+## Cost Considerations
+
+Large files use more API credits as they require multiple transcription calls. Monitor your usage in the OpenAI dashboard.
+    `,
+    relatedArticles: ['getting-started', 'troubleshooting', 'api-costs']
   }
 ]
 

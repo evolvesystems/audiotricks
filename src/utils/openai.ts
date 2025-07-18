@@ -1,5 +1,5 @@
 import { AudioProcessingResponse, TranscriptionResponse, SummaryResponse, KeyMoment } from '../types'
-
+import { splitAudioFile, mergeTranscriptionResults } from './audioSplitter'
 import { SummaryStyle } from '../components/SummaryStyleSelector'
 
 export interface GPTSettings {
@@ -107,6 +107,44 @@ export async function processAudioWithOpenAI(
 }
 
 async function transcribeAudio(file: File, apiKey: string): Promise<TranscriptionResponse> {
+  // Check if file is larger than 25MB and needs splitting
+  const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB
+  
+  if (file.size > MAX_FILE_SIZE) {
+    console.log(`File size ${(file.size / 1024 / 1024).toFixed(2)}MB exceeds limit, splitting into chunks...`)
+    
+    try {
+      const splitResult = await splitAudioFile(file)
+      const transcriptionResults = []
+      
+      // Process each chunk
+      for (let i = 0; i < splitResult.chunks.length; i++) {
+        const chunk = splitResult.chunks[i]
+        console.log(`Processing chunk ${i + 1}/${splitResult.chunks.length} (${(chunk.blob.size / 1024 / 1024).toFixed(2)}MB)`)
+        
+        const chunkResult = await transcribeAudioChunk(chunk.blob, apiKey)
+        transcriptionResults.push(chunkResult)
+      }
+      
+      // Merge results
+      const mergedResult = mergeTranscriptionResults(transcriptionResults, splitResult.chunks)
+      
+      return {
+        text: mergedResult.text,
+        segments: mergedResult.segments,
+        duration: splitResult.totalDuration
+      }
+    } catch (error) {
+      console.error('Error splitting/processing large audio file:', error)
+      throw new Error('Failed to process large audio file. Please try a smaller file or compress your audio.')
+    }
+  }
+  
+  // For normal-sized files, use the original method
+  return await transcribeAudioChunk(file, apiKey)
+}
+
+async function transcribeAudioChunk(file: File, apiKey: string): Promise<any> {
   const formData = new FormData()
   
   // Check if this is a URL submission

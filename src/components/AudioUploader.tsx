@@ -75,7 +75,7 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
       'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.mp4', '.mpeg', '.mpga', '.webm']
     },
     multiple: false,
-    maxSize: 100 * 1024 * 1024, // 100MB
+    maxSize: 100 * 1024 * 1024, // 100MB (will be automatically split if needed)
   })
 
   const handleUrlSubmit = async () => {
@@ -211,7 +211,8 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
                 {isDragActive ? 'Drop the audio file here' : 'Drop audio file here, or click to select'}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Supports MP3, WAV, M4A, FLAC, OGG (max 100MB)
+                Supports MP3, WAV, M4A, FLAC, OGG (max 100MB)<br/>
+                <span className="text-xs">Files over 25MB will be automatically split for processing</span>
               </p>
             </div>
           </div>
@@ -248,7 +249,8 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
           )}
           
           <p className="text-sm text-gray-500">
-            Supports direct links to MP3, WAV, M4A, FLAC, OGG files (max 100MB)
+            Supports direct links to MP3, WAV, M4A, FLAC, OGG files (max 100MB)<br/>
+            <span className="text-xs">Files over 25MB will be automatically split for processing</span>
           </p>
           
           {/* CORS Notice */}
