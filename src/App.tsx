@@ -1,13 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AudioUploader from './components/AudioUploader'
 import ResultsDisplay from './components/ResultsDisplay'
 import ApiKeyInput from './components/ApiKeyInput'
+import Login from './components/Login'
 import { AudioProcessingResponse } from './types'
 
 function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
   const [error, setError] = useState<string>('')
-  const [apiKey, setApiKey] = useState<string>(localStorage.getItem('openai_api_key') || '')
+  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key') || '')
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+
+  useEffect(() => {
+    // Check if already authenticated
+    const isAuthed = sessionStorage.getItem('authenticated') === 'true'
+    
+    if (isAuthed) {
+      setIsAuthenticated(true)
+    }
+  }, [])
 
   const handleProcessingComplete = (result: AudioProcessingResponse) => {
     setResults(result)
@@ -50,6 +61,10 @@ function App() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />
   }
 
   return (

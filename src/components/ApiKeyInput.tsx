@@ -10,6 +10,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange }) => 
   const [isVisible, setIsVisible] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [tempKey, setTempKey] = useState(apiKey)
+  const isEnvKey = import.meta.env.VITE_OPENAI_API_KEY
 
   const handleSave = () => {
     onApiKeyChange(tempKey)
@@ -26,13 +27,17 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange }) => 
     return (
       <div className="flex items-center space-x-2">
         <KeyIcon className="h-5 w-5 text-green-500" />
-        <span className="text-sm text-green-600">API Key Set</span>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          Change
-        </button>
+        <span className="text-sm text-green-600">
+          API Key Set {isEnvKey ? '(from environment)' : ''}
+        </span>
+        {!isEnvKey && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            Change
+          </button>
+        )}
       </div>
     )
   }
