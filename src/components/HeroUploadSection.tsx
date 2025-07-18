@@ -74,107 +74,105 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Start Processing Your Audio
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Choose your preferred method to get started. We support files, URLs, and live recording.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Upload Interface */}
-          <div className="order-2 lg:order-1">
-            {/* Method Selection */}
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              {uploadMethods.map((method) => {
-                const Icon = method.icon
-                const isSelected = selectedMethod === method.id
+        {/* What You'll Get - Now above the upload section */}
+        <div className="mb-16">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">What You'll Get</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {features.map((feature, index) => {
+                const Icon = feature.icon
                 return (
-                  <button
-                    key={method.id}
-                    onClick={() => setSelectedMethod(method.id as any)}
-                    className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 mr-2" />
-                    {method.title}
-                  </button>
+                  <div key={index} className="flex items-start space-x-4">
+                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                      <Icon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
+                      <p className="text-gray-600 text-sm">{feature.description}</p>
+                    </div>
+                  </div>
                 )
               })}
             </div>
 
-            {/* Upload Component */}
-            <div className="bg-gray-50 rounded-2xl p-8 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
-              <AudioUploader
-                apiKey={apiKey}
-                onProcessingComplete={onProcessingComplete}
-                onError={onError}
-                defaultSettings={defaultSettings}
-              />
-            </div>
-
-            {/* Supported Formats */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-500 mb-2">Supported formats:</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {['MP3', 'WAV', 'M4A', 'FLAC', 'OGG', 'MP4', 'MOV', 'AVI'].map((format) => (
-                  <span key={format} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                    {format}
-                  </span>
-                ))}
+            {/* Sample Output Preview */}
+            <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold text-gray-900">Sample Output</h4>
+                <span className="text-xs text-gray-500">2 minutes ago</span>
               </div>
-              <p className="text-xs text-gray-400 mt-2">Maximum file size: 25MB</p>
-            </div>
-          </div>
-
-          {/* Features Preview */}
-          <div className="order-1 lg:order-2">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">What You'll Get</h3>
               
-              <div className="space-y-6 mb-8">
-                {features.map((feature, index) => {
-                  const Icon = feature.icon
-                  return (
-                    <div key={index} className="flex items-start space-x-4">
-                      <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                        <Icon className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
-                        <p className="text-gray-600 text-sm">{feature.description}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Sample Output Preview */}
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-semibold text-gray-900">Sample Output</h4>
-                  <span className="text-xs text-gray-500">2 minutes ago</span>
+              <div className="space-y-3 text-sm">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="font-medium text-gray-700 mb-1">Transcript</p>
+                  <p className="text-gray-600">"Welcome to our quarterly review meeting. Today we'll cover our progress, key achievements, and upcoming goals..."</p>
                 </div>
                 
-                <div className="space-y-3 text-sm">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="font-medium text-gray-700 mb-1">Transcript</p>
-                    <p className="text-gray-600">"Welcome to our quarterly review meeting. Today we'll cover our progress, key achievements, and upcoming goals..."</p>
-                  </div>
-                  
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <p className="font-medium text-blue-700 mb-1">Key Summary</p>
-                    <p className="text-blue-600">Quarterly review focusing on progress metrics, team achievements, and strategic planning for next quarter.</p>
-                  </div>
-                  
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-gray-500">📊 247 words • 🕐 2:45 duration</span>
-                    <ArrowRightIcon className="h-4 w-4 text-gray-400" />
-                  </div>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <p className="font-medium text-blue-700 mb-1">Key Summary</p>
+                  <p className="text-blue-600">Quarterly review focusing on progress metrics, team achievements, and strategic planning for next quarter.</p>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-xs text-gray-500">📊 247 words • 🕐 2:45 duration</span>
+                  <ArrowRightIcon className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Upload Section - Now full width */}
+        <div className="max-w-4xl mx-auto">
+          {/* Method Selection */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {uploadMethods.map((method) => {
+              const Icon = method.icon
+              const isSelected = selectedMethod === method.id
+              return (
+                <button
+                  key={method.id}
+                  onClick={() => setSelectedMethod(method.id as any)}
+                  className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Icon className="h-5 w-5 mr-2" />
+                  {method.title}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Upload Component - Full width */}
+          <div className="bg-gray-50 rounded-2xl p-12 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
+            <AudioUploader
+              apiKey={apiKey}
+              onProcessingComplete={onProcessingComplete}
+              onError={onError}
+              defaultSettings={defaultSettings}
+            />
+          </div>
+
+          {/* Supported Formats */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500 mb-4">Supported formats:</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {['MP3', 'WAV', 'M4A', 'FLAC', 'OGG', 'MP4', 'MOV', 'AVI'].map((format) => (
+                <span key={format} className="px-3 py-2 bg-gray-100 text-gray-600 text-sm rounded-lg font-medium">
+                  {format}
+                </span>
+              ))}
+            </div>
+            <p className="text-sm text-gray-400 mt-4">Maximum file size: 25MB</p>
           </div>
         </div>
       </div>
