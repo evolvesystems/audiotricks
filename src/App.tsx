@@ -29,12 +29,11 @@ function App() {
   const { history, addToHistory, removeFromHistory, clearHistory } = useHistory()
 
   useEffect(() => {
-    // Check if user has logged in with password before
-    const isAuthed = sessionStorage.getItem('authenticated') === 'true'
-    const guestMode = sessionStorage.getItem('isGuest')
+    // Check if user has logged in with password before (persists permanently)
+    const isAuthed = localStorage.getItem('admin_authenticated') === 'true'
     
-    if (isAuthed && guestMode === 'false') {
-      // User previously logged in with password - use ENV keys
+    if (isAuthed) {
+      // User previously logged in with password - use ENV keys (persists permanently)
       setIsAuthenticated(true)
       setIsGuest(false)
       const envKey = import.meta.env.VITE_OPENAI_API_KEY
@@ -111,12 +110,11 @@ function App() {
   const handleLogin = (guestMode: boolean = false) => {
     setIsAuthenticated(true)
     setIsGuest(guestMode)
-    sessionStorage.setItem('authenticated', 'true')
-    sessionStorage.setItem('isGuest', guestMode.toString())
     setShowLogin(false)
     
-    // If logged in (not guest), use ENV keys
+    // If logged in (not guest), use ENV keys and save admin status permanently
     if (!guestMode) {
+      localStorage.setItem('admin_authenticated', 'true')
       const envKey = import.meta.env.VITE_OPENAI_API_KEY
       if (envKey) {
         setApiKey(envKey)
@@ -125,9 +123,8 @@ function App() {
   }
 
   const handleLogout = () => {
-    // Clear session storage
-    sessionStorage.removeItem('authenticated')
-    sessionStorage.removeItem('isGuest')
+    // Clear admin authentication
+    localStorage.removeItem('admin_authenticated')
     
     // Reset state to guest mode
     setIsAuthenticated(true)
@@ -137,6 +134,12 @@ function App() {
     
     // Clear API key (force user to enter their own)
     setApiKey('')
+    
+    // Keep any locally stored keys for when they return to guest mode
+    const localKey = localStorage.getItem('openai_api_key')
+    if (localKey) {
+      setApiKey(localKey)
+    }
   }
 
   return (

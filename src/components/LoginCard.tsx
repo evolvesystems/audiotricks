@@ -25,8 +25,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin }) => {
     }
 
     if (password === correctPassword) {
-      sessionStorage.setItem('authenticated', 'true')
-      sessionStorage.setItem('isGuest', 'false')
+      localStorage.setItem('admin_authenticated', 'true')
       onLogin(false)
     } else {
       setError('Invalid password')
