@@ -21,6 +21,7 @@ interface WordTimestamp {
 
 interface AudioEditorProps {
   results: AudioProcessingResponse
+  elevenLabsKey: string
 }
 
 const AudioEditor: React.FC<AudioEditorProps> = ({ results }) => {

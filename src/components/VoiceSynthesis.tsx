@@ -105,15 +105,6 @@ const VoiceSynthesis: React.FC<VoiceSynthesisProps> = ({ results, editedWords, e
 
   return (
     <div className="space-y-6">
-      {/* API Key Input */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">ElevenLabs Configuration</h3>
-        <ElevenLabsKeyInput 
-          apiKey={elevenLabsKey} 
-          onApiKeyChange={setElevenLabsKey}
-        />
-      </div>
-
       {/* Voice Selection */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Voice Selection</h3>
