@@ -39,9 +39,9 @@ const SummaryStyleSelector: React.FC<SummaryStyleSelectorProps> = ({
   ]
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <label className="text-sm font-medium text-gray-700">Summary Style</label>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         {styles.map((style) => {
           const Icon = style.icon
           const isSelected = selectedStyle === style.id
@@ -51,27 +51,27 @@ const SummaryStyleSelector: React.FC<SummaryStyleSelectorProps> = ({
               onClick={() => onStyleChange(style.id)}
               disabled={disabled}
               className={`
-                relative p-3 rounded-lg border-2 transition-all
+                relative p-4 rounded-xl border-2 transition-all min-h-[100px] flex flex-col items-center justify-center text-center
                 ${isSelected 
                   ? style.color === 'blue' ? 'border-blue-500 bg-blue-50' :
                     style.color === 'purple' ? 'border-purple-500 bg-purple-50' :
                     'border-green-500 bg-green-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }
                 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
             >
-              <Icon className={`h-6 w-6 mx-auto mb-1 ${
+              <Icon className={`h-7 w-7 mx-auto mb-2 ${
                 isSelected 
                   ? style.color === 'blue' ? 'text-blue-600' :
                     style.color === 'purple' ? 'text-purple-600' :
                     'text-green-600'
                   : 'text-gray-400'
               }`} />
-              <div className="text-xs font-medium text-gray-900">{style.name}</div>
-              <div className="text-xs text-gray-500">{style.description}</div>
+              <div className="text-sm font-medium text-gray-900 mb-1">{style.name}</div>
+              <div className="text-xs text-gray-500 leading-tight">{style.description}</div>
               {isSelected && (
-                <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${
+                <div className={`absolute top-2 right-2 w-2.5 h-2.5 rounded-full ${
                   style.color === 'blue' ? 'bg-blue-500' :
                   style.color === 'purple' ? 'bg-purple-500' :
                   'bg-green-500'

@@ -13,12 +13,14 @@ interface QuickActionsProps {
   onShowHelp: () => void
   historyCount: number
   compact?: boolean
+  onClose?: () => void
 }
 
 const QuickActions: React.FC<QuickActionsProps> = ({ 
   onShowHistory, 
   onShowHelp, 
-  historyCount 
+  historyCount,
+  onClose 
 }) => {
   const quickLinks = [
     {
