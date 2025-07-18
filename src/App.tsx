@@ -3,6 +3,7 @@ import AudioUploader from './components/AudioUploader'
 import ResultsDisplay2 from './components/ResultsDisplay2'
 import ApiKeyInput from './components/ApiKeyInput'
 import Login from './components/Login'
+import LoginCard from './components/LoginCard'
 import Settings from './components/Settings'
 import HeroSection from './components/HeroSection'
 import HelpCenter from './components/HelpCenter'
@@ -12,17 +13,18 @@ import QuickActions from './components/QuickActions'
 import { AudioProcessingResponse } from './types'
 import { useSettings } from './hooks/useSettings'
 import { useHistory } from './hooks/useHistory'
-import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon, ArrowRightOnRectangleIcon, UserIcon } from '@heroicons/react/24/outline'
 
 function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
   const [error, setError] = useState<string>('')
-  const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key') || '')
+  const [apiKey, setApiKey] = useState<string>(localStorage.getItem('openai_api_key') || '')
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true) // Default to authenticated
   const [isGuest, setIsGuest] = useState<boolean>(true) // Default to guest mode
   const [showSettings, setShowSettings] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   const { settings, updateSettings } = useSettings()
   const { history, addToHistory, removeFromHistory, clearHistory } = useHistory()
 
@@ -32,13 +34,22 @@ function App() {
     const guestMode = sessionStorage.getItem('isGuest')
     
     if (isAuthed && guestMode === 'false') {
-      // User previously logged in with password
+      // User previously logged in with password - use ENV keys
       setIsAuthenticated(true)
       setIsGuest(false)
+      const envKey = import.meta.env.VITE_OPENAI_API_KEY
+      if (envKey) {
+        setApiKey(envKey)
+      }
     } else {
-      // Default to guest mode (can use own keys)
+      // Default to guest mode (must use own keys)
       setIsAuthenticated(true)
       setIsGuest(true)
+      // Only use localStorage keys for guests
+      const localKey = localStorage.getItem('openai_api_key')
+      if (localKey) {
+        setApiKey(localKey)
+      }
     }
   }, [])
 
@@ -102,6 +113,15 @@ function App() {
     setIsGuest(guestMode)
     sessionStorage.setItem('authenticated', 'true')
     sessionStorage.setItem('isGuest', guestMode.toString())
+    setShowLogin(false)
+    
+    // If logged in (not guest), use ENV keys
+    if (!guestMode) {
+      const envKey = import.meta.env.VITE_OPENAI_API_KEY
+      if (envKey) {
+        setApiKey(envKey)
+      }
+    }
   }
 
   const handleLogout = () => {
@@ -109,15 +129,13 @@ function App() {
     sessionStorage.removeItem('authenticated')
     sessionStorage.removeItem('isGuest')
     
-    // Reset state
-    setIsAuthenticated(true) // Stay authenticated but go back to guest mode
+    // Reset state to guest mode
+    setIsAuthenticated(true)
     setIsGuest(true)
     setResults(null)
     setError('')
     
-    // Clear local storage
-    localStorage.removeItem('openai_api_key')
-    localStorage.removeItem('elevenlabs_api_key')
+    // Clear API key (force user to enter their own)
     setApiKey('')
   }
 
@@ -130,8 +148,13 @@ function App() {
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
               {isGuest && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                  Guest Mode
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Using Own Keys
+                </span>
+              )}
+              {!isGuest && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  Using Admin Keys
                 </span>
               )}
             </div>
@@ -188,13 +211,24 @@ function App() {
                 <Cog6ToothIcon className="h-5 w-5" />
               </button>
               <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} isGuest={isGuest} />
-              <button
-                onClick={handleLogout}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                title={isGuest ? "Logout (will clear local API keys)" : "Logout"}
-              >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
-              </button>
+              
+              {isGuest ? (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                  title="Login for enhanced features"
+                >
+                  <UserIcon className="h-5 w-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                  title="Logout and clear data"
+                >
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -286,6 +320,29 @@ function App() {
         isOpen={showHelp}
         onClose={() => setShowHelp(false)}
       />
+
+      {/* Login Modal */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full mx-4">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-semibold">Enhanced Access</h2>
+              <button
+                onClick={() => setShowLogin(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <LoginCard onLogin={handleLogin} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

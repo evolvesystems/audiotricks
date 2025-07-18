@@ -15,7 +15,9 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
 
   const handleSave = () => {
     onApiKeyChange(tempKey)
-    localStorage.setItem('openai_api_key', tempKey)
+    if (isGuest) {
+      localStorage.setItem('openai_api_key', tempKey)
+    }
     setIsEditing(false)
   }
 
@@ -29,9 +31,9 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
       <div className="flex items-center space-x-2">
         <KeyIcon className="h-5 w-5 text-green-500" />
         <span className="text-sm text-green-600">
-          API Key Set {isEnvKey ? '(from environment)' : isGuest ? '(stored locally)' : ''}
+          API Key Set {!isGuest ? '(admin keys)' : '(your keys)'}
         </span>
-        {!isEnvKey && (
+        {isGuest && (
           <button
             onClick={() => setIsEditing(true)}
             className="text-sm text-blue-600 hover:text-blue-700"
@@ -48,7 +50,7 @@ const ApiKeyInput: React.FC<ApiKeyInputProps> = ({ apiKey, onApiKeyChange, isGue
       <div className="relative">
         <input
           type={isVisible ? 'text' : 'password'}
-          placeholder={isGuest ? "Enter OpenAI API Key (stored locally)" : "Enter OpenAI API Key"}
+          placeholder={isGuest ? "Enter Your OpenAI API Key" : "Admin API Key Active"}
           value={tempKey}
           onChange={(e) => setTempKey(e.target.value)}
           className="pr-10 pl-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
