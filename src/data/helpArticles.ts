@@ -22,7 +22,7 @@ Welcome to AudioTricks! This guide will help you set up and start using the appl
 
 1. **Access Password**: Your administrator will provide this
 2. **OpenAI API Key**: Get one at [platform.openai.com](https://platform.openai.com)
-3. **Audio Files**: MP3, WAV, M4A, FLAC, or OGG format (max 100MB)
+3. **Audio Files**: MP3, WAV, M4A, FLAC, OGG, or OPUS format (max 100MB)
 
 ## First Time Setup
 
@@ -116,6 +116,7 @@ AudioTricks offers two ways to process audio files: direct upload or URL input.
 - M4A
 - FLAC
 - OGG
+- OPUS
 - Maximum file size: 100MB (files over 25MB are automatically split)
 
 ### How to Upload
@@ -1054,6 +1055,7 @@ All standard formats support splitting:
 - M4A
 - FLAC
 - OGG
+- OPUS
 
 ### Processing Time
 - Larger files take longer to process

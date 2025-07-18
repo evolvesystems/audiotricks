@@ -18,8 +18,8 @@ function App() {
   const [results, setResults] = useState<AudioProcessingResponse | null>(null)
   const [error, setError] = useState<string>('')
   const [apiKey, setApiKey] = useState<string>(import.meta.env.VITE_OPENAI_API_KEY || localStorage.getItem('openai_api_key') || '')
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-  const [isGuest, setIsGuest] = useState<boolean>(false)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true) // Default to authenticated
+  const [isGuest, setIsGuest] = useState<boolean>(true) // Default to guest mode
   const [showSettings, setShowSettings] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -27,13 +27,18 @@ function App() {
   const { history, addToHistory, removeFromHistory, clearHistory } = useHistory()
 
   useEffect(() => {
-    // Check if already authenticated
+    // Check if user has logged in with password before
     const isAuthed = sessionStorage.getItem('authenticated') === 'true'
-    const guestMode = sessionStorage.getItem('isGuest') === 'true'
+    const guestMode = sessionStorage.getItem('isGuest')
     
-    if (isAuthed) {
+    if (isAuthed && guestMode === 'false') {
+      // User previously logged in with password
       setIsAuthenticated(true)
-      setIsGuest(guestMode)
+      setIsGuest(false)
+    } else {
+      // Default to guest mode (can use own keys)
+      setIsAuthenticated(true)
+      setIsGuest(true)
     }
   }, [])
 

@@ -118,7 +118,7 @@ const AudioUrlHandler: React.FC<AudioUrlHandlerProps> = ({ onFileReady, disabled
       )}
 
       <div className="text-xs text-gray-500">
-        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG (max 100MB)</p>
+        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG, OPUS (max 100MB)</p>
         <p className="text-xs">Files over 25MB will be automatically split for processing</p>
         <p>Note: Some URLs may be blocked by CORS. We'll offer alternatives if needed.</p>
       </div>
