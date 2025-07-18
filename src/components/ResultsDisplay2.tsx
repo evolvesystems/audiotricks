@@ -30,9 +30,10 @@ interface ResultsDisplayProps {
   onExport: (format: 'txt' | 'json') => void
   showCostEstimates?: boolean
   onReprocess?: (newResults: AudioProcessingResponse) => void
+  elevenLabsKey: string
 }
 
-const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, showCostEstimates = true, onReprocess }) => {
+const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, showCostEstimates = true, onReprocess, elevenLabsKey }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'transcript' | 'podcasts' | 'editor'>('overview')
   const [expandedMoment, setExpandedMoment] = useState<number | null>(null)
   const [showReprocessModal, setShowReprocessModal] = useState(false)
@@ -371,7 +372,7 @@ const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({ results, onExport, sho
               </div>
             </div>
           ) : activeTab === 'editor' ? (
-            <AudioEditor results={results} />
+            <AudioEditor results={results} elevenLabsKey={elevenLabsKey} />
           ) : (
             <PodcastsTab results={results} />
           )}

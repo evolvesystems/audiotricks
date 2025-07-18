@@ -325,6 +325,7 @@ function App() {
                   onExport={handleExport}
                   showCostEstimates={settings.showCostEstimates}
                   onReprocess={handleReprocess}
+                  elevenLabsKey={elevenLabsKey}
                 />
               </div>
             </div>
