@@ -9,7 +9,6 @@ export const useSettings = () => {
       try {
         return { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) }
       } catch (e) {
-        console.error('Failed to parse saved settings:', e)
         return DEFAULT_SETTINGS
       }
     }

@@ -72,8 +72,9 @@ const ReprocessModal: React.FC<ReprocessModalProps> = ({
               Summary Style
             </label>
             <SummaryStyleSelector 
-              value={summaryStyle} 
-              onChange={setSummaryStyle}
+              selectedStyle={summaryStyle} 
+              onStyleChange={setSummaryStyle}
+              disabled={isProcessing}
             />
           </div>
 
@@ -83,8 +84,9 @@ const ReprocessModal: React.FC<ReprocessModalProps> = ({
               Language
             </label>
             <LanguageSelector 
-              value={language} 
-              onChange={setLanguage}
+              selectedLanguage={language} 
+              onLanguageChange={setLanguage}
+              disabled={isProcessing}
             />
           </div>
 

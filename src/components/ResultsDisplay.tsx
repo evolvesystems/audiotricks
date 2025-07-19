@@ -12,6 +12,7 @@ import PodcastsTab from './PodcastsTab'
 import TranscriptDisplay from './TranscriptDisplay'
 import CostEstimate from './CostEstimate'
 import AudioPlayer from './AudioPlayer'
+import { sanitizeHtml } from '../utils/sanitize'
 
 interface ResultsDisplayProps {
   results: AudioProcessingResponse
@@ -156,11 +157,11 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results, onExport, show
                         </div>
                         <h4 
                           className="font-medium text-gray-900 mb-1"
-                          dangerouslySetInnerHTML={{ __html: moment.title }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeHtml(moment.title) }}
                         />
                         <div 
                           className="text-sm text-gray-600 prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: moment.description }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeHtml(moment.description) }}
                         />
                       </div>
                       <StarIcon className="h-5 w-5 text-gray-400" />

@@ -1,5 +1,5 @@
 /**
- * Audio file splitting utilities to handle files larger than 25MB
+ * Audio file splitting utilities to handle files larger than 150MB
  * for OpenAI Whisper API processing
  */
 
@@ -18,7 +18,7 @@ export interface SplitAudioResult {
 }
 
 /**
- * Split audio file into chunks that fit within OpenAI's 25MB limit
+ * Split audio file into chunks that fit within OpenAI's 150MB limit
  */
 export async function splitAudioFile(file: File): Promise<SplitAudioResult> {
   const MAX_CHUNK_SIZE = 24 * 1024 * 1024 // 24MB to be safe
@@ -42,7 +42,6 @@ export async function splitAudioFile(file: File): Promise<SplitAudioResult> {
         originalSize: file.size
       }
     } catch (error) {
-      console.error('Failed to decode audio for single chunk:', error)
       // Fallback: treat as single chunk without duration info
       return {
         chunks: [{
@@ -121,7 +120,6 @@ async function estimateAudioDuration(file: File): Promise<number> {
       audio.src = url
     })
   } catch (error) {
-    console.error('Failed to estimate audio duration:', error)
     // Fallback: estimate based on file size and typical bitrate
     return file.size / (128 * 1024 / 8) // Assume 128kbps
   }

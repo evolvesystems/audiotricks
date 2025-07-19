@@ -1,8 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { 
-  CloudArrowUpIcon, 
-  MicrophoneIcon, 
-  LinkIcon, 
   PlayIcon,
   DocumentIcon,
   SpeakerWaveIcon,
@@ -23,31 +20,6 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
   onError,
   defaultSettings
 }) => {
-  const [selectedMethod, setSelectedMethod] = useState<'upload' | 'link' | 'record'>('upload')
-
-  const uploadMethods = [
-    {
-      id: 'upload',
-      title: 'Upload File',
-      description: 'Drop your audio file here',
-      icon: CloudArrowUpIcon,
-      color: 'blue'
-    },
-    {
-      id: 'link',
-      title: 'URL Link',
-      description: 'Paste YouTube, podcast, or media URL',
-      icon: LinkIcon,
-      color: 'green'
-    },
-    {
-      id: 'record',
-      title: 'Record Now',
-      description: 'Record directly from your microphone',
-      icon: MicrophoneIcon,
-      color: 'purple'
-    }
-  ]
 
   const features = [
     {
@@ -68,7 +40,7 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
   ]
 
   return (
-    <div className="bg-white py-20 border-t border-gray-200">
+    <div id="upload-section" className="bg-white py-20 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -130,28 +102,6 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
 
         {/* Upload Section - Now full width */}
         <div className="max-w-4xl mx-auto">
-          {/* Method Selection */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {uploadMethods.map((method) => {
-              const Icon = method.icon
-              const isSelected = selectedMethod === method.id
-              return (
-                <button
-                  key={method.id}
-                  onClick={() => setSelectedMethod(method.id as any)}
-                  className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  {method.title}
-                </button>
-              )
-            })}
-          </div>
-
           {/* Upload Component - Full width */}
           <div className="bg-gray-50 rounded-2xl p-12 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
             <AudioUploader
@@ -172,7 +122,7 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
                 </span>
               ))}
             </div>
-            <p className="text-sm text-gray-400 mt-4">Maximum file size: 25MB</p>
+            <p className="text-sm text-gray-400 mt-4">Maximum file size: 150MB • Files over 25MB are automatically split</p>
           </div>
         </div>
       </div>

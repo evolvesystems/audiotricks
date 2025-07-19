@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { CloudArrowUpIcon, DocumentIcon, LinkIcon } from '@heroicons/react/24/outline'
 import { processAudioWithOpenAI, processAudioFromUrl } from '../utils/openai'
 import { AudioProcessingResponse } from '../types'
-import SummaryStyleSelector, { SummaryStyle } from './SummaryStyleSelector'
-import LanguageSelector from './LanguageSelector'
-import ProcessingProgress from './ProcessingProgress'
-import AdvancedSettings from './AdvancedSettings'
+import { SummaryStyle } from './SummaryStyleSelector'
+import ProcessingProgressEnhanced from './ProcessingProgressEnhanced'
 import { UserSettings } from './Settings'
+import ProcessingOptions from './AudioUploader/ProcessingOptions'
+import ErrorDisplay from './AudioUploader/ErrorDisplay'
+import InputModeSelector from './AudioUploader/InputModeSelector'
+import ContentArea from './AudioUploader/ContentArea'
 
 interface AudioUploaderProps {
   apiKey: string
@@ -27,6 +28,10 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
   const [temperature, setTemperature] = useState(defaultSettings?.temperature || 0.3)
   const [maxTokens, setMaxTokens] = useState(defaultSettings?.maxTokens || 2000)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
+  const [inlineError, setInlineError] = useState<string>('')
+  const [currentFileSize, setCurrentFileSize] = useState<number | undefined>(undefined)
+  const [chunkProgress, setChunkProgress] = useState<{ current: number; total: number } | undefined>(undefined)
 
   // Update local state when default settings change
   useEffect(() => {
@@ -38,45 +43,74 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
     }
   }, [defaultSettings])
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
     if (!file) return
 
     if (!apiKey) {
-      onError('Please enter your OpenAI API key first')
+      setInlineError('Please enter your OpenAI API key first')
       return
     }
 
     setUploadedFile(file)
+    setInlineError('') // Clear any previous errors
+    // Don't start processing immediately - wait for user to click button
+  }, [apiKey])
+
+  const handleCancel = () => {
+    if (abortController) {
+      abortController.abort()
+      setIsProcessing(false)
+      setAbortController(null)
+      setInlineError('Processing cancelled by user')
+    }
+  }
+
+  const processUploadedFile = async () => {
+    if (!uploadedFile || !apiKey) return
+
+    const controller = new AbortController()
+    setAbortController(controller)
     setIsProcessing(true)
     setProcessingStage('uploading')
+    setInlineError('') // Clear any previous errors
+    setChunkProgress(undefined) // Clear any previous chunk progress
 
     try {
       const result = await processAudioWithOpenAI(
-        file, 
+        uploadedFile, 
         apiKey, 
         summaryStyle,
         outputLanguage,
-        (stage) => setProcessingStage(stage),
-        { temperature, maxTokens }
+        (stage, chunkProgressData) => {
+          setProcessingStage(stage)
+          setChunkProgress(chunkProgressData)
+        },
+        { temperature, maxTokens },
+        controller.signal
       )
       setProcessingStage('complete')
       onProcessingComplete(result)
     } catch (error: any) {
-      console.error('Audio processing error:', error)
-      
-      // More helpful error messages
-      let errorMessage = error.message || 'Processing failed. Please try again.'
-      
-      if (error.message?.includes('large')) {
-        errorMessage = `${error.message}\n\nTips for large files:\n• Use MP3 format for better compression\n• Remove silence from start/end\n• Try splitting manually into smaller segments`
+      // Check if it was cancelled
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        setInlineError('Processing cancelled by user')
+      } else {
+        // More helpful error messages
+        let errorMessage = error.message || 'Processing failed. Please try again.'
+        
+        if (error.message?.includes('large')) {
+          errorMessage = `${error.message}\n\nTips for large files:\n• Use MP3 format for better compression\n• Remove silence from start/end\n• Try splitting manually into smaller segments`
+        }
+        
+        setInlineError(errorMessage)
       }
-      
-      onError(errorMessage)
     } finally {
       setIsProcessing(false)
+      setUploadedFile(null)
+      setAbortController(null)
     }
-  }, [apiKey, onProcessingComplete, onError, summaryStyle, outputLanguage, temperature, maxTokens])
+  }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -84,22 +118,42 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
       'audio/*': ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.opus', '.mp4', '.mpeg', '.mpga', '.webm']
     },
     multiple: false,
-    maxSize: 100 * 1024 * 1024, // 100MB (will be automatically split if needed)
+    maxSize: 150 * 1024 * 1024, // 150MB max upload (files over 25MB will be automatically split)
   })
 
   const handleUrlSubmit = async () => {
     if (!audioUrl.trim()) {
-      onError('Please enter a valid URL')
+      setInlineError('Please enter a valid URL')
       return
     }
 
     if (!apiKey) {
-      onError('Please enter your OpenAI API key first')
+      setInlineError('Please enter your OpenAI API key first')
       return
     }
 
+    const controller = new AbortController()
+    setAbortController(controller)
     setIsProcessing(true)
     setProcessingStage('uploading')
+    setInlineError('') // Clear any previous errors
+
+    // Try to get file size first - add debug logging
+    try {
+      const headResponse = await fetch(audioUrl, { 
+        method: 'HEAD',
+        signal: controller.signal 
+      })
+      if (headResponse.ok) {
+        const contentLength = headResponse.headers.get('content-length')
+        if (contentLength) {
+          const size = parseInt(contentLength)
+          setCurrentFileSize(size)
+        }
+      }
+    } catch (headError) {
+      // Ignore HEAD request errors, continue with processing
+    }
 
     try {
       const result = await processAudioFromUrl(
@@ -107,15 +161,29 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
         apiKey, 
         summaryStyle,
         outputLanguage,
-        (stage) => setProcessingStage(stage),
-        { temperature, maxTokens }
+        (stage, chunkProgressData) => {
+          setProcessingStage(stage)
+          setChunkProgress(chunkProgressData)
+        },
+        { temperature, maxTokens },
+        controller.signal,
+        (size) => setCurrentFileSize(size)
       )
       setProcessingStage('complete')
+      // Update file size from result
+      if (result.fileSize) {
+        setCurrentFileSize(result.fileSize)
+      }
       onProcessingComplete(result)
     } catch (error: any) {
-      onError(error.message || 'Processing failed. Please try again.')
+      if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+        setInlineError('Processing cancelled by user')
+      } else {
+        setInlineError(error.message || 'Processing failed. Please try again.')
+      }
     } finally {
       setIsProcessing(false)
+      setAbortController(null)
     }
   }
 
@@ -131,160 +199,47 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ apiKey, onProcessingCompl
         </div>
       )}
 
-      {/* Processing Options */}
-      <div className="space-y-4 mb-6">
-        <h4 className="text-sm font-medium text-gray-700">Processing Options</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SummaryStyleSelector
-            selectedStyle={summaryStyle}
-            onStyleChange={setSummaryStyle}
-            disabled={isProcessing}
-          />
-          <LanguageSelector
-            selectedLanguage={outputLanguage}
-            onLanguageChange={setOutputLanguage}
-            disabled={isProcessing}
-          />
-        </div>
-        
-        {/* Advanced Settings Toggle */}
-        <div className="mt-3">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            {showAdvanced ? 'Hide' : 'Show'} Advanced Settings
-          </button>
-          
-          {showAdvanced && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-md">
-              <AdvancedSettings
-                temperature={temperature}
-                onTemperatureChange={setTemperature}
-                maxTokens={maxTokens}
-                onMaxTokensChange={setMaxTokens}
-                disabled={isProcessing}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      <ProcessingOptions
+        summaryStyle={summaryStyle}
+        onSummaryStyleChange={setSummaryStyle}
+        outputLanguage={outputLanguage}
+        onLanguageChange={setOutputLanguage}
+        temperature={temperature}
+        onTemperatureChange={setTemperature}
+        maxTokens={maxTokens}
+        onMaxTokensChange={setMaxTokens}
+        showAdvanced={showAdvanced}
+        onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+        disabled={isProcessing}
+      />
 
-      {/* Input Mode Selector */}
-      <div className="flex space-x-1 mb-4 border-b border-gray-200">
-        <button
-          onClick={() => setInputMode('upload')}
-          className={`px-4 py-2 text-sm font-medium ${
-            inputMode === 'upload'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Upload File
-        </button>
-        <button
-          onClick={() => setInputMode('url')}
-          className={`px-4 py-2 text-sm font-medium ${
-            inputMode === 'url'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          From URL
-        </button>
-      </div>
+      <ErrorDisplay error={inlineError} onDismiss={() => setInlineError('')} />
+
+      <InputModeSelector
+        inputMode={inputMode}
+        onModeChange={setInputMode}
+        onClearError={() => setInlineError('')}
+      />
       
-      {inputMode === 'upload' ? (
-        <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragActive 
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-gray-400'
-          }
-          ${isProcessing || !apiKey ? 'pointer-events-none opacity-50' : ''}
-        `}
-      >
-        <input {...getInputProps()} />
-        
-        {isProcessing ? (
-          <ProcessingProgress 
-            stage={processingStage}
-            fileName={uploadedFile?.name}
-          />
-        ) : (
-          <div className="space-y-4">
-            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <div>
-              <p className="text-lg font-medium text-gray-900">
-                {isDragActive ? 'Drop the audio file here' : 'Drop audio file here, or click to select'}
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Supports MP3, WAV, M4A, FLAC, OGG, OPUS (max 100MB)<br/>
-                <span className="text-xs">Files over 25MB will be automatically split for processing</span>
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex space-x-2">
-            <div className="flex-1 relative">
-              <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="url"
-                value={audioUrl}
-                onChange={(e) => setAudioUrl(e.target.value)}
-                placeholder="Enter audio file URL (e.g., https://example.com/audio.mp3)"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={isProcessing || !apiKey}
-              />
-            </div>
-            <button
-              onClick={handleUrlSubmit}
-              disabled={isProcessing || !apiKey || !audioUrl.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isProcessing ? 'Processing...' : 'Process'}
-            </button>
-          </div>
-          
-          {isProcessing && (
-            <ProcessingProgress 
-              stage={processingStage}
-              fileName={audioUrl.split('/').pop()}
-            />
-          )}
-          
-          <p className="text-sm text-gray-500">
-            Supports direct links to MP3, WAV, M4A, FLAC, OGG, OPUS files (max 100MB)<br/>
-            <span className="text-xs">Files over 25MB will be automatically split for processing</span>
-          </p>
-          
-          {/* CORS Notice */}
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-xs text-blue-800">
-              <strong>How it works:</strong> We'll try to fetch the audio directly. If blocked by CORS, 
-              we'll automatically use a proxy service to access the file. This may take a bit longer.
-            </p>
-          </div>
-        </div>
-      )}
+      <ContentArea
+        inputMode={inputMode}
+        isProcessing={isProcessing}
+        uploadedFile={uploadedFile}
+        isDragActive={isDragActive}
+        hasApiKey={!!apiKey}
+        processingStage={processingStage}
+        audioUrl={audioUrl}
+        currentFileSize={currentFileSize}
+        chunkProgress={chunkProgress}
+        onStartProcessing={processUploadedFile}
+        onUrlChange={setAudioUrl}
+        onUrlSubmit={handleUrlSubmit}
+        onCancel={handleCancel}
+        onClearError={() => setInlineError('')}
+        getRootProps={getRootProps}
+        getInputProps={getInputProps}
+      />
 
-      {uploadedFile && !isProcessing && inputMode === 'upload' && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center space-x-3">
-          <DocumentIcon className="h-6 w-6 text-gray-400" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {uploadedFile.name}
-            </p>
-            <p className="text-sm text-gray-500">
-              {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

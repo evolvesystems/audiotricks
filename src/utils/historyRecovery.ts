@@ -13,14 +13,12 @@ const RECOVERY_KEYS = [
 export const recoverHistory = (): HistoryItem[] => {
   const recoveredItems: HistoryItem[] = []
   
-  console.log('🔍 Searching for lost history...')
   
   // Check each possible key
   RECOVERY_KEYS.forEach(key => {
     try {
       const stored = localStorage.getItem(key)
       if (stored) {
-        console.log(`📦 Found data in ${key}:`, stored.substring(0, 100) + '...')
         
         const parsed = JSON.parse(stored)
         
@@ -41,14 +39,12 @@ export const recoverHistory = (): HistoryItem[] => {
         }
       }
     } catch (error) {
-      console.error(`❌ Error parsing ${key}:`, error)
     }
   })
   
   // Remove duplicates based on content similarity
   const uniqueItems = removeDuplicates(recoveredItems)
   
-  console.log(`✅ Recovered ${uniqueItems.length} unique items from ${recoveredItems.length} total`)
   
   return uniqueItems
 }
@@ -60,7 +56,6 @@ const convertToHistoryItem = (item: any, index: number, source: string): History
     const summary = item.summary || item.summary_text || ''
     
     if (!transcript && !summary) {
-      console.log(`⚠️  Skipping item ${index} from ${source}: no transcript or summary`)
       return null
     }
     
@@ -88,10 +83,8 @@ const convertToHistoryItem = (item: any, index: number, source: string): History
       }
     }
     
-    console.log(`✅ Converted item from ${source}:`, historyItem.title)
     return historyItem
   } catch (error) {
-    console.error(`❌ Error converting item ${index} from ${source}:`, error)
     return null
   }
 }
@@ -160,23 +153,16 @@ export const inspectLocalStorageKey = (key: string): any => {
     const data = localStorage.getItem(key)
     if (!data) return null
     
-    console.log(`🔍 Inspecting ${key}:`)
-    console.log(`   Size: ${data.length} characters`)
-    console.log(`   Preview: ${data.substring(0, 200)}...`)
     
     try {
       const parsed = JSON.parse(data)
-      console.log(`   Type: ${Array.isArray(parsed) ? 'Array' : typeof parsed}`)
       if (Array.isArray(parsed)) {
-        console.log(`   Items: ${parsed.length}`)
       }
       return parsed
     } catch {
-      console.log(`   Type: String (not JSON)`)
       return data
     }
   } catch (error) {
-    console.error(`❌ Error inspecting ${key}:`, error)
     return null
   }
 }

@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 export interface ElevenLabsVoice {
   voice_id: string
   name: string
@@ -128,7 +130,7 @@ export async function getElevenLabsVoices(apiKey: string): Promise<ElevenLabsVoi
       use_case: voice.labels?.use_case || 'general'
     }))
   } catch (error) {
-    console.error('Error fetching ElevenLabs voices:', error)
+    logger.error('Error fetching ElevenLabs voices:', error)
     return POPULAR_VOICES // Fallback to popular voices
   }
 }
@@ -206,7 +208,7 @@ export async function generateSpeechFromTranscript(
       const audioBlob = await generateSpeechWithElevenLabs(chunk, voiceId, apiKey, settings)
       audioBlobs.push(audioBlob)
     } catch (error) {
-      console.error(`Error generating speech for chunk ${i + 1}:`, error)
+      logger.error(`Error generating speech for chunk ${i + 1}:`, error)
       throw error
     }
   }

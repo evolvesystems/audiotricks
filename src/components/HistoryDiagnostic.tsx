@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { 
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  CheckCircleIcon,
   WrenchScrewdriverIcon,
   ArrowPathIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
 import { performHistoryDiagnostic, repairHistory, cleanupHistory, DiagnosticResult } from '../utils/historyDiagnostic'
+import DataIntegrityCard from './HistoryDiagnostic/DataIntegrityCard'
+import StorageAnalysisCard from './HistoryDiagnostic/StorageAnalysisCard'
+import DiagnosticMessages from './HistoryDiagnostic/DiagnosticMessages'
 
 interface HistoryDiagnosticProps {
   isOpen: boolean
@@ -38,7 +38,6 @@ const HistoryDiagnostic: React.FC<HistoryDiagnosticProps> = ({ isOpen, onClose, 
       const result = performHistoryDiagnostic()
       setDiagnostic(result)
     } catch (error) {
-      console.error('Diagnostic failed:', error)
     } finally {
       setIsRunning(false)
     }
@@ -112,126 +111,15 @@ const HistoryDiagnostic: React.FC<HistoryDiagnosticProps> = ({ isOpen, onClose, 
           {/* Diagnostic Results */}
           {diagnostic && !isRunning && (
             <>
-              {/* Data Integrity */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Data Integrity Summary</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{diagnostic.dataIntegrity.totalItems}</div>
-                    <div className="text-sm text-gray-600">Total Items</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{diagnostic.dataIntegrity.validItems}</div>
-                    <div className="text-sm text-gray-600">Valid Items</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{diagnostic.dataIntegrity.invalidItems}</div>
-                    <div className="text-sm text-gray-600">Invalid Items</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{diagnostic.dataIntegrity.corruptedItems}</div>
-                    <div className="text-sm text-gray-600">Corrupted Items</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{diagnostic.dataIntegrity.duplicateItems}</div>
-                    <div className="text-sm text-gray-600">Duplicate Items</div>
-                  </div>
-                </div>
-              </div>
+              <DataIntegrityCard dataIntegrity={diagnostic.dataIntegrity} />
 
-              {/* Storage Analysis */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Storage Analysis</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">{diagnostic.storageAnalysis.totalKeys}</div>
-                    <div className="text-sm text-gray-600">Total Keys</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{diagnostic.storageAnalysis.historyKeys.length}</div>
-                    <div className="text-sm text-gray-600">History Keys</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {Math.round(diagnostic.storageAnalysis.storageUsage / 1024)}KB
-                    </div>
-                    <div className="text-sm text-gray-600">Storage Used</div>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-2xl font-bold ${diagnostic.storageAnalysis.quotaExceeded ? 'text-red-600' : 'text-green-600'}`}>
-                      {diagnostic.storageAnalysis.quotaExceeded ? 'YES' : 'NO'}
-                    </div>
-                    <div className="text-sm text-gray-600">Quota Exceeded</div>
-                  </div>
-                </div>
-                
-                {diagnostic.storageAnalysis.historyKeys.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Found History Keys:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {diagnostic.storageAnalysis.historyKeys.map(key => (
-                        <code key={key} className="px-2 py-1 bg-gray-200 rounded text-xs">{key}</code>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <StorageAnalysisCard storageAnalysis={diagnostic.storageAnalysis} />
 
-              {/* Issues */}
-              {diagnostic.issues.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
-                    <h3 className="font-semibold text-red-900">Critical Issues ({diagnostic.issues.length})</h3>
-                  </div>
-                  <ul className="space-y-1">
-                    {diagnostic.issues.map((issue, index) => (
-                      <li key={index} className="text-sm text-red-800">• {issue}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Warnings */}
-              {diagnostic.warnings.length > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <InformationCircleIcon className="h-5 w-5 text-yellow-500 mr-2" />
-                    <h3 className="font-semibold text-yellow-900">Warnings ({diagnostic.warnings.length})</h3>
-                  </div>
-                  <ul className="space-y-1">
-                    {diagnostic.warnings.map((warning, index) => (
-                      <li key={index} className="text-sm text-yellow-800">• {warning}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Suggestions */}
-              {diagnostic.suggestions.length > 0 && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center mb-3">
-                    <CheckCircleIcon className="h-5 w-5 text-blue-500 mr-2" />
-                    <h3 className="font-semibold text-blue-900">Suggestions ({diagnostic.suggestions.length})</h3>
-                  </div>
-                  <ul className="space-y-1">
-                    {diagnostic.suggestions.map((suggestion, index) => (
-                      <li key={index} className="text-sm text-blue-800">• {suggestion}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* No Issues */}
-              {diagnostic.issues.length === 0 && diagnostic.warnings.length === 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
-                    <h3 className="font-semibold text-green-900">All Good!</h3>
-                  </div>
-                  <p className="text-sm text-green-800 mt-2">No critical issues found. Your history system is working properly.</p>
-                </div>
-              )}
+              <DiagnosticMessages 
+                issues={diagnostic.issues}
+                warnings={diagnostic.warnings}
+                suggestions={diagnostic.suggestions}
+              />
 
               {/* Action Results */}
               {repairResult && (

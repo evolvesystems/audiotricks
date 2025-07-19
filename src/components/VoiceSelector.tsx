@@ -34,7 +34,6 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({ selectedVoice, onVoiceSel
       const fetchedVoices = await getElevenLabsVoices(apiKey)
       setVoices(fetchedVoices)
     } catch (error) {
-      console.error('Failed to load voices:', error)
       setVoices(POPULAR_VOICES)
     } finally {
       setIsLoading(false)
@@ -84,11 +83,9 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({ selectedVoice, onVoiceSel
         
         audio.play()
       } else {
-        console.error('Preview generation failed')
         setPlayingVoice(null)
       }
     } catch (error) {
-      console.error('Error playing voice preview:', error)
       setPlayingVoice(null)
     }
   }

@@ -32,7 +32,6 @@ const HistoryRecovery: React.FC<HistoryRecoveryProps> = ({ onRecoveredItems, onC
         onRecoveredItems(items)
       }
     } catch (error) {
-      console.error('Recovery failed:', error)
     } finally {
       setIsRecovering(false)
     }
@@ -42,7 +41,6 @@ const HistoryRecovery: React.FC<HistoryRecoveryProps> = ({ onRecoveredItems, onC
     setShowDetails(true)
     const keys = listAllLocalStorageKeys()
     setAllKeys(keys)
-    console.log('All localStorage keys:', keys)
   }
 
   const handleInspectKey = (key: string) => {

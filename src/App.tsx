@@ -1,401 +1,145 @@
-import React, { useState, useEffect } from 'react'
-import AudioUploader from './components/AudioUploader'
-import ResultsDisplay2 from './components/ResultsDisplay2'
-import ApiKeyInput from './components/ApiKeyInput'
-import ElevenLabsKeyInput from './components/ElevenLabsKeyInput'
-import Login from './components/Login'
-import LoginCard from './components/LoginCard'
-import Settings from './components/Settings'
-import HeroSection from './components/HeroSection'
-import HeroUploadSection from './components/HeroUploadSection'
-import FeaturesSection from './components/FeaturesSection'
-import UseCasesSection from './components/UseCasesSection'
-import HelpCenter from './components/HelpCenter'
-import History from './components/History'
-import HistoryDropdown from './components/HistoryDropdown'
-import QuickActions from './components/QuickActions'
-import { AudioProcessingResponse } from './types'
+import React from 'react'
+import { useAuthentication } from './components/App/useAuthentication'
+import { useAppState } from './components/App/useAppState'
+import { useExport } from './components/App/useExport'
 import { useSettings } from './hooks/useSettings'
 import { useHistory } from './hooks/useHistory'
-import { Cog6ToothIcon, QuestionMarkCircleIcon, ClockIcon, HomeIcon, ArrowRightOnRectangleIcon, UserIcon } from '@heroicons/react/24/outline'
+import { logger } from './utils/logger'
+import AppHeader from './components/App/AppHeader'
+import AppContent from './components/App/AppContent'
+import LoginCard from './components/LoginCard'
+import Settings from './components/Settings'
+import HelpCenter from './components/HelpCenter'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function App() {
-  const [results, setResults] = useState<AudioProcessingResponse | null>(null)
-  const [error, setError] = useState<string>('')
-  const [apiKey, setApiKey] = useState<string>(localStorage.getItem('openai_api_key') || '')
-  const [elevenLabsKey, setElevenLabsKey] = useState<string>(localStorage.getItem('elevenlabs_api_key') || '')
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true) // Default to authenticated
-  const [isGuest, setIsGuest] = useState<boolean>(true) // Default to guest mode
-  const [showSettings, setShowSettings] = useState(false)
-  const [showHelp, setShowHelp] = useState(false)
-  const [showHistory, setShowHistory] = useState(false)
-  const [showLogin, setShowLogin] = useState(false)
-  const [showQuickActions, setShowQuickActions] = useState(true)
+  const {
+    isAuthenticated,
+    isGuest,
+    showLogin,
+    apiKey,
+    elevenLabsKey,
+    handleLogin,
+    handleLogout,
+    handleApiKeyChange,
+    handleElevenLabsKeyChange
+  } = useAuthentication()
+
+  const {
+    results,
+    setResults,
+    error,
+    showSettings,
+    setShowSettings,
+    showHelp,
+    setShowHelp,
+    showHistory,
+    setShowHistory,
+    showQuickActions,
+    setShowQuickActions,
+    handleProcessingComplete,
+    handleError,
+    handleSelectHistoryItem,
+    handleNewUpload
+  } = useAppState()
+
+  const { handleExport } = useExport()
   const { settings, updateSettings } = useSettings()
   const { history, addToHistory, removeFromHistory, clearHistory, refreshHistory } = useHistory()
-  
+
   const handleRecoverHistory = (items: any[]) => {
-    // Add recovered items to history
     items.forEach(item => {
       addToHistory(item.results)
     })
   }
 
-  useEffect(() => {
-    // Check if user has logged in with password before (persists permanently)
-    const isAuthed = localStorage.getItem('admin_authenticated') === 'true'
-    
-    if (isAuthed) {
-      // User previously logged in with password - use ENV keys (persists permanently)
-      setIsAuthenticated(true)
-      setIsGuest(false)
-      const envKey = import.meta.env.VITE_OPENAI_API_KEY
-      const envElevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY
-      if (envKey) {
-        setApiKey(envKey)
-      }
-      if (envElevenLabsKey) {
-        setElevenLabsKey(envElevenLabsKey)
-      }
-    } else {
-      // Default to guest mode (must use own keys)
-      setIsAuthenticated(true)
-      setIsGuest(true)
-      // Only use localStorage keys for guests
-      const localKey = localStorage.getItem('openai_api_key')
-      const localElevenLabsKey = localStorage.getItem('elevenlabs_api_key')
-      if (localKey) {
-        setApiKey(localKey)
-      }
-      if (localElevenLabsKey) {
-        setElevenLabsKey(localElevenLabsKey)
-      }
-    }
-  }, [])
-
-  const handleProcessingComplete = (result: AudioProcessingResponse) => {
-    setResults(result)
-    setError('')
-    
-    // Always add to history
-    addToHistory(result)
-  }
-
-  const handleReprocess = (newResults: AudioProcessingResponse) => {
-    setResults(newResults)
-    setError('')
-    
-    // Update the existing history item instead of creating a new one
-    addToHistory(newResults, true) // isReprocess = true
-  }
-
-  const handleError = (errorMessage: string) => {
-    setError(errorMessage)
-    setResults(null)
-  }
-
-  const handleNewUpload = () => {
-    setResults(null)
-    setError('')
-    setShowHistory(false)
-  }
-
-  const handleExport = (format: 'txt' | 'json') => {
-    if (!results) return
-
-    let content: string
-    let filename: string
-    let mimeType: string
-
-    if (format === 'txt') {
-      content = `TRANSCRIPT:\n\n${results.transcript.text}\n\nSUMMARY:\n\n${results.summary.summary}\n\nKEY MOMENTS:\n\n${results.summary.key_moments.map(moment => `${moment.timestamp} - ${moment.title}\n${moment.description}`).join('\n\n')}`
-      filename = 'transcript-summary.txt'
-      mimeType = 'text/plain'
-    } else {
-      content = JSON.stringify(results, null, 2)
-      filename = 'transcript-summary.json'
-      mimeType = 'application/json'
-    }
-
-    const blob = new Blob([content], { type: mimeType })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleLogin = (guestMode: boolean = false) => {
-    setIsAuthenticated(true)
-    setIsGuest(guestMode)
-    setShowLogin(false)
-    
-    // If logged in (not guest), use ENV keys and save admin status permanently
-    if (!guestMode) {
-      localStorage.setItem('admin_authenticated', 'true')
-      const envKey = import.meta.env.VITE_OPENAI_API_KEY
-      const envElevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY
-      if (envKey) {
-        setApiKey(envKey)
-      }
-      if (envElevenLabsKey) {
-        setElevenLabsKey(envElevenLabsKey)
-      }
+  const handleReprocess = (newResults: any) => {
+    logger.log('Handling reprocessed results')
+    try {
+      setResults(newResults)
+      addToHistory(newResults, true) // Pass true to indicate this is a reprocess
+      logger.log('Reprocessed results saved to history')
+    } catch (error) {
+      logger.error('Error saving reprocessed results:', error)
+      alert('Failed to save reprocessed results. Please try again.')
     }
   }
 
-  const handleLogout = () => {
-    // Clear admin authentication
-    localStorage.removeItem('admin_authenticated')
-    
-    // Reset state to guest mode
-    setIsAuthenticated(true)
-    setIsGuest(true)
-    // Don't clear results - keep current work
-    // Don't clear error - keep current state
-    
-    // Keep any locally stored keys for when they return to guest mode
-    const localKey = localStorage.getItem('openai_api_key')
-    const localElevenLabsKey = localStorage.getItem('elevenlabs_api_key')
-    if (localKey) {
-      setApiKey(localKey)
-    } else {
-      // If no local keys, clear API key so they need to enter their own
-      setApiKey('')
+  const handleExportWrapper = (format: 'txt' | 'json') => {
+    if (results) {
+      handleExport(results, format)
     }
-    if (localElevenLabsKey) {
-      setElevenLabsKey(localElevenLabsKey)
-    } else {
-      // If no local keys, clear ElevenLabs key so they need to enter their own
-      setElevenLabsKey('')
-    }
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <LoginCard
+        onLogin={handleLogin}
+        showLogin={showLogin}
+        onClose={() => {}}
+      />
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold text-gray-900">AudioTricks</h1>
-              {isGuest && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  Using Own Keys
-                </span>
-              )}
-              {!isGuest && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  Using Admin Keys
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleNewUpload}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                title="New Upload"
-              >
-                <HomeIcon className="h-5 w-5" />
-              </button>
-              <div className="relative">
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className={`p-2 rounded-md relative ${
-                    showHistory 
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                  title="History"
-                >
-                  <ClockIcon className="h-5 w-5" />
-                  {history.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-blue-600 rounded-full text-xs text-white flex items-center justify-center min-w-[0.75rem] h-3 px-1">
-                      {history.length > 99 ? '99+' : history.length}
-                    </span>
-                  )}
-                </button>
-                
-                <HistoryDropdown
-                  history={history}
-                  onSelectItem={(item) => {
-                    setResults(item)
-                    setShowHistory(false)
-                  }}
-                  onDeleteItem={removeFromHistory}
-                  onClearHistory={clearHistory}
-                  onRecoverHistory={handleRecoverHistory}
-                  onHistoryChange={refreshHistory}
-                  isOpen={showHistory}
-                  onClose={() => setShowHistory(false)}
-                />
-              </div>
-              <button
-                onClick={() => setShowHelp(true)}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                title="Help"
-              >
-                <QuestionMarkCircleIcon className="h-5 w-5" />
-              </button>
-              <button
-                onClick={() => setShowSettings(true)}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                title="Settings"
-              >
-                <Cog6ToothIcon className="h-5 w-5" />
-              </button>
-              <ApiKeyInput apiKey={apiKey} onApiKeyChange={setApiKey} isGuest={isGuest} />
-              <ElevenLabsKeyInput apiKey={elevenLabsKey} onApiKeyChange={setElevenLabsKey} isGuest={isGuest} />
-              
-              {isGuest ? (
-                <button
-                  onClick={() => setShowLogin(true)}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                  title="Login for enhanced features"
-                >
-                  <UserIcon className="h-5 w-5" />
-                </button>
-              ) : (
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                  title="Logout and clear data"
-                >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main>
-        {!results ? (
-          <>
-            <HeroSection onGetStarted={() => {
-              // Scroll to upload section
-              const uploadSection = document.getElementById('upload-section')
-              if (uploadSection) {
-                uploadSection.scrollIntoView({ behavior: 'smooth' })
-              }
-            }} />
-            
-            <div id="upload-section">
-              {error && (
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                  <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-800">
-                          Processing Error
-                        </h3>
-                        <div className="mt-2 text-sm text-red-700">
-                          {error}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <HeroUploadSection 
-                apiKey={apiKey}
-                onProcessingComplete={handleProcessingComplete}
-                onError={handleError}
-                defaultSettings={settings}
-              />
-            </div>
-            
-            <FeaturesSection />
-            <UseCasesSection />
-            
-            {/* Quick Actions Sidebar - Now as a floating element */}
-            {showQuickActions && (
-              <div className="fixed bottom-6 right-6 space-y-4 z-40 hidden lg:block">
-                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm">
-                  <QuickActions 
-                    onShowHistory={() => setShowHistory(true)}
-                    onShowHelp={() => setShowHelp(true)}
-                    historyCount={history.length}
-                    onClose={() => setShowQuickActions(false)}
-                  />
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-              <div className="space-y-6">
-                <div className="text-center mb-8 animate-fadeIn">
-                  <h1 className="text-4xl font-bold gradient-text mb-2">
-                    Your Audio Analysis
-                  </h1>
-                  <p className="text-gray-600">
-                    Comprehensive insights extracted from your audio content
-                  </p>
-                </div>
-                
-                <ResultsDisplay2 
-                  results={results}
-                  onExport={handleExport}
-                  showCostEstimates={settings.showCostEstimates}
-                  onReprocess={handleReprocess}
-                  elevenLabsKey={elevenLabsKey}
-                  currentSettings={settings}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Settings Modal */}
-      <Settings
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        onSettingsChange={updateSettings}
-        currentSettings={settings}
-      />
-      
-      {/* Help Center */}
-      <HelpCenter
-        isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gray-50">
+        <AppHeader
+        apiKey={apiKey}
+        elevenLabsKey={elevenLabsKey}
+        isGuest={isGuest}
+        history={history}
+        showHistory={showHistory}
+        onApiKeyChange={handleApiKeyChange}
+        onElevenLabsKeyChange={handleElevenLabsKeyChange}
+        onHistoryToggle={() => setShowHistory(!showHistory)}
+        onSelectHistoryItem={handleSelectHistoryItem}
+        onDeleteHistoryItem={removeFromHistory}
+        onClearHistory={clearHistory}
+        onRecoverHistory={handleRecoverHistory}
+        onHistoryChange={refreshHistory}
+        onHistoryClose={() => setShowHistory(false)}
+        onNewUpload={handleNewUpload}
+        onShowHelp={() => setShowHelp(true)}
+        onShowSettings={() => setShowSettings(true)}
+        onLogout={handleLogout}
       />
 
-      {/* Login Modal */}
-      {showLogin && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full mx-4">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-semibold">Enhanced Access</h2>
-              <button
-                onClick={() => setShowLogin(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <span className="sr-only">Close</span>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4">
-              <LoginCard onLogin={handleLogin} />
-            </div>
-          </div>
-        </div>
+      <AppContent
+        results={results}
+        error={error}
+        apiKey={apiKey}
+        elevenLabsKey={elevenLabsKey}
+        settings={settings}
+        showQuickActions={showQuickActions}
+        onProcessingComplete={(newResults) => {
+          handleProcessingComplete(newResults)
+          addToHistory(newResults)
+        }}
+        onError={handleError}
+        onExport={handleExportWrapper}
+        onReprocess={handleReprocess}
+        onCloseQuickActions={() => setShowQuickActions(false)}
+      />
+
+      {/* Modal Overlays */}
+      {showSettings && (
+        <Settings
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          currentSettings={settings}
+          onSettingsChange={updateSettings}
+        />
       )}
-    </div>
+
+      {showHelp && (
+        <HelpCenter
+          isOpen={showHelp}
+          onClose={() => setShowHelp(false)}
+        />
+      )}
+      </div>
+    </ErrorBoundary>
   )
 }
 

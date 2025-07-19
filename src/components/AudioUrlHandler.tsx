@@ -36,14 +36,13 @@ const AudioUrlHandler: React.FC<AudioUrlHandlerProps> = ({ onFileReady, disabled
       const fileName = url.split('/').pop() || 'audio.mp3'
       const file = new File([blob], fileName, { type: blob.type || 'audio/mpeg' })
 
-      if (file.size > 100 * 1024 * 1024) {
-        throw new Error('File is too large. Maximum size is 100MB.')
+      if (file.size > 150 * 1024 * 1024) {
+        throw new Error('File is too large. Maximum size is 150MB.')
       }
 
       onFileReady(file)
       setUrl('')
     } catch (err: any) {
-      console.error('Fetch error:', err)
       setError('Unable to fetch from this URL due to CORS restrictions')
       setShowAlternative(true)
     } finally {
@@ -118,8 +117,8 @@ const AudioUrlHandler: React.FC<AudioUrlHandlerProps> = ({ onFileReady, disabled
       )}
 
       <div className="text-xs text-gray-500">
-        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG, OPUS (max 100MB)</p>
-        <p className="text-xs">Files over 25MB will be automatically split for processing</p>
+        <p>Supported formats: MP3, WAV, M4A, FLAC, OGG, OPUS (max 150MB)</p>
+        <p className="text-xs">Files over 150MB will be automatically split for processing</p>
         <p>Note: Some URLs may be blocked by CORS. We'll offer alternatives if needed.</p>
       </div>
     </div>

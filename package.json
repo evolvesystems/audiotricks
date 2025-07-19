@@ -6,23 +6,33 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite --port 3001",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "@types/dompurify": "^3.0.5",
+    "axios": "^1.6.2",
+    "dompurify": "^3.2.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "axios": "^1.6.2",
-    "react-dropzone": "^14.2.3",
-    "@heroicons/react": "^2.0.18"
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.8",
-    "typescript": "^5.3.3",
-    "tailwindcss": "^3.3.6",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "jsdom": "^26.1.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vitest": "^3.2.4"
   }
 }
