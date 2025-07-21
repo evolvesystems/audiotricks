@@ -4,15 +4,6 @@ import userEvent from '@testing-library/user-event'
 import App from '../App'
 
 // Mock child components to simplify testing
-vi.mock('../components/LoginCard', () => ({
-  default: ({ onLogin }: any) => (
-    <div>
-      <button onClick={() => onLogin(true)}>Login as Guest</button>
-      <button onClick={() => onLogin(false)}>Login with Password</button>
-    </div>
-  )
-}))
-
 vi.mock('../components/HeroSection', () => ({
   default: () => <div>Hero Section</div>
 }))
@@ -38,38 +29,19 @@ describe('App', () => {
     vi.clearAllMocks()
   })
 
-  // Test 1: Expected use - guest login flow
-  it('allows guest login and shows main interface', async () => {
+  // Test 1: Expected use - main interface renders
+  it('renders main interface', async () => {
     render(<App />)
     
-    // Should show login initially
-    const guestLoginButton = screen.getByText('Login as Guest')
-    await userEvent.click(guestLoginButton)
-    
-    // Should now show main app
+    // Should show main app
     await waitFor(() => {
       expect(screen.getByText('AudioTricks')).toBeInTheDocument()
     })
   })
 
-  // Test 2: Edge case - remembers admin authentication
-  it('remembers admin authentication across sessions', async () => {
-    // Set admin auth in localStorage
-    localStorage.setItem('admin_authenticated', 'true')
-    
+  // Test 2: API key input functionality
+  it('shows API key input in header', async () => {
     render(<App />)
-    
-    // Should skip login and show main app
-    expect(screen.getByText('AudioTricks')).toBeInTheDocument()
-  })
-
-  // Test 3: Failure case - handles missing API key
-  it('shows appropriate UI when API key is missing', async () => {
-    render(<App />)
-    
-    // Login as guest
-    const guestLoginButton = screen.getByText('Login as Guest')
-    await userEvent.click(guestLoginButton)
     
     // Should show API key input in header
     await waitFor(() => {
@@ -78,9 +50,8 @@ describe('App', () => {
     })
   })
 
-  // Test 4: Settings modal functionality
+  // Test 3: Settings modal functionality
   it('can open and close settings modal', async () => {
-    localStorage.setItem('admin_authenticated', 'true')
     render(<App />)
     
     // Find and click settings button
@@ -93,9 +64,8 @@ describe('App', () => {
     })
   })
 
-  // Test 5: History functionality
+  // Test 4: History functionality
   it('tracks processing history', async () => {
-    localStorage.setItem('admin_authenticated', 'true')
     render(<App />)
     
     // Process an audio file
@@ -107,6 +77,20 @@ describe('App', () => {
       const historyButton = screen.getByTitle('History')
       const badge = historyButton.querySelector('.bg-blue-600')
       expect(badge?.textContent).toBe('1')
+    })
+  })
+
+  // Test 5: Help modal functionality
+  it('can open help center', async () => {
+    render(<App />)
+    
+    // Find and click help button
+    const helpButton = screen.getByTitle('Help')
+    await userEvent.click(helpButton)
+    
+    // Help center should be visible
+    await waitFor(() => {
+      expect(screen.getByText(/Help Center/i)).toBeInTheDocument()
     })
   })
 })

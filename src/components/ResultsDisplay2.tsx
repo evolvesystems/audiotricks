@@ -6,6 +6,8 @@ import { useReprocessing } from './ResultsDisplay/useReprocessing'
 import PodcastsTab from './PodcastsTab'
 import TranscriptDisplay from './TranscriptDisplay'
 import AudioEditor from './AudioEditor'
+import AudioErrorBoundary from './AudioErrorBoundary'
+import APIErrorBoundary from './APIErrorBoundary'
 import ReprocessModal from './ReprocessModal'
 
 interface ResultsDisplayProps {
@@ -61,10 +63,12 @@ const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({
         )
       case 'editor':
         return (
-          <AudioEditor
-            results={results}
-            elevenLabsKey={elevenLabsKey}
-          />
+          <AudioErrorBoundary>
+            <AudioEditor
+              results={results}
+              elevenLabsKey={elevenLabsKey}
+            />
+          </AudioErrorBoundary>
         )
       default:
         return null
@@ -86,20 +90,22 @@ const ResultsDisplay2: React.FC<ResultsDisplayProps> = ({
 
       {/* Reprocess Modal */}
       {showReprocessModal && (
-        <ReprocessModal
-          isOpen={showReprocessModal}
-          onClose={() => setShowReprocessModal(false)}
-          onReprocess={handleReprocess}
-          isProcessing={isReprocessing}
-          currentSettings={{
-            summaryStyle: currentSettings?.summaryStyle || 'formal',
-            language: currentSettings?.outputLanguage || 'en',
-            gptSettings: {
-              temperature: currentSettings?.temperature || 0.3,
-              maxTokens: currentSettings?.maxTokens || 2000
-            }
-          }}
-        />
+        <APIErrorBoundary apiProvider="openai">
+          <ReprocessModal
+            isOpen={showReprocessModal}
+            onClose={() => setShowReprocessModal(false)}
+            onReprocess={handleReprocess}
+            isProcessing={isReprocessing}
+            currentSettings={{
+              summaryStyle: currentSettings?.summaryStyle || 'formal',
+              language: currentSettings?.outputLanguage || 'en',
+              gptSettings: {
+                temperature: currentSettings?.temperature || 0.3,
+                maxTokens: currentSettings?.maxTokens || 2000
+              }
+            }}
+          />
+        </APIErrorBoundary>
       )}
     </div>
   )

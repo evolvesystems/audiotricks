@@ -11,16 +11,20 @@ import QuickActions from '../QuickActions'
 
 interface AppContentProps {
   results: AudioProcessingResponse | null
-  error: string
+  error: string | null
   apiKey: string
   elevenLabsKey: string
   settings: UserSettings
   showQuickActions: boolean
+  history?: any[]
+  isGuest?: boolean
+  token?: string | null
   onProcessingComplete: (results: AudioProcessingResponse) => void
-  onError: (error: string) => void
-  onExport: (format: 'txt' | 'json') => void
+  onError: (error: Error) => void
+  onExport: (format: 'txt' | 'json' | 'pdf' | 'srt' | 'docx') => void
   onReprocess: (newResults: AudioProcessingResponse) => void
-  onCloseQuickActions: () => void
+  onToggleQuickActions: () => void
+  onNewUpload: () => void
 }
 
 const AppContent: React.FC<AppContentProps> = ({
@@ -30,11 +34,15 @@ const AppContent: React.FC<AppContentProps> = ({
   elevenLabsKey,
   settings,
   showQuickActions,
+  history,
+  isGuest = false,
+  token = null,
   onProcessingComplete,
   onError,
   onExport,
   onReprocess,
-  onCloseQuickActions
+  onToggleQuickActions,
+  onNewUpload
 }) => {
   if (results) {
     return (
@@ -52,7 +60,7 @@ const AppContent: React.FC<AppContentProps> = ({
             </div>
             {showQuickActions && (
               <div className="w-80 flex-shrink-0">
-                <QuickActions onClose={onCloseQuickActions} />
+                <QuickActions onClose={onToggleQuickActions} />
               </div>
             )}
           </div>

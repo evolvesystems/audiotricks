@@ -1,0 +1,183 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AudioTricks Overview",
+    "tags": ["audiotricks", "overview"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 30,
+    "version": 1,
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Backend Uptime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "nodejs_uptime_seconds{job=\"audiotricks-backend\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "nodejs_memory_heap_used_bytes{job=\"audiotricks-backend\"}",
+            "refId": "A",
+            "legendFormat": "Heap Used"
+          },
+          {
+            "expr": "nodejs_memory_heap_total_bytes{job=\"audiotricks-backend\"}",
+            "refId": "B",
+            "legendFormat": "Heap Total"
+          },
+          {
+            "expr": "nodejs_memory_rss_bytes{job=\"audiotricks-backend\"}",
+            "refId": "C",
+            "legendFormat": "RSS"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 18,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "HTTP Request Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"audiotricks-backend\"}[5m])",
+            "refId": "A",
+            "legendFormat": "{{method}} {{status_code}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Response Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"audiotricks-backend\"}[5m]))",
+            "refId": "A",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"audiotricks-backend\"}[5m]))",
+            "refId": "B",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Database Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"audiotricks\"}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 6,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Error Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"audiotricks-backend\",status_code=~\"5..\"}[5m])",
+            "refId": "A",
+            "legendFormat": "5xx Errors"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"audiotricks-backend\",status_code=~\"4..\"}[5m])",
+            "refId": "B",
+            "legendFormat": "4xx Errors"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 18,
+          "x": 6,
+          "y": 16
+        }
+      }
+    ]
+  }
+}

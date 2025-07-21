@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { ScissorsIcon, SpeakerWaveIcon } from '@heroicons/react/24/outline'
 import { AudioProcessingResponse } from '../types'
 import VoiceSynthesis from './VoiceSynthesis'
+import APIErrorBoundary from './APIErrorBoundary'
 import { useAudioControls } from './AudioEditor/useAudioControls'
 import { useWordSelection } from './AudioEditor/useWordSelection'
 import { useTranscriptParsing } from './AudioEditor/useTranscriptParsing'
@@ -190,11 +191,13 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ results, elevenLabsKey }) => 
           />
         </>
       ) : (
-        <VoiceSynthesis 
-          results={results} 
-          editedWords={getEditedWords()}
-          elevenLabsKey={elevenLabsKey}
-        />
+        <APIErrorBoundary apiProvider="elevenlabs">
+          <VoiceSynthesis 
+            results={results} 
+            editedWords={getEditedWords()}
+            elevenLabsKey={elevenLabsKey}
+          />
+        </APIErrorBoundary>
       )}
     </div>
   )

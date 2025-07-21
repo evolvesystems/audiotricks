@@ -6,6 +6,7 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
 import AudioUploader from './AudioUploader'
+import APIErrorBoundary from './APIErrorBoundary'
 
 interface HeroUploadSectionProps {
   apiKey: string
@@ -104,12 +105,14 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
         <div className="max-w-4xl mx-auto">
           {/* Upload Component - Full width */}
           <div className="bg-gray-50 rounded-2xl p-12 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
-            <AudioUploader
-              apiKey={apiKey}
-              onProcessingComplete={onProcessingComplete}
-              onError={onError}
-              defaultSettings={defaultSettings}
-            />
+            <APIErrorBoundary apiProvider="openai">
+              <AudioUploader
+                apiKey={apiKey}
+                onProcessingComplete={onProcessingComplete}
+                onError={onError}
+                defaultSettings={defaultSettings}
+              />
+            </APIErrorBoundary>
           </div>
 
           {/* Supported Formats */}

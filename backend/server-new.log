@@ -1,0 +1,471 @@
+
+> audiotricks-backend@1.0.0 dev
+> tsx watch src/index.ts
+
+[32minfo[39m: StripeService initialized (simplified version) {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: StripeService initialized (simplified version) {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+prisma:info Starting a postgresql pool with 13 connections.
+[32minfo[39m: Database connection established successfully {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Failed to connect to Redis: Stream isn't writeable and enableOfflineQueue options is false {"service":"audiotricks-backend","stack":"Error: Stream isn't writeable and enableOfflineQueue options is false\n    at EventEmitter.sendCommand (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/ioredis/built/Redis.js:362:32)\n    at EventEmitter.ping (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/ioredis/built/utils/Commander.js:90:25)\n    at testRedisConnection (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/config/redis.ts:73:17)\n    at startServer (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/index.ts:66:34)","timestamp":"2025-07-20 20:59:52"}
+[33mwarn[39m: Redis connection failed - continuing without Redis {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Server running on port 3000 in development mode {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Frontend URL: http://localhost:3001 {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Health checks available at: http://localhost:3000/health {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:52"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:53"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:54"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:54"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:54"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:54"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:54"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:54"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:55"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:55"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:55"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:55"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:55"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:55"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:56"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:56"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:56"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:56"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:56"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:56"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:57"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:57"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:57"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:58"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:58"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:58"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 20:59:59"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:59"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 20:59:59"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:00"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:00"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:00"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:00"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:00"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:00"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:01"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:01"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:01"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:02"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:02"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:02"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:03"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:03"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:03"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:05"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:05"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:05"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:06"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:06"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:06"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:07"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:07"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:07"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:08"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:08"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:08"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:09"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:09"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:09"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:11"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:11"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:11"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:12"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:12"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:12"}
+[32minfo[39m: Getting available plans {"currency":"AUD","service":"audiotricks-backend","timestamp":"2025-07-20 21:00:12"}
+[31merror[39m: Error getting available plans: 
+Invalid `this.prisma.subscriptionPlan.findMany()` invocation in
+/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56
+
+  43 try {
+  44   logger.info('Getting available plans', { currency, region });
+  45 
+→ 46   const plans = await this.prisma.subscriptionPlan.findMany({
+         where: {
+           isActive: true
+         },
+         include: {
+           pricing: {
+             where: {
+               currency: "AUD",
+               isActive: true
+             }
+           },
+           features: {
+           ~~~~~~~~
+             include: {
+               feature: true
+             }
+           },
+       ?   subscriptions?: true,
+       ?   planPricing?: true,
+       ?   planFeatures?: true,
+       ?   currentPlanRecommendations?: true,
+       ?   recommendedPlanRecommendations?: true,
+       ?   customPlans?: true
+         },
+         orderBy: [
+           {
+             tier: "asc"
+           },
+           {
+             sortOrder: "asc"
+           }
+         ]
+       })
+
+Invalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.
+Note that include statements only accept relation fields. {"clientVersion":"5.22.0","name":"PrismaClientValidationError","service":"audiotricks-backend","stack":"PrismaClientValidationError: \nInvalid `this.prisma.subscriptionPlan.findMany()` invocation in\n/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56\n\n  43 try {\n  44   logger.info('Getting available plans', { currency, region });\n  45 \n→ 46   const plans = await this.prisma.subscriptionPlan.findMany({\n         where: {\n           isActive: true\n         },\n         include: {\n           pricing: {\n             where: {\n               currency: \"AUD\",\n               isActive: true\n             }\n           },\n           features: {\n           ~~~~~~~~\n             include: {\n               feature: true\n             }\n           },\n       ?   subscriptions?: true,\n       ?   planPricing?: true,\n       ?   planFeatures?: true,\n       ?   currentPlanRecommendations?: true,\n       ?   recommendedPlanRecommendations?: true,\n       ?   customPlans?: true\n         },\n         orderBy: [\n           {\n             tier: \"asc\"\n           },\n           {\n             sortOrder: \"asc\"\n           }\n         ]\n       })\n\nInvalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.\nNote that include statements only accept relation fields.\n    at wn (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:1363)\n    at e.throwValidationError (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:10206)\n    at rd (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6772)\n    at td (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6525)\n    at ed (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6411)\n    at mr (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6055)\n    at vn (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:5902)\n    at /Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:130:10186\n    at Object.runInChildSpan (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:121:1509)\n    at t._executeRequest (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:130:10165)","timestamp":"2025-07-20 21:00:12"}
+[31merror[39m: Failed to get plans: Failed to get subscription plans: 
+Invalid `this.prisma.subscriptionPlan.findMany()` invocation in
+/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56
+
+  43 try {
+  44   logger.info('Getting available plans', { currency, region });
+  45 
+→ 46   const plans = await this.prisma.subscriptionPlan.findMany({
+         where: {
+           isActive: true
+         },
+         include: {
+           pricing: {
+             where: {
+               currency: "AUD",
+               isActive: true
+             }
+           },
+           features: {
+           ~~~~~~~~
+             include: {
+               feature: true
+             }
+           },
+       ?   subscriptions?: true,
+       ?   planPricing?: true,
+       ?   planFeatures?: true,
+       ?   currentPlanRecommendations?: true,
+       ?   recommendedPlanRecommendations?: true,
+       ?   customPlans?: true
+         },
+         orderBy: [
+           {
+             tier: "asc"
+           },
+           {
+             sortOrder: "asc"
+           }
+         ]
+       })
+
+Invalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.
+Note that include statements only accept relation fields. {"service":"audiotricks-backend","stack":"Error: Failed to get subscription plans: \nInvalid `this.prisma.subscriptionPlan.findMany()` invocation in\n/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56\n\n  43 try {\n  44   logger.info('Getting available plans', { currency, region });\n  45 \n→ 46   const plans = await this.prisma.subscriptionPlan.findMany({\n         where: {\n           isActive: true\n         },\n         include: {\n           pricing: {\n             where: {\n               currency: \"AUD\",\n               isActive: true\n             }\n           },\n           features: {\n           ~~~~~~~~\n             include: {\n               feature: true\n             }\n           },\n       ?   subscriptions?: true,\n       ?   planPricing?: true,\n       ?   planFeatures?: true,\n       ?   currentPlanRecommendations?: true,\n       ?   recommendedPlanRecommendations?: true,\n       ?   customPlans?: true\n         },\n         orderBy: [\n           {\n             tier: \"asc\"\n           },\n           {\n             sortOrder: \"asc\"\n           }\n         ]\n       })\n\nInvalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.\nNote that include statements only accept relation fields.\n    at PlanService.getAvailablePlans (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:77:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async SubscriptionController.getPlans (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/controllers/subscription.controller.ts:24:21)","timestamp":"2025-07-20 21:00:12"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:14"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:14"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:14"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:15"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:15"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:15"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:17"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:17"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:17"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:18"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:18"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:18"}
+[32minfo[39m: Getting available plans {"currency":"AUD","service":"audiotricks-backend","timestamp":"2025-07-20 21:00:18"}
+[31merror[39m: Error getting available plans: 
+Invalid `this.prisma.subscriptionPlan.findMany()` invocation in
+/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56
+
+  43 try {
+  44   logger.info('Getting available plans', { currency, region });
+  45 
+→ 46   const plans = await this.prisma.subscriptionPlan.findMany({
+         where: {
+           isActive: true
+         },
+         include: {
+           pricing: {
+             where: {
+               currency: "AUD",
+               isActive: true
+             }
+           },
+           features: {
+           ~~~~~~~~
+             include: {
+               feature: true
+             }
+           },
+       ?   subscriptions?: true,
+       ?   planPricing?: true,
+       ?   planFeatures?: true,
+       ?   currentPlanRecommendations?: true,
+       ?   recommendedPlanRecommendations?: true,
+       ?   customPlans?: true
+         },
+         orderBy: [
+           {
+             tier: "asc"
+           },
+           {
+             sortOrder: "asc"
+           }
+         ]
+       })
+
+Invalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.
+Note that include statements only accept relation fields. {"clientVersion":"5.22.0","name":"PrismaClientValidationError","service":"audiotricks-backend","stack":"PrismaClientValidationError: \nInvalid `this.prisma.subscriptionPlan.findMany()` invocation in\n/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56\n\n  43 try {\n  44   logger.info('Getting available plans', { currency, region });\n  45 \n→ 46   const plans = await this.prisma.subscriptionPlan.findMany({\n         where: {\n           isActive: true\n         },\n         include: {\n           pricing: {\n             where: {\n               currency: \"AUD\",\n               isActive: true\n             }\n           },\n           features: {\n           ~~~~~~~~\n             include: {\n               feature: true\n             }\n           },\n       ?   subscriptions?: true,\n       ?   planPricing?: true,\n       ?   planFeatures?: true,\n       ?   currentPlanRecommendations?: true,\n       ?   recommendedPlanRecommendations?: true,\n       ?   customPlans?: true\n         },\n         orderBy: [\n           {\n             tier: \"asc\"\n           },\n           {\n             sortOrder: \"asc\"\n           }\n         ]\n       })\n\nInvalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.\nNote that include statements only accept relation fields.\n    at wn (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:1363)\n    at e.throwValidationError (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:10206)\n    at rd (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6772)\n    at td (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6525)\n    at ed (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6411)\n    at mr (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:6055)\n    at vn (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:29:5902)\n    at /Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:130:10186\n    at Object.runInChildSpan (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:121:1509)\n    at t._executeRequest (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/@prisma/client/runtime/library.js:130:10165)","timestamp":"2025-07-20 21:00:18"}
+[31merror[39m: Failed to get plans: Failed to get subscription plans: 
+Invalid `this.prisma.subscriptionPlan.findMany()` invocation in
+/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56
+
+  43 try {
+  44   logger.info('Getting available plans', { currency, region });
+  45 
+→ 46   const plans = await this.prisma.subscriptionPlan.findMany({
+         where: {
+           isActive: true
+         },
+         include: {
+           pricing: {
+             where: {
+               currency: "AUD",
+               isActive: true
+             }
+           },
+           features: {
+           ~~~~~~~~
+             include: {
+               feature: true
+             }
+           },
+       ?   subscriptions?: true,
+       ?   planPricing?: true,
+       ?   planFeatures?: true,
+       ?   currentPlanRecommendations?: true,
+       ?   recommendedPlanRecommendations?: true,
+       ?   customPlans?: true
+         },
+         orderBy: [
+           {
+             tier: "asc"
+           },
+           {
+             sortOrder: "asc"
+           }
+         ]
+       })
+
+Invalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.
+Note that include statements only accept relation fields. {"service":"audiotricks-backend","stack":"Error: Failed to get subscription plans: \nInvalid `this.prisma.subscriptionPlan.findMany()` invocation in\n/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:46:56\n\n  43 try {\n  44   logger.info('Getting available plans', { currency, region });\n  45 \n→ 46   const plans = await this.prisma.subscriptionPlan.findMany({\n         where: {\n           isActive: true\n         },\n         include: {\n           pricing: {\n             where: {\n               currency: \"AUD\",\n               isActive: true\n             }\n           },\n           features: {\n           ~~~~~~~~\n             include: {\n               feature: true\n             }\n           },\n       ?   subscriptions?: true,\n       ?   planPricing?: true,\n       ?   planFeatures?: true,\n       ?   currentPlanRecommendations?: true,\n       ?   recommendedPlanRecommendations?: true,\n       ?   customPlans?: true\n         },\n         orderBy: [\n           {\n             tier: \"asc\"\n           },\n           {\n             sortOrder: \"asc\"\n           }\n         ]\n       })\n\nInvalid scalar field `features` for include statement on model SubscriptionPlan. Available options are marked with ?.\nNote that include statements only accept relation fields.\n    at PlanService.getAvailablePlans (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/services/subscription/plan.service.ts:77:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async SubscriptionController.getPlans (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/controllers/subscription.controller.ts:24:21)","timestamp":"2025-07-20 21:00:18"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:20"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:20"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:20"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:22"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:22"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:22"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:23"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:23"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:23"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:25"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:25"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:25"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:27"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:27"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:27"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:29"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:29"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:29"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:31"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:31"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:31"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:33"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:33"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:33"}
+[31merror[39m: Bad escaped character in JSON at position 48 (line 1 column 49) {"method":"POST","path":"/api/auth/register","service":"audiotricks-backend","stack":"SyntaxError: Bad escaped character in JSON at position 48 (line 1 column 49)\n    at JSON.parse (<anonymous>)\n    at parse (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/body-parser/lib/types/json.js:92:19)\n    at /Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/body-parser/lib/read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at invokeCallback (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:238:16)\n    at done (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:227:7)\n    at IncomingMessage.onEnd (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:287:7)\n    at IncomingMessage.emit (node:events:518:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","timestamp":"2025-07-20 21:00:35"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:35"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:35"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:35"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:37"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:37"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:37"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:39"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:39"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:39"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:41"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:41"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:41"}
+[31merror[39m: Bad escaped character in JSON at position 48 (line 1 column 49) {"method":"POST","path":"/api/auth/register","service":"audiotricks-backend","stack":"SyntaxError: Bad escaped character in JSON at position 48 (line 1 column 49)\n    at JSON.parse (<anonymous>)\n    at parse (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/body-parser/lib/types/json.js:92:19)\n    at /Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/body-parser/lib/read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at invokeCallback (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:238:16)\n    at done (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:227:7)\n    at IncomingMessage.onEnd (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/raw-body/index.js:287:7)\n    at IncomingMessage.emit (node:events:518:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","timestamp":"2025-07-20 21:00:42"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:43"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:43"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:43"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:45"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:45"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:45"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:47"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:47"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:47"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:49"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:49"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:49"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:51"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:51"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:51"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:53"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:53"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:53"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:55"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:55"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:55"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:57"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:57"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:57"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:00:59"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:59"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:00:59"}
+prisma:query SELECT 1
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."username", "public"."users"."password_hash", "public"."users"."role", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."last_login_at", "public"."users"."is_active", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."avatar_url", "public"."users"."timezone" FROM "public"."users" WHERE ("public"."users"."email" = $1 OR "public"."users"."username" = $2) LIMIT $3 OFFSET $4
+prisma:query BEGIN
+prisma:query INSERT INTO "public"."users" ("id","email","username","password_hash","role","created_at","updated_at","is_active","timezone") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "public"."users"."id"
+prisma:query INSERT INTO "public"."user_settings" ("user_id","preferred_language","summary_quality","default_summary_style","default_temperature","default_max_tokens","show_cost_estimates","email_notifications","processing_notifications","settings_json","updated_at") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING "public"."user_settings"."user_id"
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."username", "public"."users"."created_at" FROM "public"."users" WHERE "public"."users"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query COMMIT
+[32minfo[39m: New user registered: test@example.com {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:00"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:01"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:01"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:01"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:03"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:03"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:03"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:05"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:05"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:05"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:07"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:07"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:07"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:09"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:09"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:09"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:11"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:11"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:11"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:13"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:13"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:13"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:15"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:15"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:15"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:17"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:17"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:17"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:19"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:19"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:19"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:21"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:21"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:21"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:23"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:23"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:23"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:25"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:25"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:25"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:27"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:27"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:27"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:29"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:29"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:29"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:31"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:31"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:31"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:33"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:33"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:33"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:35"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:35"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:35"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:37"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:37"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:37"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:39"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:39"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:39"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:41"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:41"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:41"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:43"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:43"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:43"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:45"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:45"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:45"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:47"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:47"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:47"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:49"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:49"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:49"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:51"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:51"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:51"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:53"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:53"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:53"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:55"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:55"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:55"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:57"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:57"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:57"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:01:59"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:59"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:01:59"}
+prisma:query SELECT 1
+prisma:query SELECT "public"."users"."id", "public"."users"."email", "public"."users"."username", "public"."users"."password_hash", "public"."users"."role", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."last_login_at", "public"."users"."is_active", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."avatar_url", "public"."users"."timezone" FROM "public"."users" WHERE ("public"."users"."email" = $1 OR "public"."users"."username" = $2) LIMIT $3 OFFSET $4
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:02:01"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:01"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:01"}
+prisma:query BEGIN
+prisma:query INSERT INTO "public"."sessions" ("id","user_id","token_hash","expires_at","created_at") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."sessions"."id", "public"."sessions"."user_id", "public"."sessions"."token_hash", "public"."sessions"."expires_at", "public"."sessions"."created_at", "public"."sessions"."ip_address", "public"."sessions"."user_agent"
+prisma:query UPDATE "public"."users" SET "last_login_at" = $1, "updated_at" = $2 WHERE ("public"."users"."id" = $3 AND 1=1) RETURNING "public"."users"."id", "public"."users"."email", "public"."users"."username", "public"."users"."password_hash", "public"."users"."role", "public"."users"."created_at", "public"."users"."updated_at", "public"."users"."last_login_at", "public"."users"."is_active", "public"."users"."first_name", "public"."users"."last_name", "public"."users"."avatar_url", "public"."users"."timezone"
+prisma:query COMMIT
+[32minfo[39m: User logged in: test@example.com {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:01"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:02:03"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:03"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:03"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:02:05"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:05"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:05"}
+[31merror[39m: Redis connection error: connect ECONNREFUSED 127.0.0.1:6379 {"address":"127.0.0.1","code":"ECONNREFUSED","errno":-61,"port":6379,"service":"audiotricks-backend","stack":"Error: connect ECONNREFUSED 127.0.0.1:6379\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1636:16)","syscall":"connect","timestamp":"2025-07-20 21:02:07"}
+[32minfo[39m: Redis connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:07"}
+[32minfo[39m: Redis reconnecting... {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:07"}
+[32minfo[39m: SIGTERM received, shutting down gracefully {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:09"}
+[31merror[39m: Error closing Redis connection: Stream isn't writeable and enableOfflineQueue options is false {"service":"audiotricks-backend","stack":"Error: Stream isn't writeable and enableOfflineQueue options is false\n    at EventEmitter.sendCommand (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/ioredis/built/Redis.js:362:32)\n    at EventEmitter.quit (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/ioredis/built/utils/Commander.js:90:25)\n    at closeRedisConnection (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/config/redis.ts:87:17)\n    at process.<anonymous> (/Users/johnnorth/CascadeProjects/AudioTricks/backend/src/index.ts:87:5)\n    at process.emit (node:events:530:35)\n    at process.emit (/Users/johnnorth/CascadeProjects/AudioTricks/backend/node_modules/tsx/dist/suppress-warnings.cjs:1:472)","timestamp":"2025-07-20 21:02:09"}
+[32minfo[39m: Database connection closed {"service":"audiotricks-backend","timestamp":"2025-07-20 21:02:09"}

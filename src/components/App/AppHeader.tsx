@@ -3,21 +3,21 @@ import {
   Cog6ToothIcon, 
   QuestionMarkCircleIcon, 
   ClockIcon, 
-  HomeIcon, 
-  ArrowRightOnRectangleIcon, 
-  UserIcon
+  HomeIcon
 } from '@heroicons/react/24/outline'
-import ApiKeyInput from '../ApiKeyInput'
-import ElevenLabsKeyInput from '../ElevenLabsKeyInput'
+import SecureApiKeyInput from '../SecureApiKeyInput'
 import HistoryDropdown from '../HistoryDropdown'
 import ApiKeySafetyDropdown from './ApiKeySafetyDropdown'
+import UserAuth from '../UserAuth'
 import { AudioProcessingResponse } from '../../types'
 import { HistoryItem } from '../../hooks/useHistory'
 
 interface AppHeaderProps {
   apiKey: string
   elevenLabsKey: string
-  isGuest: boolean
+  isGuest?: boolean
+  token?: string | null
+  hasSecureKeys?: { hasOpenAI: boolean; hasElevenLabs: boolean }
   history: HistoryItem[]
   showHistory: boolean
   onApiKeyChange: (key: string) => void
@@ -32,13 +32,14 @@ interface AppHeaderProps {
   onNewUpload: () => void
   onShowHelp: () => void
   onShowSettings: () => void
-  onLogout: () => void
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
   apiKey,
   elevenLabsKey,
-  isGuest,
+  isGuest = false,
+  token = null,
+  hasSecureKeys,
   history,
   showHistory,
   onApiKeyChange,
@@ -52,8 +53,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   onHistoryClose,
   onNewUpload,
   onShowHelp,
-  onShowSettings,
-  onLogout
+  onShowSettings
 }) => {
   return (
     <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
@@ -65,41 +65,39 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* API Key Safety Dropdown */}
-            <ApiKeySafetyDropdown />
-
-            {/* API Key Inputs */}
-            <div className="flex items-center space-x-3">
-              <ApiKeyInput 
-                apiKey={apiKey} 
-                onApiKeyChange={onApiKeyChange}
-                isGuest={isGuest}
-              />
-              <ElevenLabsKeyInput 
-                apiKey={elevenLabsKey} 
-                onApiKeyChange={onElevenLabsKeyChange}
-                isGuest={isGuest}
-              />
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className="hidden sm:flex items-center space-x-2">
               <button
                 onClick={onNewUpload}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                title="New Upload"
+                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors flex items-center space-x-1"
               >
-                <HomeIcon className="h-5 w-5" />
+                <HomeIcon className="h-4 w-4" />
+                <span>New Upload</span>
               </button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <SecureApiKeyInput
+                apiKey={apiKey}
+                onApiKeyChange={onApiKeyChange}
+                isGuest={isGuest}
+                token={token}
+                keyType="openai"
+              />
+              
+              <SecureApiKeyInput
+                apiKey={elevenLabsKey}
+                onApiKeyChange={onElevenLabsKeyChange}
+                isGuest={isGuest}
+                token={token}
+                keyType="elevenlabs"
+              />
+              
+              <ApiKeySafetyDropdown />
               
               <div className="relative">
                 <button
                   onClick={onHistoryToggle}
-                  className={`p-2 rounded-md relative ${
-                    showHistory 
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md relative"
                   title="History"
                 >
                   <ClockIcon className="h-5 w-5" />
@@ -138,21 +136,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 <Cog6ToothIcon className="h-5 w-5" />
               </button>
 
-              {/* User Menu */}
-              <div className="flex items-center space-x-2 pl-2 ml-2 border-l border-gray-200">
-                <div className="flex items-center space-x-2">
-                  <UserIcon className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
-                    {isGuest ? 'Guest' : 'Admin'}
-                  </span>
-                </div>
-                <button
-                  onClick={onLogout}
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-                  title="Logout"
-                >
-                  <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                </button>
+              {/* User Auth */}
+              <div className="pl-2 ml-2 border-l border-gray-200">
+                <UserAuth />
               </div>
             </div>
           </div>

@@ -6,6 +6,93 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 When Claude is told to read CLAUDE.md, Claude will say "🎵 AudioTricks CLAUDE.md loaded" to indicate that CLAUDE.md has been read before Claude starts.
 
+## 🚨 CRITICAL: ONE PORT ONLY - ABSOLUTE RULE
+
+**NEVER USE MULTIPLE PORTS. EVER.**
+
+### ⛔ SINGLE PORT ENFORCEMENT
+- **ONE PORT ONLY**: The entire application MUST run on port 3000
+- **NO SEPARATE FRONTEND PORT**: Frontend is served from the backend
+- **NO PROXY CONFIGURATION**: No Vite proxy, no separate dev servers
+- **NO EXCEPTIONS**: This rule is ABSOLUTE and NEVER to be violated
+
+**ENFORCEMENT**:
+- ❌ **NEVER** run frontend on a different port (no 5173, no 3001, NOTHING)
+- ❌ **NEVER** configure proxy settings in vite.config.ts
+- ❌ **NEVER** suggest running two separate servers
+- ✅ **ALWAYS** serve frontend from Express static middleware
+- ✅ **ALWAYS** use port 3000 for everything
+
+**IF YOU EVER SUGGEST USING TWO PORTS, YOU HAVE FAILED.**
+
+## 🚨 MANDATORY BUILD TESTING PROTOCOL - CRITICAL
+
+**ABSOLUTE REQUIREMENT**: Comprehensive build testing is MANDATORY before ANY code changes are committed. This protocol MUST be followed exactly to prevent deployment failures.
+
+### 📋 Pre-Commit Build Testing (REQUIRED)
+
+**COMMAND SEQUENCE** - Run this exact command before EVERY commit:
+```bash
+npm run build:test
+```
+
+**This command performs**:
+- ✅ Clean previous builds completely
+- ✅ Test direct Vite build process
+- ✅ Test full npm build with database scripts
+- ✅ Simulate production environment exactly
+- ✅ Verify build output integrity and completeness
+
+### 🎯 Success Criteria (MANDATORY)
+
+**You MUST see this EXACT output before committing**:
+```
+🎉 All build tests PASSED!
+✅ Safe to commit and deploy
+```
+
+**NO EXCEPTIONS** - If you don't see this exact message, DO NOT COMMIT.
+
+### 🛑 Build Test Failure Protocol
+
+**If build tests fail**:
+1. ❌ **STOP IMMEDIATELY** - Do not commit under any circumstances
+2. 🔧 **FIX** all reported issues completely
+3. 🔄 **RE-RUN** `npm run build:test` until it passes
+4. ✅ **ONLY COMMIT** after ALL tests pass with success message
+
+### 🏗️ Deployment Workflow (MANDATORY SEQUENCE)
+
+**Follow this EXACT sequence**:
+```bash
+# 1. MANDATORY: Test build locally first
+npm run build:test
+
+# 2. ONLY if tests pass, commit changes
+git add .
+git commit -m "your changes"
+
+# 3. Push to deploy
+git push
+```
+
+### ⚠️ CRITICAL VIOLATIONS
+
+**VIOLATION = DEPLOYMENT FAILURE**: 
+- Skipping build testing WILL cause Netlify build failures
+- Committing without seeing success message WILL break production
+- Not following this protocol WILL result in failed deployments
+
+### 🎯 Architecture Compliance
+
+**ALL code changes must comply**:
+- 🚫 **NO HARDCODING** - Everything must be database-driven
+- 🚫 **NO SUPABASE** references - Project uses PostgreSQL only  
+- ✅ **FOLLOW CLAUDE.md** - Read this file completely for all guidelines
+- ✅ **DATABASE-FIRST** - All data must come from PostgreSQL
+
+**This build testing protocol is NON-NEGOTIABLE and must be followed by ALL contributors without exception.**
+
 ## ⚠️ CRITICAL ARCHITECTURAL RULES - NEVER VIOLATE
 
 ### 🚫 ABSOLUTE PROHIBITION: NO HARDCODING OF SENSITIVE DATA
@@ -27,24 +114,32 @@ When Claude is told to read CLAUDE.md, Claude will say "🎵 AudioTricks CLAUDE.
 
 ### 🔧 IMPLEMENTATION STANDARDS - NO EXCEPTIONS
 
-**When implementing client-side features:**
-1. **NO BACKEND DEPENDENCIES** - This is a pure frontend React application
-2. **NO SERVER-SIDE LOGIC** - All processing happens in the browser
-3. **API-FIRST APPROACH** - Direct integration with OpenAI and ElevenLabs APIs
-4. **SECURE BY DEFAULT** - Never expose sensitive information
+**When implementing full-stack features:**
+1. **DATABASE-FIRST APPROACH** - PostgreSQL database for persistent data storage
+2. **SECURE BACKEND** - Server-side authentication and data validation
+3. **API-FIRST ARCHITECTURE** - RESTful APIs between frontend and backend
+4. **SECURE BY DEFAULT** - Never expose sensitive information in client-side code
 
-## 🔐 Client-Side Security Standards (CRITICAL)
+## 🔐 Full-Stack Security Standards (CRITICAL)
+
+### MANDATORY: Database Security
+- **Environment Variables**: Database credentials stored in .env files, never in source code
+- **Connection Pooling**: Use secure connection pooling with proper timeouts
+- **SQL Injection Prevention**: Use parameterized queries and ORM validation
+- **Authentication**: Server-side session management with secure tokens
+- **Authorization**: Role-based access control for database operations
 
 ### MANDATORY: API Key Security
-- **Local Storage Only**: API keys stored in localStorage, never in source code
-- **No Transmission**: API keys never sent to any server except target APIs
+- **Server-Side Storage**: Third-party API keys stored server-side, never exposed to client
+- **Proxy Pattern**: Backend proxies external API calls to protect keys
 - **Secure Input**: API key inputs must be password-type with proper validation
 - **Error Handling**: API errors must not expose key information
 
 ### MANDATORY: Input Validation
-- **File Upload**: Validate file types, sizes, and content before processing
+- **File Upload**: Validate file types, sizes, and content on both client and server
 - **API Responses**: Always validate and sanitize API responses
 - **User Input**: Sanitize all user inputs before processing or display
+- **Database Queries**: Validate all data before database operations
 
 ## 🧱 Code Structure & Modularity
 
@@ -62,28 +157,50 @@ When Claude is told to read CLAUDE.md, Claude will say "🎵 AudioTricks CLAUDE.
 - **Separate utilities** into dedicated files
 - **Group related functionality** into feature modules
 
-### 🗂️ Component Organization
+### 🗂️ Full-Stack Project Organization
 
 **MANDATORY STRUCTURE**:
 ```
-src/
-├── components/           # React components (max 250 lines each)
-│   ├── audio/           # Audio-related components
-│   ├── ui/              # Reusable UI components
-│   ├── forms/           # Form components
-│   └── modals/          # Modal components
-├── hooks/               # Custom React hooks
-├── utils/               # Utility functions
-├── types/               # TypeScript definitions
-├── services/            # API services
-└── tests/               # Test files (required!)
+audiotricks/
+├── frontend/            # React frontend application
+│   ├── src/
+│   │   ├── components/  # React components (max 250 lines each)
+│   │   │   ├── audio/   # Audio-related components
+│   │   │   ├── ui/      # Reusable UI components
+│   │   │   ├── forms/   # Form components
+│   │   │   └── modals/  # Modal components
+│   │   ├── hooks/       # Custom React hooks
+│   │   ├── utils/       # Utility functions
+│   │   ├── types/       # TypeScript definitions
+│   │   ├── services/    # Frontend API services
+│   │   └── tests/       # Frontend test files
+│   └── package.json
+├── backend/             # Node.js/Express backend
+│   ├── src/
+│   │   ├── controllers/ # Route controllers (max 250 lines each)
+│   │   ├── models/      # Database models
+│   │   ├── routes/      # API route definitions
+│   │   ├── middleware/  # Express middleware
+│   │   ├── services/    # Business logic services
+│   │   ├── utils/       # Backend utility functions
+│   │   └── tests/       # Backend test files
+│   ├── migrations/      # Database migrations
+│   ├── package.json
+│   └── .env.example
+├── database/            # Database scripts and schema
+│   ├── schema.sql       # Database schema
+│   ├── seeds/           # Seed data
+│   └── scripts/         # Database utilities
+└── docs/                # Project documentation
 ```
 
-**COMPONENT PATTERNS**:
-- **Single Responsibility**: Each component has one clear purpose
-- **Composition over Inheritance**: Use component composition
-- **Custom Hooks**: Extract complex logic into custom hooks
-- **TypeScript**: All components must use proper TypeScript
+**FULL-STACK PATTERNS**:
+- **Single Responsibility**: Each component/module has one clear purpose
+- **API-First Design**: Frontend and backend communicate via REST APIs
+- **Database Models**: Use Prisma or TypeORM for type-safe database operations
+- **Authentication**: JWT tokens for secure session management
+- **Error Handling**: Consistent error responses across API endpoints
+- **TypeScript**: All code must use proper TypeScript (frontend and backend)
 
 ## 🧪 Testing & Reliability (MANDATORY)
 
@@ -128,9 +245,11 @@ describe('AudioUploader', () => {
 
 **BEFORE TASK COMPLETION**:
 1. **Build Check**: `npm run build` must pass
-2. **Type Check**: No TypeScript errors
+2. **Type Check**: No TypeScript errors  
 3. **Test Check**: All tests must pass
 4. **Lint Check**: Code must pass linting (when configured)
+5. **Browser Testing**: All code changes MUST be tested in browser before delivery
+6. **Security Review**: Check for sensitive data exposure, input validation, auth/authz
 
 ### 📝 Documentation Requirements
 
@@ -157,27 +276,42 @@ async function processAudioFile(audioFile: File, apiKey: string): Promise<AudioP
 - **Chunking**: Large files must be processed in chunks
 - **Progress Tracking**: Provide user feedback during processing
 
-**API Integration**:
-- **OpenAI Whisper**: For audio transcription
-- **OpenAI GPT**: For text summarization
-- **ElevenLabs**: For voice synthesis
-- **Error Handling**: Robust error handling for all API calls
+**Enterprise API Integration**:
+- **OpenAI Whisper**: Audio transcription with speaker identification
+- **OpenAI GPT-4**: Text summarization and AI chatbot responses
+- **OpenAI Embeddings**: Vector embeddings for semantic search
+- **ElevenLabs**: Voice synthesis and custom voice cloning
+- **eWAY Payment Gateway**: Australian payment processing
+- **SendGrid**: Professional email automation and analytics
+- **DigitalOcean Spaces**: File storage with global CDN delivery
+- **Error Handling**: Comprehensive error handling with retry mechanisms
 
-### 💾 LocalStorage Best Practices
+### 💾 Database Best Practices
 
-**Data Storage**:
-- **History Management**: Implement proper history storage with size limits
-- **Settings Persistence**: User preferences should persist across sessions
-- **Key Management**: Secure storage of API keys
-- **Migration Support**: Handle localStorage schema changes
+**PostgreSQL Enterprise Data Storage**:
+- **Enhanced Schema**: 30+ tables with complete relationships (users, workspaces, subscriptions, files, audit)
+- **DigitalOcean Spaces Integration**: File metadata with CDN URLs, no local storage
+- **Subscription Management**: Complex billing, plans, quotas, and usage tracking
+- **AI Chatbot Data**: Vector embeddings, conversation history, semantic search
+- **Audit System**: Comprehensive logging of all user actions and security events
+- **Row-Level Security**: Workspace isolation and permission-based data access
+- **Performance Indexes**: Optimized queries for real-time analytics and search
+- **Migration Strategy**: Automated database migrations with rollback capabilities
 
 ### 🔄 State Management
 
-**React Patterns**:
+**Frontend State Patterns**:
 - **Custom Hooks**: Extract complex state logic
-- **Context API**: For global state (settings, keys)
+- **Context API**: For global state (user session, settings)
 - **Local State**: Component-specific state
 - **Error Boundaries**: Implement error boundaries for reliability
+- **API State**: Use React Query or SWR for server state management
+
+**Backend State Patterns**:
+- **Database Transactions**: Use transactions for data consistency
+- **Connection Pooling**: Efficient database connection management
+- **Caching Strategy**: Redis for session storage and API response caching
+- **Event Logging**: Audit trails for all user actions
 
 ## 📱 User Experience Standards
 
@@ -209,42 +343,64 @@ async function processAudioFile(audioFile: File, apiKey: string): Promise<AudioP
 ### 🔐 Privacy Considerations
 
 **Data Handling**:
-- **No Data Retention**: Don't store user audio on servers
-- **Local Processing**: All processing happens client-side
-- **User Control**: Users control their data and API keys
+- **DigitalOcean Spaces Storage**: Audio files stored in secure cloud storage with CDN
+- **User Data Control**: Users can delete their data and export their information  
+- **API Key Security**: Third-party API keys stored server-side, never exposed to client
+- **GDPR Compliance**: Data retention policies and user consent management
+- **Encryption**: All sensitive data encrypted at rest and in transit
+- **Audit Trail**: Complete logging of all user actions and data access
 
 ## 🚀 Development Workflow
 
 ### 📦 Build System
 
-**Requirements**:
+**Frontend Requirements**:
 - **Vite**: Fast build tool with HMR
 - **TypeScript**: Strict type checking
 - **Tailwind CSS**: Utility-first styling
 - **ESLint**: Code linting (when configured)
 
+**Backend Requirements**:
+- **Node.js**: Server runtime environment
+- **Express**: Web framework for APIs
+- **Prisma/TypeORM**: Database ORM with migrations
+- **Jest**: Testing framework for backend
+
 ### 🔧 Development Commands
 
 ```bash
-# Install dependencies
-npm install
+# ONE PORT DEVELOPMENT - ONLY WAY ALLOWED
+# Backend serves BOTH API and frontend on port 3000
 
-# Run development server
-npm run dev
+# Initial setup
+npm run build:frontend   # Build frontend FIRST
+cd backend && npm install
 
-# Build for production
-npm run build
+# Development (ONE COMMAND, ONE PORT)
+npm run dev              # Runs EVERYTHING on port 3000
 
-# Run tests
-npm run test
+# Production build
+npm run build            # Builds both frontend and backend
+npm run start            # Starts server on port 3000
 
-# Type checking
-npm run type-check
+# Testing
+npm run test             # Runs all tests
+
+# Database
+npm run migrate          # Run database migrations
+npm run db:seed          # Seed database
 ```
 
 ## 🚫 Prohibited Patterns
 
 ### ❌ NEVER DO THIS
+
+**MULTIPLE PORTS - ABSOLUTELY FORBIDDEN**:
+- Running frontend and backend on different ports
+- Using Vite dev server separately from backend
+- Configuring proxy in vite.config.ts
+- Suggesting port 5173, 3001, or ANY port other than 3000
+- Having separate dev commands for frontend and backend
 
 **Code Quality Violations**:
 - Files longer than 250 lines
@@ -260,10 +416,12 @@ npm run type-check
 - Client-side secrets
 
 **Architecture Violations**:
-- Backend dependencies
-- Server-side logic
-- Database requirements
-- Complex state management without proper hooks
+- Mixing frontend and backend code in same files
+- Direct database access from frontend
+- Hardcoded database credentials
+- Missing API authentication middleware
+- Storing sensitive data in frontend state
+- Complex state management without proper patterns
 
 ## 🎯 Success Metrics
 
@@ -283,41 +441,113 @@ npm run type-check
 - Intuitive user interface
 - Reliable audio processing
 
-## 📋 Current Technical Debt
+## 📋 Current Implementation Status
 
-### 🔥 Immediate Actions Required
+### ✅ **Completed Specifications (Ready for Implementation)**
+
+1. **Enhanced Database Schema** - `database/schema-enhanced.prisma` (30+ tables)
+2. **DigitalOcean Spaces Storage** - `database/digitalocean-spaces-storage-specification.md`
+3. **SendGrid Email Integration** - `database/sendgrid-email-integration-specification.md`
+4. **AI Chatbot System** - `database/chatbot-system-specification.md`
+5. **eWAY Payment Gateway** - `database/eway-payment-gateway-specification.md`
+6. **Subscription Management** - `database/enhanced-subscription-plans.sql`
+7. **User Plan Assignment** - `database/user-plan-assignment-system.sql`
+8. **Audit & Security System** - `database/audit-security-spec.md`
+9. **Implementation Plan** - `IMPLEMENTATION_PLAN.md` (16-week roadmap)
+10. **Task Breakdown** - `TASK_BREAKDOWN.md` (48 detailed tasks)
+
+### 🔥 **Immediate Implementation Priorities (Phase 1: Weeks 1-4)**
+
+1. **Deploy Enhanced Database Schema** (Critical - Week 1)
+   - Migrate from basic schema to 30+ table enterprise schema
+   - Configure PostgreSQL with row-level security
+   - Set up performance indexes and constraints
+
+2. **DigitalOcean Spaces Storage Integration** (Critical - Week 1)
+   - Replace local storage with DigitalOcean Spaces
+   - Configure CDN with custom domain
+   - Implement multipart upload for large files
+
+3. **Enhanced Authentication & Security** (Critical - Week 2)
+   - Implement JWT with refresh tokens
+   - Add encrypted API key management
+   - Deploy comprehensive audit logging
+
+4. **Advanced Audio Processing** (High - Week 3)
+   - Implement chunked upload with resume capability
+   - Add speaker identification and timestamps
+   - Set up processing queue with priority handling
+
+5. **SendGrid Email System** (High - Week 4)
+   - Configure professional email automation
+   - Set up welcome sequences and notifications
+   - Implement email analytics and tracking
+
+### 🎯 **Next Phase Priorities (Phase 2: Weeks 5-8)**
+
+1. **Subscription & Billing System** (Critical)
+   - Deploy subscription plan management
+   - Integrate eWAY payment gateway
+   - Implement quota enforcement engine
+
+2. **Workspace Collaboration** (High)
+   - Team management and invitations
+   - Role-based access control
+   - Workspace branding options
+
+3. **Usage Analytics & Monitoring** (High)
+   - Real-time usage dashboard
+   - Business intelligence analytics
+   - Performance monitoring system
+
+### 🚀 **Advanced Features (Phase 3: Weeks 9-12)**
+
+1. **AI Chatbot with Semantic Search**
+2. **Voice Synthesis Integration**
+3. **Advanced Export & API System**
+4. **Mobile Optimization & PWA**
+
+### 📋 **Legacy Technical Debt (To Address During Implementation)**
 
 1. **Refactor AudioEditor.tsx** (511 lines → multiple components)
-2. **Add comprehensive test suite** (currently missing)
-3. **Implement ESLint configuration**
-4. **Add proper error boundaries**
-5. **Improve TypeScript strictness**
-
-### 🎯 Medium-term Goals
-
-1. **Performance optimization** (memoization, lazy loading)
-2. **Accessibility improvements** (ARIA labels, keyboard navigation)
-3. **Bundle size optimization**
-4. **Progressive Web App features**
+2. **Add comprehensive test suite** (implement during each phase)
+3. **Implement ESLint configuration** (Week 1 setup)
+4. **Add proper error boundaries** (Week 2 security phase)
+5. **Improve TypeScript strictness** (ongoing during implementation)
 
 ## 🧠 AI Behavior Rules
 
+### **Investigation & Problem Solving**
+- **Deep Analysis Required** - Examine entire flow and all dependencies meticulously
+- **Evidence-Based Approach** - No changes, patches, or guesses without concrete evidence
 - **Never assume missing context** - Ask questions if uncertain
+- **Trace complete data flow** - From user action to final result
+
+### **Code Quality & Standards**
 - **Never hallucinate libraries** - Only use verified packages from package.json
 - **Always confirm file paths** - Verify files exist before referencing
 - **Never delete existing code** - Unless explicitly instructed
 - **Follow the 250-line limit** - Refactor oversized files immediately
 - **Always add tests** - No feature is complete without tests
 
+### **Implementation Standards**
+- **No placeholders or mockups** - Build real, functional components
+- **Connect to actual data sources** - Use database/APIs, not mock data
+- **Production-ready code only** - No demonstrations or temporary solutions
+- **Proper error handling** - Implement real error states, not placeholder text
+
 ## 🎵 AudioTricks Philosophy
 
-**Simple, Secure, and Powerful**:
-- Client-side audio processing
-- No backend complexity
-- User-controlled API keys
-- Privacy-first approach
-- Modern React patterns
-- Comprehensive error handling
+**Enterprise-Grade, AI-Powered, Global Scale**:
+- **Full-Stack Platform**: Complete React frontend with Node.js backend
+- **Enterprise Database**: PostgreSQL with 30+ tables, row-level security, audit trails
+- **Global File Storage**: DigitalOcean Spaces with worldwide CDN distribution
+- **AI Intelligence**: Semantic search, chatbot, voice synthesis, automated insights
+- **Business Ready**: Subscription management, payment processing, team collaboration
+- **Email Automation**: Professional SendGrid integration with marketing workflows
+- **Security First**: Encrypted API keys, comprehensive audit logging, GDPR compliance
+- **Scalable Architecture**: Multi-tenant, real-time analytics, performance optimized
+- **Developer Friendly**: RESTful APIs, webhook system, comprehensive documentation
 
 ---
 
