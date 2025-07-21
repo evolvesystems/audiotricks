@@ -581,7 +581,7 @@ export class SubscriptionService {
           end: subscription.currentPeriodEnd
         },
         usage: usageByType,
-        quotas,
+        quotas: planLimits,
         totalCost: Object.values(usageByType).reduce((sum, u) => sum + u.cost, 0)
       };
     } catch (error) {

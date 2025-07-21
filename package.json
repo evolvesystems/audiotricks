@@ -7,6 +7,7 @@
     "build": "vite build",
     "build:frontend": "./scripts/build-frontend.sh",
     "build:test": "./scripts/build-test.sh",
+    "build:production": "npm run build && cd netlify/functions && npm install",
     "dev": "./dev.sh",
     "dev:win": "dev.bat",
     "start": "echo '🚫 ERROR: Frontend served from backend. Run: npm run dev' && exit 1",

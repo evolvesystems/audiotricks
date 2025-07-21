@@ -95,7 +95,7 @@ export class AdminSubscriptionController {
 
       // Check if plan has active subscriptions
       const activeSubscriptions = await prisma.workspaceSubscription.count({
-        where: { subscriptionPlanId: planId }
+        where: { planId: planId }
       });
 
       if (activeSubscriptions > 0) {
@@ -126,7 +126,7 @@ export class AdminSubscriptionController {
 
       const where: any = {};
       if (status) where.status = status;
-      if (planId) where.subscriptionPlanId = planId;
+      if (planId) where.planId = planId;
 
       const [subscriptions, total] = await Promise.all([
         prisma.workspaceSubscription.findMany({
@@ -138,8 +138,8 @@ export class AdminSubscriptionController {
             workspace: {
               select: { id: true, name: true, ownerId: true }
             },
-            subscriptionPlan: {
-              select: { id: true, name: true, tier: true, priceAUD: true }
+            plan: {
+              select: { id: true, name: true, tier: true }
             },
             _count: {
               select: { billingRecords: true }
@@ -198,13 +198,8 @@ export class AdminSubscriptionController {
         }),
         // Plan distribution
         prisma.workspaceSubscription.groupBy({
-          by: ['subscriptionPlanId'],
-          _count: { subscriptionPlanId: true },
-          include: {
-            subscriptionPlan: {
-              select: { name: true, tier: true }
-            }
-          }
+          by: ['planId'],
+          _count: { planId: true }
         }),
         // Recent transactions
         prisma.billingRecord.findMany({

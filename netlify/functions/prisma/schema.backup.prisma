@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  isActive    Boolean  @default(true) @map("is_active")
+
+  users       WorkspaceUser[]
+  invitations WorkspaceInvitation[]
+  audioHistory AudioHistory[]
+
+  @@map("workspaces")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  username     String         @unique
+  passwordHash String         @map("password_hash")
+  role         String         @default("user") // user, admin, superadmin
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  lastLoginAt  DateTime?      @map("last_login_at")
+  isActive     Boolean        @default(true) @map("is_active")
+  
+  audioHistory AudioHistory[]
+  sessions     Session[]
+  settings     UserSettings?
+  workspaces   WorkspaceUser[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model WorkspaceUser {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  userId      String    @map("user_id")
+  role        String    @default("member") // member, admin, owner
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_users")
+}
+
+model WorkspaceInvitation {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  email       String
+  role        String    @default("member")
+  token       String    @unique
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  acceptedAt  DateTime? @map("accepted_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_invitations")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  token       String   @unique
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model UserSettings {
+  userId                    String   @id @map("user_id")
+  openaiApiKeyEncrypted     String?  @map("openai_api_key_encrypted")
+  elevenlabsApiKeyEncrypted String?  @map("elevenlabs_api_key_encrypted")
+  preferredLanguage         String   @default("en") @map("preferred_language")
+  summaryQuality            String   @default("balanced") @map("summary_quality")
+  settingsJson              Json     @default("{}") @map("settings_json")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model AudioHistory {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  workspaceId       String?  @map("workspace_id")
+  title             String?  @db.VarChar(500)
+  audioUrl          String?  @map("audio_url")
+  fileSizeBytes     BigInt?  @map("file_size_bytes")
+  durationSeconds   Int?     @map("duration_seconds")
+  transcript        String?
+  summary           String?
+  keyMoments        Json?    @map("key_moments")
+  processingOptions Json?    @map("processing_options")
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace         Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("audio_history")
+}

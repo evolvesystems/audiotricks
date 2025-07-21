@@ -1,7 +1,43 @@
 [build]
-  command = "npm run build"
+  command = "npm run build:production"
   publish = "dist"
 
+[functions]
+  directory = "netlify/functions"
+
+# API routes redirect to serverless functions
+[[redirects]]
+  from = "/api/auth/*"
+  to = "/.netlify/functions/auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/*"
+  to = "/.netlify/functions/admin"
+  status = 200
+
+[[redirects]]
+  from = "/api/users/*"
+  to = "/.netlify/functions/users"
+  status = 200
+
+[[redirects]]
+  from = "/api/workspaces/*"
+  to = "/.netlify/functions/workspaces"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+# All other API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api"
+  status = 200
+
+# SPA fallback for frontend routes
 [[redirects]]
   from = "/*"
   to = "/index.html"

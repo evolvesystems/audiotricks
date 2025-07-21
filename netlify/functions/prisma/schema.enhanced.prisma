@@ -1,0 +1,846 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER & AUTH MODELS ====================
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  username          String    @unique
+  passwordHash      String    @map("password_hash")
+  role              String    @default("user") // user, admin, superadmin
+  firstName         String?   @map("first_name")
+  lastName          String?   @map("last_name")
+  avatar            String?
+  phoneNumber       String?   @map("phone_number")
+  timezone          String    @default("UTC")
+  lastLoginAt       DateTime? @map("last_login_at")
+  emailVerified     Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspaces        WorkspaceUser[]
+  audioHistory      AudioHistory[]
+  audioUploads      AudioUpload[]
+  apiKeys           ApiKeyManagement[]
+  sessions          Session[]
+  refreshTokens     RefreshToken[]
+  settings          UserSettings?
+  auditLogs         AuditLog[]
+  securityEvents    SecurityEvent[]
+  notifications     Notification[]
+  audioSegments     AudioSegment[]
+  emailPreferences  EmailPreference?
+  quotaUsage        UserQuota[]
+  aiTokenUsage      AiTokenUsage[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  token       String   @unique
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+// ==================== WORKSPACE MODELS ====================
+
+model Workspace {
+  id                String   @id @default(uuid())
+  name              String
+  slug              String   @unique
+  description       String?
+  logo              String?
+  website           String?
+  industry          String?
+  size              String?  // small, medium, large, enterprise
+  isActive          Boolean  @default(true) @map("is_active")
+  settings          Json     @default("{}") // Workspace-specific settings
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users             WorkspaceUser[]
+  invitations       WorkspaceInvitation[]
+  audioHistory      AudioHistory[]
+  audioUploads      AudioUpload[]
+  subscriptions     WorkspaceSubscription[]
+  storageQuotas     StorageQuota[]
+  integrations      Integration[]
+  automations       WorkspaceAutomation[]
+  webhooks          Webhook[]
+  customFields      CustomField[]
+  tags              Tag[]
+  aiAgents          AiAgent[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceUser {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  userId      String    @map("user_id")
+  role        String    @default("member") // member, admin, owner
+  permissions Json      @default("{}") // Custom permissions
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+  lastActiveAt DateTime? @map("last_active_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_users")
+}
+
+model WorkspaceInvitation {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  email       String
+  role        String    @default("member")
+  token       String    @unique
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  acceptedAt  DateTime? @map("accepted_at")
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_invitations")
+}
+
+// ==================== AUDIO PROCESSING MODELS ====================
+
+model AudioUpload {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  workspaceId       String   @map("workspace_id")
+  originalFileName  String   @map("original_file_name")
+  fileSize          BigInt   @map("file_size")
+  mimeType          String   @map("mime_type")
+  uploadStatus      String   @default("pending") @map("upload_status") // pending, uploading, completed, failed
+  uploadProgress    Float    @default(0) @map("upload_progress")
+  storageProvider   String   @map("storage_provider") // digitalocean, aws, azure
+  storagePath       String?  @map("storage_path")
+  storageUrl        String?  @map("storage_url")
+  cdnUrl            String?  @map("cdn_url")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user              User                @relation(fields: [userId], references: [id])
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id])
+  processingJobs    ProcessingJob[]
+  audioChunks       AudioChunk[]
+  fileStorage       FileStorage?
+
+  @@index([userId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("audio_uploads")
+}
+
+model ProcessingJob {
+  id              String   @id @default(uuid())
+  uploadId        String   @map("upload_id")
+  jobType         String   @map("job_type") // transcription, summary, analysis
+  status          String   @default("queued") // queued, processing, completed, failed
+  priority        Int      @default(0)
+  progress        Float    @default(0)
+  startedAt       DateTime? @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  error           String?
+  result          Json?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  audioHistory    AudioHistory?
+
+  @@index([status, priority])
+  @@map("processing_jobs")
+}
+
+model AudioHistory {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  workspaceId       String?  @map("workspace_id")
+  processingJobId   String?  @unique @map("processing_job_id")
+  title             String?  @db.VarChar(500)
+  audioUrl          String?  @map("audio_url")
+  fileSizeBytes     BigInt?  @map("file_size_bytes")
+  durationSeconds   Int?     @map("duration_seconds")
+  transcript        String?
+  summary           String?
+  keyMoments        Json?    @map("key_moments")
+  processingOptions Json?    @map("processing_options")
+  language          String?
+  confidence        Float?
+  speakers          Int?
+  tags              String[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace         Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  processingJob     ProcessingJob? @relation(fields: [processingJobId], references: [id])
+  segments          AudioSegment[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("audio_history")
+}
+
+model AudioSegment {
+  id              String   @id @default(uuid())
+  audioHistoryId  String   @map("audio_history_id")
+  userId          String   @map("user_id")
+  startTime       Float    @map("start_time")
+  endTime         Float    @map("end_time")
+  text            String
+  speaker         String?
+  confidence      Float?
+  keywords        String[]
+  sentiment       String?  // positive, negative, neutral
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  audioHistory    AudioHistory @relation(fields: [audioHistoryId], references: [id], onDelete: Cascade)
+  user            User @relation(fields: [userId], references: [id])
+
+  @@index([audioHistoryId, startTime])
+  @@map("audio_segments")
+}
+
+model AudioChunk {
+  id              String   @id @default(uuid())
+  uploadId        String   @map("upload_id")
+  chunkIndex      Int      @map("chunk_index")
+  startByte       BigInt   @map("start_byte")
+  endByte         BigInt   @map("end_byte")
+  size            BigInt
+  storageKey      String   @map("storage_key")
+  checksum        String
+  uploadedAt      DateTime? @map("uploaded_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@unique([uploadId, chunkIndex])
+  @@map("audio_chunks")
+}
+
+// ==================== STORAGE MODELS ====================
+
+model StorageProvider {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  type            String   // digitalocean, aws, azure, gcp
+  endpoint        String?
+  region          String?
+  bucket          String?
+  cdnEndpoint     String?  @map("cdn_endpoint")
+  isActive        Boolean  @default(true) @map("is_active")
+  isDefault       Boolean  @default(false) @map("is_default")
+  config          Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  files           FileStorage[]
+
+  @@map("storage_providers")
+}
+
+model FileStorage {
+  id              String   @id @default(uuid())
+  uploadId        String   @unique @map("upload_id")
+  providerId      String   @map("provider_id")
+  storageKey      String   @unique @map("storage_key")
+  fileName        String   @map("file_name")
+  fileSize        BigInt   @map("file_size")
+  mimeType        String   @map("mime_type")
+  checksum        String
+  publicUrl       String?  @map("public_url")
+  cdnUrl          String?  @map("cdn_url")
+  expiresAt       DateTime? @map("expires_at")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  lastAccessedAt  DateTime? @map("last_accessed_at")
+
+  // Relations
+  provider        StorageProvider @relation(fields: [providerId], references: [id])
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, createdAt])
+  @@map("file_storage")
+}
+
+// ==================== SUBSCRIPTION & BILLING MODELS ====================
+
+model SubscriptionPlan {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  displayName       String   @map("display_name")
+  description       String?
+  tier              String   // free, pro, enterprise
+  price             Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD")
+  billingPeriod     String   @map("billing_period") // monthly, yearly
+  features          Json     // Feature list and limits
+  quotas            Json     // Usage quotas
+  isActive          Boolean  @default(true) @map("is_active")
+  isPublic          Boolean  @default(true) @map("is_public")
+  trialDays         Int      @default(0) @map("trial_days")
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subscriptions     WorkspaceSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model WorkspaceSubscription {
+  id                String   @id @default(uuid())
+  workspaceId       String   @map("workspace_id")
+  planId            String   @map("plan_id")
+  status            String   // active, cancelled, expired, past_due
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd  DateTime @map("current_period_end")
+  cancelledAt       DateTime? @map("cancelled_at")
+  cancelReason      String?   @map("cancel_reason")
+  trialEnd          DateTime? @map("trial_end")
+  metadata          Json      @default("{}")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  billingRecords    BillingRecord[]
+  usageRecords      UsageRecord[]
+
+  @@unique([workspaceId])
+  @@map("workspace_subscriptions")
+}
+
+model BillingRecord {
+  id                String   @id @default(uuid())
+  subscriptionId    String   @map("subscription_id")
+  amount            Decimal  @db.Decimal(10, 2)
+  currency          String
+  status            String   // pending, paid, failed, refunded
+  invoiceNumber     String?  @unique @map("invoice_number")
+  invoiceUrl        String?  @map("invoice_url")
+  paymentMethod     String?  @map("payment_method")
+  paymentIntentId   String?  @map("payment_intent_id")
+  failureReason     String?  @map("failure_reason")
+  paidAt            DateTime? @map("paid_at")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  subscription      WorkspaceSubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId, createdAt])
+  @@map("billing_records")
+}
+
+model PaymentMethod {
+  id                String   @id @default(uuid())
+  workspaceId       String   @map("workspace_id")
+  type              String   // card, bank_account
+  provider          String   // eway, stripe
+  isDefault         Boolean  @default(false) @map("is_default")
+  lastFour          String?  @map("last_four")
+  expiryMonth       Int?     @map("expiry_month")
+  expiryYear        Int?     @map("expiry_year")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_methods")
+}
+
+// ==================== API KEY MANAGEMENT ====================
+
+model ApiKeyManagement {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  provider          String   // openai, elevenlabs, custom
+  keyHash           String   @map("key_hash")
+  keyPrefix         String   @map("key_prefix") // First 8 chars for identification
+  encryptedKey      String   @map("encrypted_key")
+  isActive          Boolean  @default(true) @map("is_active")
+  lastUsedAt        DateTime? @map("last_used_at")
+  usageCount        Int      @default(0) @map("usage_count")
+  expiresAt         DateTime? @map("expires_at")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs         ApiKeyUsageLog[]
+
+  @@unique([userId, provider])
+  @@index([keyHash])
+  @@map("api_key_management")
+}
+
+model ApiKeyUsageLog {
+  id              String   @id @default(uuid())
+  apiKeyId        String   @map("api_key_id")
+  endpoint        String
+  method          String
+  statusCode      Int      @map("status_code")
+  responseTime    Int      @map("response_time") // milliseconds
+  tokensUsed      Int?     @map("tokens_used")
+  cost            Decimal? @db.Decimal(10, 6)
+  error           String?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  apiKey          ApiKeyManagement @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, createdAt])
+  @@map("api_key_usage_logs")
+}
+
+// ==================== USER SETTINGS & PREFERENCES ====================
+
+model UserSettings {
+  userId                    String   @id @map("user_id")
+  openaiApiKeyEncrypted     String?  @map("openai_api_key_encrypted")
+  elevenlabsApiKeyEncrypted String?  @map("elevenlabs_api_key_encrypted")
+  preferredLanguage         String   @default("en") @map("preferred_language")
+  summaryQuality            String   @default("balanced") @map("summary_quality")
+  theme                     String   @default("light")
+  notifications             Json     @default("{}")
+  privacy                   Json     @default("{}")
+  settingsJson              Json     @default("{}") @map("settings_json")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+  
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ==================== ANALYTICS & METRICS ====================
+
+model UsageMetric {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  metricType      String   @map("metric_type") // audio_minutes, storage_bytes, api_calls
+  value           BigInt
+  period          String   // daily, monthly
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([workspaceId, metricType, periodStart])
+  @@index([workspaceId, periodStart])
+  @@map("usage_metrics")
+}
+
+model UserQuota {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  workspaceId     String   @map("workspace_id")
+  quotaType       String   @map("quota_type") // audio_minutes, storage_gb, api_calls
+  used            BigInt   @default(0)
+  limit           BigInt
+  resetPeriod     String   @map("reset_period") // daily, monthly, never
+  nextResetAt     DateTime @map("next_reset_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, workspaceId, quotaType])
+  @@map("user_quotas")
+}
+
+model StorageQuota {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  totalBytes      BigInt   @map("total_bytes")
+  usedBytes       BigInt   @map("used_bytes")
+  fileCount       Int      @map("file_count")
+  lastCalculated  DateTime @map("last_calculated")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([workspaceId])
+  @@map("storage_quotas")
+}
+
+model UsageRecord {
+  id              String   @id @default(uuid())
+  subscriptionId  String   @map("subscription_id")
+  recordType      String   @map("record_type") // minutes_transcribed, storage_used, api_calls
+  quantity        BigInt
+  unitPrice       Decimal? @db.Decimal(10, 6) @map("unit_price")
+  totalCost       Decimal? @db.Decimal(10, 2) @map("total_cost")
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  subscription    WorkspaceSubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId, periodStart])
+  @@map("usage_records")
+}
+
+// ==================== AUDIT & SECURITY ====================
+
+model AuditLog {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  workspaceId     String?  @map("workspace_id")
+  action          String   // create, update, delete, access
+  resource        String   // user, workspace, audio, etc
+  resourceId      String?  @map("resource_id")
+  changes         Json?    // before/after values
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+model SecurityEvent {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  eventType       String   @map("event_type") // login_failed, suspicious_activity, api_limit_exceeded
+  severity        String   // low, medium, high, critical
+  description     String
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent")
+  metadata        Json     @default("{}")
+  resolved        Boolean  @default(false)
+  resolvedAt      DateTime? @map("resolved_at")
+  resolvedBy      String?   @map("resolved_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user            User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([eventType, severity])
+  @@map("security_events")
+}
+
+// ==================== NOTIFICATIONS & EMAIL ====================
+
+model Notification {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  type            String   // system, workspace, billing, security
+  title           String
+  message         String
+  actionUrl       String?  @map("action_url")
+  read            Boolean  @default(false)
+  readAt          DateTime? @map("read_at")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@map("notifications")
+}
+
+model EmailTemplate {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  subject         String
+  htmlContent     String   @map("html_content")
+  textContent     String   @map("text_content")
+  variables       Json     // Required variables
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  emailLogs       EmailLog[]
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id              String   @id @default(uuid())
+  templateId      String?  @map("template_id")
+  recipientEmail  String   @map("recipient_email")
+  subject         String
+  status          String   // sent, failed, bounced, opened
+  provider        String   // sendgrid
+  providerMessageId String? @map("provider_message_id")
+  openedAt        DateTime? @map("opened_at")
+  clickedAt       DateTime? @map("clicked_at")
+  error           String?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  template        EmailTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([recipientEmail, createdAt])
+  @@map("email_logs")
+}
+
+model EmailPreference {
+  userId          String   @id @map("user_id")
+  marketing       Boolean  @default(true)
+  transactional   Boolean  @default(true)
+  security        Boolean  @default(true)
+  newsletter      Boolean  @default(true)
+  productUpdates  Boolean  @default(true) @map("product_updates")
+  unsubscribeToken String  @unique @map("unsubscribe_token")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_preferences")
+}
+
+// ==================== WORKSPACE FEATURES ====================
+
+model Integration {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  type            String   // slack, teams, zapier, webhook
+  name            String
+  config          Json     // Encrypted configuration
+  isActive        Boolean  @default(true) @map("is_active")
+  lastSyncAt      DateTime? @map("last_sync_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, type])
+  @@map("integrations")
+}
+
+model WorkspaceAutomation {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  description     String?
+  trigger         Json     // Trigger conditions
+  actions         Json     // Actions to perform
+  isActive        Boolean  @default(true) @map("is_active")
+  lastRunAt       DateTime? @map("last_run_at")
+  runCount        Int      @default(0) @map("run_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_automations")
+}
+
+model Webhook {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  url             String
+  events          String[] // audio.processed, workspace.updated, etc
+  secret          String
+  isActive        Boolean  @default(true) @map("is_active")
+  lastTriggeredAt DateTime? @map("last_triggered_at")
+  failureCount    Int      @default(0) @map("failure_count")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("webhooks")
+}
+
+model CustomField {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  fieldType       String   @map("field_type") // text, number, date, select
+  isRequired      Boolean  @default(false) @map("is_required")
+  options         Json?    // For select fields
+  defaultValue    String?  @map("default_value")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@map("custom_fields")
+}
+
+model Tag {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  color           String
+  description     String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@map("tags")
+}
+
+// ==================== AI FEATURES ====================
+
+model AiAgent {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  description     String?
+  systemPrompt    String   @map("system_prompt")
+  model           String   @default("gpt-4")
+  temperature     Float    @default(0.7)
+  maxTokens       Int      @default(2048) @map("max_tokens")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversations   AiConversation[]
+
+  @@map("ai_agents")
+}
+
+model AiConversation {
+  id              String   @id @default(uuid())
+  agentId         String   @map("agent_id")
+  userId          String   @map("user_id")
+  title           String?
+  context         Json?    // Conversation context
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agent           AiAgent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages        AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id              String   @id @default(uuid())
+  conversationId  String   @map("conversation_id")
+  role            String   // user, assistant, system
+  content         String
+  tokensUsed      Int?     @map("tokens_used")
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  conversation    AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+model AiTokenUsage {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  workspaceId     String   @map("workspace_id")
+  provider        String   // openai, anthropic
+  model           String
+  tokensUsed      Int      @map("tokens_used")
+  cost            Decimal  @db.Decimal(10, 6)
+  purpose         String   // transcription, summary, chat
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("ai_token_usage")
+}
+
+// ==================== SYSTEM MODELS ====================
+
+model SystemConfig {
+  key             String   @id
+  value           Json
+  description     String?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("system_config")
+}
+
+model HealthCheck {
+  id              String   @id @default(uuid())
+  service         String   // api, database, storage, email
+  status          String   // healthy, degraded, down
+  responseTime    Int      @map("response_time") // milliseconds
+  details         Json?
+  checkedAt       DateTime @default(now()) @map("checked_at")
+
+  @@index([service, checkedAt])
+  @@map("health_checks")
+}
