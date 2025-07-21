@@ -58,6 +58,19 @@ const loginValidation = [
     .withMessage('Password required')
 ];
 
+/**
+ * Change password validation rules
+ */
+const changePasswordValidation = [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('Current password required'),
+  body('newPassword')
+    .isLength({ min: 8 })
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('New password must be at least 8 characters with uppercase, lowercase, and number')
+];
+
 // Public routes
 router.post('/register', registerValidation, validate, authController.register);
 router.post('/login', loginValidation, validate, authController.login);
@@ -65,5 +78,6 @@ router.post('/login', loginValidation, validate, authController.login);
 // Protected routes
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.getCurrentUser);
+router.put('/change-password', authenticate, changePasswordValidation, validate, authController.changePassword);
 
 export default router;
