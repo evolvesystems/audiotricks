@@ -159,6 +159,35 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Health check endpoint for debugging
+    if (endpoint === '/health' && method === 'GET') {
+      const healthCheck = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        environment: {
+          hasDbUrl: !!process.env.DATABASE_URL,
+          hasJwtSecret: !!process.env.JWT_SECRET,
+          nodeEnv: process.env.NODE_ENV,
+          dbUrlPreview: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'not set'
+        }
+      };
+
+      try {
+        // Test database connection
+        await prisma.$queryRaw`SELECT 1`;
+        healthCheck.database = 'connected';
+      } catch (dbError) {
+        healthCheck.database = 'failed';
+        healthCheck.dbError = dbError.message;
+      }
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify(healthCheck)
+      };
+    }
+
     // Default response
     return {
       statusCode: 404,
@@ -168,10 +197,23 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Auth function error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      endpoint: getEndpoint(event),
+      method: event.httpMethod,
+      hasDbUrl: !!process.env.DATABASE_URL,
+      hasJwtSecret: !!process.env.JWT_SECRET
+    });
+    
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      })
     };
   } finally {
     await prisma.$disconnect();
