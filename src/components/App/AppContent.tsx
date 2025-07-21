@@ -1,7 +1,7 @@
 import React from 'react'
 import { AudioProcessingResponse } from '../../types'
 import { UserSettings } from '../Settings'
-import AudioUploader from '../AudioUploader'
+import { BackendAudioUploader } from '../AudioUploader/BackendAudioUploader'
 import ResultsDisplay2 from '../ResultsDisplay2'
 import HeroSection from '../HeroSection'
 import HeroUploadSection from '../HeroUploadSection'

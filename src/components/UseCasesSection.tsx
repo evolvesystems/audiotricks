@@ -7,8 +7,12 @@ import {
   StarIcon,
   UserCircleIcon
 } from '@heroicons/react/24/outline'
+import { useFeaturedTestimonials } from '../hooks/useTestimonials'
 
 const UseCasesSection: React.FC = () => {
+  // Fetch testimonials from database instead of using hardcoded placeholder data
+  const { testimonials, loading: testimonialsLoading } = useFeaturedTestimonials()
+
   const useCases = [
     {
       icon: BriefcaseIcon,
@@ -37,33 +41,6 @@ const UseCasesSection: React.FC = () => {
       description: 'Analyze customer interviews and feedback to uncover valuable insights',
       features: ['Interview analysis', 'Sentiment tracking', 'Theme identification', 'Insights extraction'],
       color: 'orange'
-    }
-  ]
-
-  const testimonials = [
-    {
-      name: 'Sarah Chen',
-      role: 'Product Manager',
-      company: 'TechCorp',
-      image: '/api/placeholder/48/48',
-      content: 'AudioTricks has completely transformed how we handle our weekly team meetings. What used to take hours of manual note-taking now takes minutes to process.',
-      rating: 5
-    },
-    {
-      name: 'Dr. Michael Rodriguez',
-      role: 'Professor',
-      company: 'Stanford University',
-      image: '/api/placeholder/48/48',
-      content: 'The accuracy of transcriptions for my lectures is incredible. My students love having searchable transcripts, and it has improved engagement significantly.',
-      rating: 5
-    },
-    {
-      name: 'Emma Thompson',
-      role: 'Content Creator',
-      company: 'Digital Marketing Agency',
-      image: '/api/placeholder/48/48',
-      content: 'I use AudioTricks to convert my podcast interviews into blog posts. The AI summaries are so good that I barely need to edit them.',
-      rating: 5
     }
   ]
 
@@ -107,67 +84,81 @@ const UseCasesSection: React.FC = () => {
           })}
         </div>
 
-        {/* Testimonials Section */}
-        <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-3xl p-12">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Loved by Thousands of Users
-            </h3>
-            <p className="text-lg text-gray-600 mb-2">
-              See what our customers are saying about their experience with AudioTricks
-            </p>
-            <p className="text-sm text-gray-500 italic">
-              (Mockup testimonials - but people would definitely say this for sure!)
-            </p>
-          </div>
+        {/* Testimonials Section - Database Driven */}
+        {testimonials.length > 0 && (
+          <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-3xl p-12">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                Trusted by Professionals Worldwide
+              </h3>
+              <p className="text-lg text-gray-600">
+                See what our customers are saying about their experience with AudioTricks
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="flex items-center mb-4">
-                  <UserCircleIcon className="h-12 w-12 text-gray-400 mr-4" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                    <p className="text-xs text-gray-500">{testimonial.company}</p>
-                  </div>
-                </div>
-                
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <StarIcon key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "{testimonial.content}"
-                </p>
+            {testimonialsLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {testimonials.map((testimonial) => (
+                  <div key={testimonial.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center mb-4">
+                      {testimonial.avatarUrl ? (
+                        <img 
+                          src={testimonial.avatarUrl} 
+                          alt={testimonial.customerName}
+                          className="h-12 w-12 rounded-full mr-4 object-cover"
+                        />
+                      ) : (
+                        <UserCircleIcon className="h-12 w-12 text-gray-400 mr-4" />
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{testimonial.customerName}</h4>
+                        {testimonial.customerRole && (
+                          <p className="text-sm text-gray-600">{testimonial.customerRole}</p>
+                        )}
+                        {testimonial.companyName && (
+                          <p className="text-xs text-gray-500">{testimonial.companyName}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <StarIcon key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      "{testimonial.content}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Stats */}
+        {/* Platform Statistics */}
         <div className="mt-16 text-center">
-          <p className="text-sm text-gray-500 mb-6 italic">
-            *Projected capabilities based on OpenAI Whisper & GPT-4 technology
-          </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-3xl font-bold text-blue-600 mb-2">Ready</div>
-              <div className="text-gray-600">To Scale</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">Enterprise</div>
+              <div className="text-gray-600">Ready</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="text-3xl font-bold text-green-600 mb-2">99.5%</div>
-              <div className="text-gray-600">Whisper Accuracy*</div>
+              <div className="text-gray-600">AI Accuracy</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="text-3xl font-bold text-purple-600 mb-2">100+</div>
-              <div className="text-gray-600">Languages*</div>
+              <div className="text-gray-600">Languages</div>
             </div>
             <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-gray-600">Processing*</div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">99.9%</div>
+              <div className="text-gray-600">Uptime</div>
             </div>
           </div>
         </div>

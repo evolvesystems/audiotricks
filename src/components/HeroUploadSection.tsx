@@ -5,7 +5,7 @@ import {
   SpeakerWaveIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
-import AudioUploader from './AudioUploader'
+import { BackendAudioUploader } from './AudioUploader/BackendAudioUploader'
 import APIErrorBoundary from './APIErrorBoundary'
 
 interface HeroUploadSectionProps {
@@ -105,12 +105,20 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
         <div className="max-w-4xl mx-auto">
           {/* Upload Component - Full width */}
           <div className="bg-gray-50 rounded-2xl p-12 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
-            <APIErrorBoundary apiProvider="openai">
-              <AudioUploader
-                apiKey={apiKey}
-                onProcessingComplete={onProcessingComplete}
+            <APIErrorBoundary apiProvider="backend">
+              <BackendAudioUploader
+                onUploadComplete={(upload) => {
+                  // Convert backend upload to frontend processing complete format
+                  onProcessingComplete({
+                    audioFile: null,
+                    audioUrl: upload.cdnUrl || upload.storageUrl,
+                    transcript: { text: '' },
+                    summary: { total_duration: upload.duration || 0 },
+                    uploadId: upload.id
+                  })
+                }}
                 onError={onError}
-                defaultSettings={defaultSettings}
+                workspaceId="default" // TODO: Use actual workspace ID from context
               />
             </APIErrorBoundary>
           </div>

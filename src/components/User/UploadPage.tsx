@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import AudioUploader from '../AudioUploader';
+import { BackendAudioUploader } from '../AudioUploader/BackendAudioUploader';
 import { AudioProcessingResponse } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { useApiKeys } from '../../hooks/useApiKeys';
@@ -97,11 +97,19 @@ export default function UploadPage() {
 
       {/* Upload Interface */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <AudioUploader
-          apiKey={apiKey}
-          onProcessingComplete={handleProcessingComplete}
+        <BackendAudioUploader
+          onUploadComplete={(upload) => {
+            // Convert backend upload to processing complete format
+            handleProcessingComplete({
+              audioFile: null,
+              audioUrl: upload.cdnUrl || upload.storageUrl,
+              transcript: { text: '' },
+              summary: { total_duration: upload.duration || 0 },
+              uploadId: upload.id
+            })
+          }}
           onError={handleError}
-          defaultSettings={settings}
+          workspaceId="default" // TODO: Use actual workspace ID from context
         />
       </div>
 

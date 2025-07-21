@@ -1,7 +1,7 @@
 import { config } from '../config/env';
 
-// Base API configuration
-const API_BASE_URL = config.apiUrl || (config.isDevelopment ? 'http://localhost:3001/api' : '/api');
+// Base API configuration - CLAUDE.md compliant: ONE PORT ONLY (3000)
+const API_BASE_URL = config.apiUrl || (config.isDevelopment ? 'http://localhost:3000/api' : '/api');
 
 // Types for API responses
 export interface ApiResponse<T = any> {
