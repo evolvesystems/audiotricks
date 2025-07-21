@@ -239,15 +239,15 @@ export class SubscriptionLifecycleService {
         data: {
           status: 'cancelled',
           cancelledAt: new Date(),
-          cancellationReason: reason,
+          cancelReason: reason,
           updatedAt: new Date()
         }
       });
 
       // Cancel recurring payments if using eWAY
-      if (subscription.paymentGateway === 'eway' && subscription.ewayScheduleId) {
+      if (subscription.paymentGateway === 'eway' && subscription.paymentMethodId) {
         try {
-          await this.ewayService.cancelRecurringSchedule(subscription.ewayScheduleId);
+          await this.ewayService.cancelRecurringSchedule(subscription.paymentMethodId);
         } catch (ewayError) {
           logger.error('Error cancelling eWAY schedule:', ewayError);
           // Don't fail the whole cancellation if eWAY cancellation fails

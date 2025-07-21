@@ -11,7 +11,7 @@ export class AdminRolesController {
   /**
    * Get all roles with permissions
    */
-  async getRoles(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getRoles(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const roles = await prisma.role.findMany({
         include: {

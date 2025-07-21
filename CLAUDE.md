@@ -93,6 +93,33 @@ git push
 
 **This build testing protocol is NON-NEGOTIABLE and must be followed by ALL contributors without exception.**
 
+### 🌐 Enhanced Browser Testing (RECOMMENDED)
+
+**Live Browser Verification**: Use `npm run build:test:full` for complete testing including:
+- All standard build tests
+- Live preview server testing
+- Automated login smoke tests
+- Navigation functionality verification
+- Real browser environment testing
+
+**When to use enhanced testing:**
+- ✅ **Before major releases** - Always use full browser testing
+- ✅ **After authentication changes** - Verify login functionality
+- ✅ **After routing updates** - Test navigation works
+- ✅ **Before deployment** - Comprehensive pre-deployment check
+
+### 🚫 Build Testing Violations - STRICTLY FORBIDDEN
+
+**VIOLATION = IMMEDIATE BUILD FAILURE**:
+- ❌ **Committing without testing** - Skipping `npm run build:test` is prohibited
+- ❌ **Ignoring test failures** - Must fix ALL errors before committing
+- ❌ **Partial testing** - Must see complete success message
+- ❌ **Local-only testing** - Must verify browser functionality works
+- ❌ **Production hardcoding** - No hardcoded values allowed in builds
+- ❌ **Untested refactors** - All code changes require full testing
+
+**ENFORCEMENT**: Any commit that breaks builds will be reverted immediately. No exceptions.
+
 ## ⚠️ CRITICAL ARCHITECTURAL RULES - NEVER VIOLATE
 
 ### 🚫 ABSOLUTE PROHIBITION: NO HARDCODING OF SENSITIVE DATA

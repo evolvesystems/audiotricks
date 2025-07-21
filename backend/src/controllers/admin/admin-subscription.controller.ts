@@ -11,7 +11,7 @@ export class AdminSubscriptionController {
   /**
    * Get all subscription plans for admin management
    */
-  async getSubscriptionPlans(req: Request, res: Response) {
+  async getSubscriptionPlans(_req: Request, res: Response) {
     try {
       const plans = await prisma.subscriptionPlan.findMany({
         orderBy: [
