@@ -41,13 +41,13 @@ export default function BillingHistorySection() {
 
       if (response.ok) {
         const data = await response.json();
-        setBillingHistory(data.records || mockBillingHistory);
+        setBillingHistory(data.records || []);
       } else {
-        setBillingHistory(mockBillingHistory);
+        setBillingHistory([]);
       }
     } catch (error) {
       console.error('Error fetching billing history:', error);
-      setBillingHistory(mockBillingHistory);
+      setBillingHistory([]);
     } finally {
       setLoading(false);
     }
@@ -223,47 +223,3 @@ export default function BillingHistorySection() {
     </div>
   );
 }
-
-// Mock data for development
-const mockBillingHistory: BillingRecord[] = [
-  {
-    id: '1',
-    date: '2024-01-01',
-    description: 'Pro Plan - Monthly Subscription',
-    amount: 49.00,
-    status: 'paid',
-    invoiceUrl: '/invoices/2024-01-01.pdf'
-  },
-  {
-    id: '2',
-    date: '2023-12-01',
-    description: 'Pro Plan - Monthly Subscription',
-    amount: 49.00,
-    status: 'paid',
-    invoiceUrl: '/invoices/2023-12-01.pdf'
-  },
-  {
-    id: '3',
-    date: '2023-11-01',
-    description: 'Pro Plan - Monthly Subscription',
-    amount: 49.00,
-    status: 'paid',
-    invoiceUrl: '/invoices/2023-11-01.pdf'
-  },
-  {
-    id: '4',
-    date: '2023-10-15',
-    description: 'Plan Upgrade - Starter to Pro',
-    amount: 30.00,
-    status: 'paid',
-    invoiceUrl: '/invoices/2023-10-15.pdf'
-  },
-  {
-    id: '5',
-    date: '2023-10-01',
-    description: 'Starter Plan - Monthly Subscription',
-    amount: 19.00,
-    status: 'paid',
-    invoiceUrl: '/invoices/2023-10-01.pdf'
-  }
-];

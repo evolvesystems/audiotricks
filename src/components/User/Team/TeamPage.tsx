@@ -47,14 +47,13 @@ export default function TeamPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setTeamMembers(data.members || mockTeamMembers);
+        setTeamMembers(data.members || []);
       } else {
-        // Use mock data for now
-        setTeamMembers(mockTeamMembers);
+        setTeamMembers([]);
       }
     } catch (error) {
       console.error('Error fetching team members:', error);
-      setTeamMembers(mockTeamMembers);
+      setTeamMembers([]);
     } finally {
       setLoading(false);
     }
@@ -282,42 +281,3 @@ export default function TeamPage() {
     </div>
   );
 }
-
-// Mock data for development
-const mockTeamMembers: TeamMember[] = [
-  {
-    id: '1',
-    username: 'john_user',
-    email: 'john@example.com',
-    role: 'owner',
-    joinedAt: '2024-01-01',
-    lastActiveAt: '2024-01-20',
-    status: 'active'
-  },
-  {
-    id: '2',
-    username: 'sarah_doe',
-    email: 'sarah@example.com',
-    role: 'admin',
-    joinedAt: '2024-01-05',
-    lastActiveAt: '2024-01-19',
-    status: 'active'
-  },
-  {
-    id: '3',
-    username: 'mike_jones',
-    email: 'mike@example.com',
-    role: 'member',
-    joinedAt: '2024-01-10',
-    lastActiveAt: '2024-01-18',
-    status: 'active'
-  },
-  {
-    id: '4',
-    username: 'jane_smith',
-    email: 'jane@example.com',
-    role: 'member',
-    joinedAt: '2024-01-15',
-    status: 'invited'
-  }
-];

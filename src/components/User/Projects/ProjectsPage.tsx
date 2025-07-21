@@ -39,53 +39,37 @@ export default function ProjectsPage() {
 
   const fetchProjects = async () => {
     try {
-      // Mock data for now - these endpoints would need to be implemented
-      setProjects([
-        {
-          id: '1',
-          name: 'Podcast Episodes',
-          description: 'Weekly podcast transcriptions for our show',
-          createdAt: '2024-01-15T00:00:00Z',
-          updatedAt: '2024-01-20T00:00:00Z',
-          jobCount: 8,
-          completedJobs: 6,
-          status: 'active',
-          totalDuration: 1440
-        },
-        {
-          id: '2',
-          name: 'Meeting Notes',
-          description: 'Company meeting recordings and minutes',
-          createdAt: '2024-01-10T00:00:00Z',
-          updatedAt: '2024-01-18T00:00:00Z',
-          jobCount: 12,
-          completedJobs: 11,
-          status: 'active',
-          totalDuration: 720
-        },
-        {
-          id: '3',
-          name: 'Interview Transcripts',
-          description: 'Customer interview recordings for research',
-          createdAt: '2024-01-05T00:00:00Z',
-          updatedAt: '2024-01-16T00:00:00Z',
-          jobCount: 3,
-          completedJobs: 3,
-          status: 'active',
-          totalDuration: 180
-        },
-        {
-          id: '4',
-          name: 'Q4 2023 Earnings Call',
-          description: 'Quarterly earnings call transcriptions',
-          createdAt: '2023-12-01T00:00:00Z',
-          updatedAt: '2023-12-15T00:00:00Z',
-          jobCount: 4,
-          completedJobs: 4,
-          status: 'archived',
-          totalDuration: 240
-        }
-      ]);
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        console.error('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      };
+
+      const response = await fetch('/api/user/projects', { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.projects.map((project: any) => ({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          createdAt: project.createdAt,
+          updatedAt: project.updatedAt,
+          jobCount: project.jobCount,
+          completedJobs: 0, // TODO: Calculate from job statuses
+          status: project.status,
+          totalDuration: 0 // TODO: Calculate from job durations
+        })));
+      } else {
+        console.error('Failed to fetch projects:', response.status);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching projects:', error);

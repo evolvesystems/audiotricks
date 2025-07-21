@@ -65,10 +65,10 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
         setWaveformData(normalizedData)
         setIsLoading(false)
       } catch (error) {
+        console.error('Error loading audio waveform data:', error)
         setIsLoading(false)
-        // Generate fake waveform data as fallback
-        const fakeData = Array.from({ length: 500 }, () => Math.random() * 0.8 + 0.1)
-        setWaveformData(fakeData)
+        // Use empty waveform data instead of fake data
+        setWaveformData([])
       }
     }
 

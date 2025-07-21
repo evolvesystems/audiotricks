@@ -60,6 +60,7 @@ export default function UserDashboard() {
   const [recentProjects, setRecentProjects] = useState<Project[]>([]);
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -67,335 +68,431 @@ export default function UserDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Mock data for now - these endpoints would need to be implemented
-      setStats({
-        totalProjects: 5,
-        totalJobs: 23,
-        completedJobs: 20,
-        processingJobs: 2,
-        failedJobs: 1,
-        usageThisMonth: {
-          audioFiles: 45,
-          storageUsed: 2.3,
-          apiCalls: 89
-        },
-        limits: {
-          audioFiles: 100,
-          storage: 5,
-          apiCalls: 1000
-        }
-      });
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        throw new Error('No authentication token found');
+      }
 
-      setRecentProjects([
-        {
-          id: '1',
-          name: 'Podcast Episodes',
-          description: 'Weekly podcast transcriptions',
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-20',
-          jobCount: 8,
-          status: 'active'
-        },
-        {
-          id: '2',
-          name: 'Meeting Notes',
-          description: 'Company meeting recordings',
-          createdAt: '2024-01-10',
-          updatedAt: '2024-01-18',
-          jobCount: 12,
-          status: 'active'
-        },
-        {
-          id: '3',
-          name: 'Interview Transcripts',
-          description: 'Customer interview recordings',
-          createdAt: '2024-01-05',
-          updatedAt: '2024-01-16',
-          jobCount: 3,
-          status: 'active'
-        }
-      ]);
+      const headers = {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      };
 
-      setRecentJobs([
-        {
-          id: 'j1',
-          fileName: 'episode-24.mp3',
-          projectId: '1',
-          projectName: 'Podcast Episodes',
-          status: 'completed',
-          createdAt: '2024-01-20T10:30:00Z',
-          completedAt: '2024-01-20T10:33:00Z',
-          duration: 180
-        },
-        {
-          id: 'j2',
-          fileName: 'meeting-jan19.wav',
-          projectId: '2',
-          projectName: 'Meeting Notes',
-          status: 'processing',
-          createdAt: '2024-01-20T09:15:00Z'
-        },
-        {
-          id: 'j3',
-          fileName: 'interview-customer-5.mp3',
-          projectId: '3',
-          projectName: 'Interview Transcripts',
-          status: 'completed',
-          createdAt: '2024-01-19T14:20:00Z',
-          completedAt: '2024-01-19T14:22:00Z',
-          duration: 120
-        },
-        {
-          id: 'j4',
-          fileName: 'episode-23.mp3',
-          projectId: '1',
-          projectName: 'Podcast Episodes',
-          status: 'failed',
-          createdAt: '2024-01-19T11:00:00Z'
-        }
-      ]);
+      // Fetch dashboard stats
+      const statsResponse = await fetch('/api/user/dashboard/stats', { headers });
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData.stats);
+      } else {
+        console.error('Failed to fetch stats:', statsResponse.status);
+        setError('Failed to load dashboard statistics');
+      }
+
+      // Fetch recent projects
+      const projectsResponse = await fetch('/api/user/dashboard/projects', { headers });
+      if (projectsResponse.ok) {
+        const projectsData = await projectsResponse.json();
+        setRecentProjects(projectsData.projects);
+      } else {
+        console.error('Failed to fetch projects:', projectsResponse.status);
+      }
+
+      // Fetch recent jobs
+      const jobsResponse = await fetch('/api/user/dashboard/jobs', { headers });
+      if (jobsResponse.ok) {
+        const jobsData = await jobsResponse.json();
+        setRecentJobs(jobsData.jobs);
+      } else {
+        console.error('Failed to fetch jobs:', jobsResponse.status);
+      }
 
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError('Failed to load dashboard data');
       setLoading(false);
     }
   };
 
-  const getJobStatusIcon = (status: string) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return 'N/A';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+        return 'text-green-600 bg-green-100';
       case 'processing':
-        return <ClockIcon className="h-5 w-5 text-yellow-500" />;
+        return 'text-blue-600 bg-blue-100';
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-100';
       case 'failed':
-        return <ExclamationCircleIcon className="h-5 w-5 text-red-500" />;
+        return 'text-red-600 bg-red-100';
       default:
-        return <ClockIcon className="h-5 w-5 text-gray-500" />;
+        return 'text-gray-600 bg-gray-100';
     }
   };
 
-  const getJobStatusColor = (status: string) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed':
+        return <CheckCircleIcon className="h-5 w-5" />;
+      case 'processing':
+        return <ClockIcon className="h-5 w-5" />;
+      case 'pending':
+        return <ClockIcon className="h-5 w-5" />;
+      case 'failed':
+        return <ExclamationCircleIcon className="h-5 w-5" />;
+      default:
+        return <DocumentTextIcon className="h-5 w-5" />;
     }
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="flex items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-gray-600">Loading dashboard...</span>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-lg shadow">
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error Loading Dashboard</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={fetchDashboardData}
+                    className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's an overview of your projects and transcriptions.</p>
+          <p className="mt-2 text-gray-600">
+            Welcome back! Here's an overview of your projects and transcriptions.
+          </p>
         </div>
-        <Link
-          to="/projects/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <PlusIcon className="h-5 w-5" />
-          New Project
-        </Link>
-      </div>
 
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Projects</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalProjects}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FolderIcon className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalJobs}</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DocumentTextIcon className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.completedJobs}</p>
-              </div>
-              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <CheckCircleIcon className="h-6 w-6 text-emerald-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Processing</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.processingJobs}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <ClockIcon className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
+        {/* Quick Action */}
+        <div className="mb-8">
+          <Link
+            to="/upload"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+            New Project
+          </Link>
         </div>
-      )}
 
-      {/* Usage Overview */}
-      {stats && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-            <ChartBarIcon className="h-5 w-5" />
-            Usage This Month
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Audio Files</span>
-                <span className="font-medium">{stats.usageThisMonth.audioFiles} / {stats.limits.audioFiles}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full" 
-                  style={{ width: `${(stats.usageThisMonth.audioFiles / stats.limits.audioFiles) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Storage</span>
-                <span className="font-medium">{stats.usageThisMonth.storageUsed}GB / {stats.limits.storage}GB</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-purple-600 h-2 rounded-full" 
-                  style={{ width: `${(stats.usageThisMonth.storageUsed / stats.limits.storage) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">API Calls</span>
-                <span className="font-medium">{stats.usageThisMonth.apiCalls} / {stats.limits.apiCalls}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
-                  className="bg-green-600 h-2 rounded-full" 
-                  style={{ width: `${(stats.usageThisMonth.apiCalls / stats.limits.apiCalls) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Projects */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Recent Projects</h3>
-              <Link to="/projects" className="text-sm text-blue-600 hover:text-blue-700">
-                View all
-              </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentProjects.map((project) => (
-                <Link
-                  key={project.id}
-                  to={`/projects/${project.id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FolderIcon className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900">{project.name}</h4>
-                        <p className="text-sm text-gray-500">{project.description}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Updated {new Date(project.updatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-medium text-gray-600">
-                      {project.jobCount} jobs
-                    </span>
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <FolderIcon className="h-6 w-6 text-gray-400" />
                   </div>
-                </Link>
-              ))}
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Total Projects
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.totalProjects}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Recent Jobs */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Recent Transcriptions</h3>
-              <Link to="/jobs" className="text-sm text-blue-600 hover:text-blue-700">
-                View all
-              </Link>
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <DocumentTextIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Total Jobs
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.totalJobs}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <CheckCircleIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Completed
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.completedJobs}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <ClockIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Processing
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stats.processingJobs}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentJobs.map((job) => (
-                <Link
-                  key={job.id}
-                  to={`/jobs/${job.id}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                >
+        )}
+
+        {/* Usage This Month */}
+        {stats && (
+          <div className="bg-white shadow rounded-lg mb-8">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Usage This Month
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getJobStatusIcon(job.status)}
-                      <div>
-                        <h4 className="font-medium text-gray-900">{job.fileName}</h4>
-                        <p className="text-sm text-gray-500">{job.projectName}</p>
-                        <p className="text-xs text-gray-400">
-                          {formatDateTime(job.createdAt)}
+                    <span className="text-sm font-medium text-gray-500">Audio Files</span>
+                    <span className="text-sm text-gray-900">
+                      {stats.usageThisMonth.audioFiles} / {stats.limits.audioFiles}
+                    </span>
+                  </div>
+                  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ 
+                        width: `${Math.min((stats.usageThisMonth.audioFiles / stats.limits.audioFiles) * 100, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-500">Storage</span>
+                    <span className="text-sm text-gray-900">
+                      {stats.usageThisMonth.storageUsed} GB / {stats.limits.storage} GB
+                    </span>
+                  </div>
+                  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ 
+                        width: `${Math.min((stats.usageThisMonth.storageUsed / stats.limits.storage) * 100, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-500">API Calls</span>
+                    <span className="text-sm text-gray-900">
+                      {stats.usageThisMonth.apiCalls} / {stats.limits.apiCalls}
+                    </span>
+                  </div>
+                  <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full" 
+                      style={{ 
+                        width: `${Math.min((stats.usageThisMonth.apiCalls / stats.limits.apiCalls) * 100, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Projects */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Recent Projects
+                </h3>
+                <Link
+                  to="/projects"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                >
+                  View all
+                </Link>
+              </div>
+              {recentProjects.length === 0 ? (
+                <div className="text-center py-6">
+                  <FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No projects yet</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by creating your first project.
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      to="/upload"
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <PlusIcon className="-ml-0.5 mr-2 h-4 w-4" />
+                      New Project
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentProjects.map((project) => (
+                    <div key={project.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <FolderIcon className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <Link 
+                            to={`/projects/${project.id}`}
+                            className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                          >
+                            {project.name}
+                          </Link>
+                          <p className="text-xs text-gray-500">{project.description}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-900">{project.jobCount} jobs</p>
+                        <p className="text-xs text-gray-500">Updated {formatDate(project.updatedAt)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Jobs */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Recent Jobs
+                </h3>
+                <Link
+                  to="/jobs"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                >
+                  View all
+                </Link>
+              </div>
+              {recentJobs.length === 0 ? (
+                <div className="text-center py-6">
+                  <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No jobs yet</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Upload audio files to start processing.
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      to="/upload"
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <CloudArrowUpIcon className="-ml-0.5 mr-2 h-4 w-4" />
+                      Upload Audio
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentJobs.map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-1 rounded-full ${getStatusColor(job.status)}`}>
+                          {getStatusIcon(job.status)}
+                        </div>
+                        <div>
+                          <Link 
+                            to={`/jobs/${job.id}`}
+                            className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                          >
+                            {job.fileName}
+                          </Link>
+                          <p className="text-xs text-gray-500">{job.projectName}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-900 capitalize">{job.status}</p>
+                        <p className="text-xs text-gray-500">
+                          {job.duration ? formatDuration(job.duration) : 'N/A'}
                         </p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getJobStatusColor(job.status)}`}>
-                      {job.status}
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

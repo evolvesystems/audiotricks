@@ -46,75 +46,41 @@ export default function JobsPage() {
 
   const fetchJobs = async () => {
     try {
-      // Mock data for now - these endpoints would need to be implemented
-      setJobs([
-        {
-          id: 'j1',
-          fileName: 'episode-24.mp3',
-          originalFileName: 'podcast-episode-24-final.mp3',
-          projectId: '1',
-          projectName: 'Podcast Episodes',
-          status: 'completed',
-          createdAt: '2024-01-20T10:30:00Z',
-          completedAt: '2024-01-20T10:33:00Z',
-          duration: 1800,
-          fileSize: 25600000,
-          transcriptionText: 'Welcome to our podcast...',
-          confidence: 0.95,
-          language: 'en'
-        },
-        {
-          id: 'j2',
-          fileName: 'meeting-jan19.wav',
-          originalFileName: 'weekly-meeting-jan19-2024.wav',
-          projectId: '2',
-          projectName: 'Meeting Notes',
-          status: 'processing',
-          createdAt: '2024-01-20T09:15:00Z',
-          duration: 3600,
-          fileSize: 64000000,
-          language: 'en'
-        },
-        {
-          id: 'j3',
-          fileName: 'interview-customer-5.mp3',
-          originalFileName: 'customer-interview-5.mp3',
-          projectId: '3',
-          projectName: 'Interview Transcripts',
-          status: 'completed',
-          createdAt: '2024-01-19T14:20:00Z',
-          completedAt: '2024-01-19T14:22:00Z',
-          duration: 1200,
-          fileSize: 18000000,
-          transcriptionText: 'Thank you for taking the time...',
-          confidence: 0.92,
-          language: 'en'
-        },
-        {
-          id: 'j4',
-          fileName: 'episode-23.mp3',
-          originalFileName: 'podcast-episode-23.mp3',
-          projectId: '1',
-          projectName: 'Podcast Episodes',
-          status: 'failed',
-          createdAt: '2024-01-19T11:00:00Z',
-          duration: 1900,
-          fileSize: 28000000,
-          language: 'en'
-        },
-        {
-          id: 'j5',
-          fileName: 'board-meeting-q1.wav',
-          originalFileName: 'board-meeting-q1-planning.wav',
-          projectId: '2',
-          projectName: 'Meeting Notes',
-          status: 'pending',
-          createdAt: '2024-01-21T08:00:00Z',
-          duration: 2700,
-          fileSize: 45000000,
-          language: 'en'
-        }
-      ]);
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        console.error('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      };
+
+      const response = await fetch('/api/user/jobs', { headers });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setJobs(data.jobs.map((job: any) => ({
+          id: job.id,
+          fileName: job.fileName,
+          originalFileName: job.fileName, // Use fileName as originalFileName for now
+          projectId: job.projectId,
+          projectName: job.projectName,
+          status: job.status,
+          createdAt: job.createdAt,
+          completedAt: job.completedAt,
+          duration: job.duration || 0,
+          fileSize: job.fileSize || 0,
+          transcriptionText: job.results?.transcription,
+          confidence: job.results?.confidence,
+          language: 'en' // Default to English for now
+        })));
+      } else {
+        console.error('Failed to fetch jobs:', response.status);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching jobs:', error);

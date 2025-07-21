@@ -242,6 +242,123 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // User dashboard stats (also available to admins)
+    if (endpoint === '/dashboard/stats' && method === 'GET') {
+      const userId = decoded.userId;
+      
+      const [
+        userProjects,
+        userJobs,
+        completedJobs,
+        processingJobs,
+        failedJobs
+      ] = await Promise.all([
+        prisma.project.count({ where: { userId } }),
+        prisma.job.count({ where: { userId } }),
+        prisma.job.count({ where: { userId, status: 'completed' } }),
+        prisma.job.count({ where: { userId, status: 'processing' } }),
+        prisma.job.count({ where: { userId, status: 'failed' } })
+      ]);
+
+      // Get usage this month
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const monthlyJobs = await prisma.job.count({
+        where: {
+          userId,
+          createdAt: { gte: startOfMonth }
+        }
+      });
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          stats: {
+            totalProjects: userProjects,
+            totalJobs: userJobs,
+            completedJobs,
+            processingJobs,
+            failedJobs,
+            usageThisMonth: {
+              audioFiles: monthlyJobs,
+              storageUsed: 0, // TODO: Calculate from file sizes
+              apiCalls: monthlyJobs
+            },
+            limits: {
+              audioFiles: 100, // TODO: Get from user plan
+              storage: 5,
+              apiCalls: 1000
+            }
+          }
+        })
+      };
+    }
+
+    // User recent projects
+    if (endpoint === '/dashboard/projects' && method === 'GET') {
+      const userId = decoded.userId;
+      
+      const projects = await prisma.project.findMany({
+        where: { userId },
+        include: {
+          _count: {
+            select: { jobs: true }
+          }
+        },
+        orderBy: { updatedAt: 'desc' },
+        take: 5
+      });
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          projects: projects.map(project => ({
+            id: project.id,
+            name: project.name,
+            description: project.description,
+            createdAt: project.createdAt.toISOString(),
+            updatedAt: project.updatedAt.toISOString(),
+            jobCount: project._count.jobs,
+            status: 'active' // TODO: Add status field to project model
+          }))
+        })
+      };
+    }
+
+    // User recent jobs
+    if (endpoint === '/dashboard/jobs' && method === 'GET') {
+      const userId = decoded.userId;
+      
+      const jobs = await prisma.job.findMany({
+        where: { userId },
+        include: {
+          project: {
+            select: { name: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5
+      });
+
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          jobs: jobs.map(job => ({
+            id: job.id,
+            fileName: job.fileName,
+            projectId: job.projectId,
+            projectName: job.project?.name || 'Unknown Project',
+            status: job.status,
+            createdAt: job.createdAt.toISOString(),
+            completedAt: job.completedAt?.toISOString(),
+            duration: job.duration
+          }))
+        })
+      };
+    }
+
     // Default response
     return {
       statusCode: 404,
