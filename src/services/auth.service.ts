@@ -133,7 +133,7 @@ export class AuthService {
    * Change password (authenticated user)
    */
   static async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    await apiClient.post('/auth/change-password', {
+    await apiClient.put('/auth/change-password', {
       currentPassword,
       newPassword
     });
