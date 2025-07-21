@@ -58,7 +58,7 @@ export class SubscriptionService {
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
-    this.ewayService = new EwayService(prisma);
+    this.ewayService = new EwayService();
   }
 
   /**
@@ -251,12 +251,12 @@ export class SubscriptionService {
         // Create recurring schedule for billing
         if (plan.trialDays === 0) {
           await this.ewayService.createRecurringSchedule({
-            userId: ownerUser.id,
-            subscriptionId: subscription.id,
+            tokenCustomerId: ownerUser.id,
             amount: Number(pricing.price),
-            scheduleType: pricing.billingPeriod === 'yearly' ? 'yearly' : 'monthly',
-            workspaceId,
-            currency
+            currency: currency,
+            frequency: pricing.billingPeriod === 'yearly' ? 'Yearly' : 'Monthly',
+            startDate: new Date(),
+            invoiceDescription: `Subscription for ${plan.name}`
           });
         }
       } else {
@@ -469,7 +469,7 @@ export class SubscriptionService {
         });
 
         if (recurringSchedule) {
-          await this.ewayService.cancelRecurringSchedule(recurringSchedule.id, reason);
+          await this.ewayService.cancelRecurringSchedule(recurringSchedule.id);
         }
 
         // Update subscription status
@@ -566,8 +566,12 @@ export class SubscriptionService {
         return acc;
       }, {} as Record<string, { quantity: number; cost: number }>);
 
-      // Get plan quotas
-      const quotas = subscription.plan.quotas as any;
+      // Get plan limits
+      const planLimits = {
+        maxApiCalls: subscription.plan.maxApiCalls,
+        maxStorageMb: subscription.plan.maxStorageMb,
+        maxProcessingMin: subscription.plan.maxProcessingMin
+      };
 
       return {
         subscriptionId: subscription.id,

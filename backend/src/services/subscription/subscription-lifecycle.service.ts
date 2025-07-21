@@ -345,7 +345,6 @@ export class SubscriptionLifecycleService {
    * Transform subscription data to SubscriptionDetails interface
    */
   private transformSubscriptionData(subscription: any): SubscriptionDetails {
-    const plan = this.planService.getPlanById ? subscription.plan : subscription.plan;
 
     return {
       id: subscription.id,
