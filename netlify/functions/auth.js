@@ -98,6 +98,58 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Me endpoint - verify token and return user info
+    if (endpoint === '/me' && method === 'GET') {
+      const authHeader = event.headers.authorization || event.headers.Authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'No token provided' })
+        };
+      }
+
+      const token = authHeader.replace('Bearer ', '');
+      const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key';
+
+      try {
+        const decoded = jwt.verify(token, jwtSecret);
+        
+        // Get fresh user data from database
+        const user = await prisma.user.findUnique({
+          where: { id: decoded.userId }
+        });
+
+        if (!user || !user.isActive) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'User not found or inactive' })
+          };
+        }
+
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            user: {
+              id: user.id,
+              email: user.email,
+              username: user.username,
+              role: user.role
+            }
+          })
+        };
+      } catch (error) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid token' })
+        };
+      }
+    }
+
     // Logout endpoint
     if (endpoint === '/logout' && method === 'POST') {
       return {

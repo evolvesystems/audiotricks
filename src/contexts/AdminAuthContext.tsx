@@ -67,14 +67,22 @@ export const AdminAuthProvider = ({ children }: AdminAuthProviderProps) => {
         setToken(storedToken);
       } else {
         logger.warn('Auth check failed with status:', response.status);
-        if (response.status === 401) {
+        // Only clear auth on 401/403 (authentication/authorization errors)
+        // Don't clear on 404 (endpoint missing) or 500 (server errors)
+        if (response.status === 401 || response.status === 403) {
           localStorage.removeItem('authToken');
           setUser(null);
           setToken(null);
+        } else {
+          // For other errors (404, 500, etc), keep existing token and retry later
+          logger.warn('Auth refresh failed but keeping existing session for retry');
+          setToken(storedToken);
         }
       }
     } catch (error) {
-      logger.error('Auth check failed:', error);
+      logger.error('Auth check failed with network error:', error);
+      // On network errors, keep the token for retry but don't set user data
+      setToken(storedToken);
     } finally {
       setLoading(false);
     }
