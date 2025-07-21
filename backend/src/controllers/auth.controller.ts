@@ -191,3 +191,55 @@ export async function getCurrentUser(req: AuthRequest, res: Response): Promise<v
     res.status(500).json({ error: 'Failed to get user data' });
   }
 }
+
+/**
+ * Change user password
+ */
+export async function changePassword(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Get current user with password hash
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: {
+        id: true,
+        email: true,
+        passwordHash: true
+      }
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isCurrentPasswordValid) {
+      res.status(400).json({ error: 'Current password is incorrect' });
+      return;
+    }
+
+    // Hash new password
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+
+    // Update password in database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: newPasswordHash }
+    });
+
+    // Invalidate all existing sessions for security
+    await prisma.session.deleteMany({
+      where: { userId: user.id }
+    });
+
+    logger.info(`Password changed for user: ${user.email}`);
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    logger.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+}

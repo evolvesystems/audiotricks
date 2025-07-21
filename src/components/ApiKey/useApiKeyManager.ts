@@ -1,23 +1,9 @@
 import { useState, useEffect } from 'react';
-import ApiKeyService, { ApiKeyUsageStats, ApiKeyInfo } from '../../services/apikey.service';
+import ApiKeyService from '../../services/apikey.service';
+import { ApiError } from '../../services/api';
+import { KeyState, PROVIDERS } from './types';
 
-interface KeyState {
-  [provider: string]: {
-    info: ApiKeyInfo | null;
-    loading: boolean;
-    editing: boolean;
-    testing: boolean;
-    usage: ApiKeyUsageStats | null;
-    showUsage: boolean;
-  };
-}
-
-const PROVIDERS = ['openai', 'elevenlabs'] as const;
-
-/**
- * Custom hook for API key management logic
- */
-export const useApiKeyManager = (onKeysUpdated?: () => void) => {
+export function useApiKeyManager(onKeysUpdated?: () => void) {
   const [keyStates, setKeyStates] = useState<KeyState>({});
   const [newKeys, setNewKeys] = useState<{ [provider: string]: string }>({});
   const [showKeys, setShowKeys] = useState<{ [provider: string]: boolean }>({});
@@ -48,33 +34,31 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
 
   const loadApiKeys = async () => {
     setLoading(true);
-    setError(null);
-
     try {
-      const promises = PROVIDERS.map(async (provider) => {
-        try {
-          const info = await ApiKeyService.getApiKeyInfo(provider);
-          return { provider, info };
-        } catch (err) {
-          console.warn(`Failed to load ${provider} key:`, err);
-          return { provider, info: null };
-        }
-      });
-
-      const results = await Promise.all(promises);
+      const response = await ApiKeyService.listApiKeys();
       
       setKeyStates(prev => {
         const newState = { ...prev };
-        results.forEach(({ provider, info }) => {
+        
+        // Reset all providers
+        PROVIDERS.forEach(provider => {
           if (newState[provider]) {
-            newState[provider].info = info;
-            newState[provider].loading = false;
+            newState[provider].info = null;
           }
         });
+        
+        // Set existing keys
+        response.keys.forEach(key => {
+          if (newState[key.provider]) {
+            newState[key.provider].info = key;
+          }
+        });
+        
         return newState;
       });
-    } catch (err: any) {
-      setError(`Failed to load API keys: ${err.message}`);
+    } catch (error) {
+      console.error('Failed to load API keys:', error);
+      setError('Failed to load API keys');
     } finally {
       setLoading(false);
     }
@@ -87,12 +71,19 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
 
   const handleSaveKey = async (provider: string) => {
     const key = newKeys[provider]?.trim();
-    
     if (!key) {
       setError('Please enter an API key');
       return;
     }
 
+    // Validate format
+    const validation = ApiKeyService.validateApiKeyFormat(provider, key);
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid API key format');
+      return;
+    }
+
+    clearMessages();
     setKeyStates(prev => ({
       ...prev,
       [provider]: { ...prev[provider], loading: true }
@@ -101,40 +92,38 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
     try {
       await ApiKeyService.saveApiKey(provider, key);
       
-      // Reload the key info
-      const info = await ApiKeyService.getApiKeyInfo(provider);
-      
+      setSuccess(`${ApiKeyService.getProviderInfo(provider).name} API key saved successfully`);
+      setNewKeys(prev => ({ ...prev, [provider]: '' }));
       setKeyStates(prev => ({
         ...prev,
-        [provider]: {
-          ...prev[provider],
-          info,
-          loading: false,
-          editing: false
-        }
+        [provider]: { ...prev[provider], loading: false, editing: false }
       }));
       
-      setNewKeys(prev => ({ ...prev, [provider]: '' }));
-      setSuccess(`${provider.toUpperCase()} API key saved successfully`);
+      await loadApiKeys();
       
-      onKeysUpdated?.();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(`Failed to save ${provider} API key: ${err.message}`);
+      if (onKeysUpdated) {
+        onKeysUpdated();
+      }
+    } catch (error) {
       setKeyStates(prev => ({
         ...prev,
         [provider]: { ...prev[provider], loading: false }
       }));
+      
+      if (error instanceof ApiError) {
+        setError(error.message);
+      } else {
+        setError('Failed to save API key');
+      }
     }
   };
 
   const handleDeleteKey = async (provider: string) => {
-    if (!confirm(`Are you sure you want to delete your ${provider.toUpperCase()} API key?`)) {
+    if (!confirm(`Are you sure you want to delete your ${ApiKeyService.getProviderInfo(provider).name} API key?`)) {
       return;
     }
 
+    clearMessages();
     setKeyStates(prev => ({
       ...prev,
       [provider]: { ...prev[provider], loading: true }
@@ -143,56 +132,50 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
     try {
       await ApiKeyService.deleteApiKey(provider);
       
+      setSuccess(`${ApiKeyService.getProviderInfo(provider).name} API key deleted successfully`);
       setKeyStates(prev => ({
         ...prev,
-        [provider]: {
-          ...prev[provider],
-          info: null,
-          loading: false,
-          editing: false,
-          usage: null,
-          showUsage: false
-        }
+        [provider]: { ...prev[provider], loading: false, info: null }
       }));
       
-      setSuccess(`${provider.toUpperCase()} API key deleted successfully`);
-      
-      onKeysUpdated?.();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(`Failed to delete ${provider} API key: ${err.message}`);
+      if (onKeysUpdated) {
+        onKeysUpdated();
+      }
+    } catch (error) {
       setKeyStates(prev => ({
         ...prev,
         [provider]: { ...prev[provider], loading: false }
       }));
+      
+      if (error instanceof ApiError) {
+        setError(error.message);
+      } else {
+        setError('Failed to delete API key');
+      }
     }
   };
 
   const handleTestKey = async (provider: string) => {
+    clearMessages();
     setKeyStates(prev => ({
       ...prev,
       [provider]: { ...prev[provider], testing: true }
     }));
 
     try {
-      const result = await ApiKeyService.testApiKey(provider);
+      const response = await ApiKeyService.testApiKey(provider);
       
-      if (result.valid) {
-        setSuccess(`${provider.toUpperCase()} API key is working correctly`);
+      if (response.valid) {
+        setSuccess(`${ApiKeyService.getProviderInfo(provider).name} API key is valid and working!`);
       } else {
-        setError(`${provider.toUpperCase()} API key test failed: ${result.error}`);
+        setError(response.error || 'API key test failed');
       }
-      
-      // Clear messages after 3 seconds
-      setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 3000);
-    } catch (err: any) {
-      setError(`Failed to test ${provider} API key: ${err.message}`);
-      setTimeout(() => setError(null), 3000);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setError(error.message);
+      } else {
+        setError('Failed to test API key');
+      }
     } finally {
       setKeyStates(prev => ({
         ...prev,
@@ -202,31 +185,64 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
   };
 
   const handleLoadUsage = async (provider: string) => {
+    const currentState = keyStates[provider];
+    
+    if (currentState?.showUsage) {
+      // Hide usage
+      setKeyStates(prev => ({
+        ...prev,
+        [provider]: { ...prev[provider], showUsage: false, usage: null }
+      }));
+      return;
+    }
+
+    setKeyStates(prev => ({
+      ...prev,
+      [provider]: { ...prev[provider], loading: true }
+    }));
+
     try {
-      const usage = await ApiKeyService.getUsageStats(provider);
+      const response = await ApiKeyService.getApiKeyUsage(provider);
       
       setKeyStates(prev => ({
         ...prev,
-        [provider]: { ...prev[provider], usage }
+        [provider]: {
+          ...prev[provider],
+          usage: response.stats,
+          showUsage: true,
+          loading: false
+        }
       }));
-    } catch (err: any) {
-      setError(`Failed to load usage stats for ${provider}: ${err.message}`);
-      setTimeout(() => setError(null), 3000);
+    } catch (error) {
+      setKeyStates(prev => ({
+        ...prev,
+        [provider]: { ...prev[provider], loading: false }
+      }));
+      
+      setError('Failed to load usage statistics');
     }
   };
 
-  const updateKeyState = (provider: string, updates: Partial<KeyState[string]>) => {
+  const handleEditToggle = (provider: string) => {
     setKeyStates(prev => ({
       ...prev,
-      [provider]: { ...prev[provider], ...updates }
+      [provider]: { ...prev[provider], editing: true }
     }));
   };
 
-  const updateNewKey = (provider: string, key: string) => {
-    setNewKeys(prev => ({ ...prev, [provider]: key }));
+  const handleCancelEdit = (provider: string) => {
+    setKeyStates(prev => ({
+      ...prev,
+      [provider]: { ...prev[provider], editing: false }
+    }));
+    setNewKeys(prev => ({ ...prev, [provider]: '' }));
   };
 
-  const toggleShowKey = (provider: string) => {
+  const handleKeyChange = (provider: string, value: string) => {
+    setNewKeys(prev => ({ ...prev, [provider]: value }));
+  };
+
+  const handleShowKeyToggle = (provider: string) => {
     setShowKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
   };
 
@@ -237,15 +253,14 @@ export const useApiKeyManager = (onKeysUpdated?: () => void) => {
     error,
     success,
     loading,
-    PROVIDERS,
-    loadApiKeys,
     clearMessages,
     handleSaveKey,
     handleDeleteKey,
     handleTestKey,
     handleLoadUsage,
-    updateKeyState,
-    updateNewKey,
-    toggleShowKey
+    handleEditToggle,
+    handleCancelEdit,
+    handleKeyChange,
+    handleShowKeyToggle
   };
-};
+}

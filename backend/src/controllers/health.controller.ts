@@ -8,9 +8,9 @@ import { getErrorMessage } from '../utils/error-handler';
  */
 export class HealthController {
   private prisma: PrismaClient;
-  private redis: Redis;
+  private redis: Redis | null;
 
-  constructor(prisma: PrismaClient, redis: Redis) {
+  constructor(prisma: PrismaClient, redis: Redis | null) {
     this.prisma = prisma;
     this.redis = redis;
   }
@@ -61,20 +61,27 @@ export class HealthController {
       };
     }
 
-    // Redis health check
-    const redisStartTime = Date.now();
-    try {
-      await this.redis.ping();
+    // Redis health check (optional)
+    if (this.redis) {
+      const redisStartTime = Date.now();
+      try {
+        await this.redis.ping();
+        healthStatus.checks.redis = {
+          status: 'healthy',
+          responseTime: Date.now() - redisStartTime
+        };
+      } catch (error) {
+        healthStatus.status = 'degraded';
+        healthStatus.checks.redis = {
+          status: 'unhealthy',
+          error: getErrorMessage(error),
+          responseTime: Date.now() - redisStartTime
+        };
+      }
+    } else {
       healthStatus.checks.redis = {
-        status: 'healthy',
-        responseTime: Date.now() - redisStartTime
-      };
-    } catch (error) {
-      healthStatus.status = 'unhealthy';
-      healthStatus.checks.redis = {
-        status: 'unhealthy',
-        error: getErrorMessage(error),
-        responseTime: Date.now() - redisStartTime
+        status: 'disabled',
+        message: 'Redis is not configured'
       };
     }
 
@@ -130,8 +137,10 @@ export class HealthController {
       // Check database connection
       await this.prisma.$queryRaw`SELECT 1`;
       
-      // Check Redis connection
-      await this.redis.ping();
+      // Check Redis connection (if available)
+      if (this.redis) {
+        await this.redis.ping();
+      }
 
       res.status(200).json({
         status: 'ready',

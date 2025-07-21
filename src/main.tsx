@@ -18,14 +18,16 @@ import AdminTest from './components/Admin/AdminTest.tsx'
 import DashboardTest from './components/Admin/DashboardTest.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { AdminAuthProvider } from './contexts/AdminAuthContext.tsx'
+import { AuthProvider } from './contexts/AuthContext.tsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
       <BrowserRouter>
-        <AdminAuthProvider>
-          <Routes>
+        <AuthProvider>
+          <AdminAuthProvider>
+            <Routes>
           {/* Main App */}
           <Route path="/" element={<App />} />
           
@@ -57,7 +59,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        </AdminAuthProvider>
+          </AdminAuthProvider>
+        </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>,
