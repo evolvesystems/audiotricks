@@ -199,17 +199,30 @@ class AudioTricksTestSuite {
       // Test AudioTricks header buttons and navigation elements
       const navigationElements = [];
       
-      // Check for header buttons (Help, Settings, History, New Upload)
+      // Check for header buttons (Help, Settings, History)
       const headerButtons = await this.page.$$('button[title="History"], button[title="Help"], button[title="Settings"]');
-      const newUploadButton = await this.page.$('button:has-text("New Upload")');
       
-      if (newUploadButton) headerButtons.push(newUploadButton);
+      // Look for "New Upload" button by iterating through all buttons
+      const allButtons = await this.page.$$('button');
+      for (const button of allButtons) {
+        const buttonText = await button.evaluate(el => el.textContent?.trim() || '');
+        if (buttonText.includes('New Upload')) {
+          headerButtons.push(button);
+          break;
+        }
+      }
       
       // Check for any anchor links
       const links = await this.page.$$('a[href]');
       
-      // Check for user auth elements
-      const authElements = await this.page.$$('button:has-text("Login"), button:has-text("Register"), button:has-text("Logout")');
+      // Check for user auth elements by iterating through buttons
+      const authElements = [];
+      for (const button of allButtons) {
+        const buttonText = await button.evaluate(el => el.textContent?.trim() || '');
+        if (buttonText.includes('Login') || buttonText.includes('Register') || buttonText.includes('Logout')) {
+          authElements.push(button);
+        }
+      }
       
       const totalElements = headerButtons.length + links.length + authElements.length;
       

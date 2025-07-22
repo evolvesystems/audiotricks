@@ -1,102 +1,102 @@
 {
   "title": "AudioTricks Comprehensive Browser Test Report",
-  "timestamp": "2025-07-22T08:13:40.688Z",
+  "timestamp": "2025-07-22T08:33:53.375Z",
   "baseUrl": "https://audiotricks.evolvepreneuriq.com",
   "totalTests": 9,
-  "passed": 6,
-  "failed": 3,
+  "passed": 8,
+  "failed": 1,
   "results": [
     {
       "test": "Home Page Loads",
       "category": "Navigation",
       "status": "PASS",
       "message": "",
-      "duration": 3518,
+      "duration": 3269,
       "screenshot": "000-home-page-loads.png",
-      "timestamp": "2025-07-22T08:12:52.595Z"
+      "timestamp": "2025-07-22T08:32:49.414Z"
     },
     {
       "test": "API Health Endpoints",
       "category": "API",
       "status": "PASS",
       "message": "",
-      "duration": 4815,
+      "duration": 4646,
       "screenshot": "001-api-health-endpoints.png",
-      "timestamp": "2025-07-22T08:12:57.412Z"
+      "timestamp": "2025-07-22T08:32:54.061Z"
     },
     {
       "test": "Admin Login Process",
       "category": "Authentication",
       "status": "PASS",
       "message": "",
-      "duration": 12175,
+      "duration": 12037,
       "screenshot": "002-admin-login-process.png",
-      "timestamp": "2025-07-22T08:13:09.588Z"
+      "timestamp": "2025-07-22T08:33:06.098Z"
     },
     {
       "test": "Navigation Menu Functionality",
       "category": "Navigation",
-      "status": "FAIL",
-      "message": "No navigation menu items found",
-      "duration": 3543,
-      "screenshot": "003-failed-navigation-menu-functionality.png",
-      "timestamp": "2025-07-22T08:13:13.131Z"
+      "status": "PASS",
+      "message": "",
+      "duration": 16476,
+      "screenshot": "003-navigation-menu-functionality.png",
+      "timestamp": "2025-07-22T08:33:22.574Z"
     },
     {
       "test": "Button Interactions",
       "category": "Interactions",
       "status": "PASS",
       "message": "",
-      "duration": 11286,
+      "duration": 9748,
       "screenshot": "004-button-interactions.png",
-      "timestamp": "2025-07-22T08:13:24.417Z"
+      "timestamp": "2025-07-22T08:33:32.322Z"
     },
     {
       "test": "Form Element Testing",
       "category": "Forms",
       "status": "PASS",
       "message": "",
-      "duration": 10667,
+      "duration": 10389,
       "screenshot": "005-form-element-testing.png",
-      "timestamp": "2025-07-22T08:13:35.084Z"
+      "timestamp": "2025-07-22T08:33:42.711Z"
     },
     {
       "test": "Mobile Responsiveness",
       "category": "Responsive Design",
       "status": "FAIL",
-      "message": "Page not responsive: body width 1198px on mobile",
-      "duration": 2175,
+      "message": "Page has horizontal scroll on mobile: body width 1058px exceeds viewport 375px",
+      "duration": 4802,
       "screenshot": "006-failed-mobile-responsiveness.png",
-      "timestamp": "2025-07-22T08:13:37.260Z"
+      "timestamp": "2025-07-22T08:33:47.513Z"
     },
     {
       "test": "Page Load Performance",
       "category": "Performance",
       "status": "PASS",
       "message": "",
-      "duration": 1696,
+      "duration": 1325,
       "screenshot": "007-page-load-performance.png",
-      "timestamp": "2025-07-22T08:13:38.956Z"
+      "timestamp": "2025-07-22T08:33:48.838Z"
     },
     {
       "test": "Error Page Handling",
       "category": "Error Handling",
-      "status": "FAIL",
-      "message": "Error page testing failed: Unexpected 404 handling: 200 - https://audiotricks.evolvepreneuriq.com/",
-      "duration": 1731,
-      "screenshot": "008-failed-error-page-handling.png",
-      "timestamp": "2025-07-22T08:13:40.687Z"
+      "status": "PASS",
+      "message": "",
+      "duration": 4537,
+      "screenshot": "008-error-page-handling.png",
+      "timestamp": "2025-07-22T08:33:53.375Z"
     }
   ],
   "screenshots": [
     "000-home-page-loads.png",
     "001-api-health-endpoints.png",
     "002-admin-login-process.png",
-    "003-failed-navigation-menu-functionality.png",
+    "003-navigation-menu-functionality.png",
     "004-button-interactions.png",
     "005-form-element-testing.png",
     "006-failed-mobile-responsiveness.png",
     "007-page-load-performance.png",
-    "008-failed-error-page-handling.png"
+    "008-error-page-handling.png"
   ]
 }
