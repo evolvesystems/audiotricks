@@ -20,8 +20,10 @@ export class AdminRolesController {
               permission: true
             }
           },
-          _count: {
-            select: { users: true }
+          permissions: {
+            include: {
+              permission: true
+            }
           }
         },
         orderBy: { name: 'asc' }
@@ -31,10 +33,9 @@ export class AdminRolesController {
       const transformedRoles = roles.map(role => ({
         id: role.id,
         name: role.name,
-        displayName: role.displayName,
         description: role.description,
-        isSystemRole: role.isSystemRole,
-        userCount: role._count.users,
+        isSystem: role.isSystem,
+        userCount: 0, // TODO: Add user count relation
         permissions: role.permissions.map(rp => rp.permission)
       }));
 
@@ -56,7 +57,6 @@ export class AdminRolesController {
       const role = await prisma.role.create({
         data: {
           name,
-          displayName,
           description
         }
       });
@@ -76,7 +76,7 @@ export class AdminRolesController {
             permission = await prisma.permission.create({
               data: {
                 name: `${permissionResource}_read`,
-                displayName: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                description: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 resource: permissionResource,
                 action: 'read'
               }
@@ -138,7 +138,7 @@ export class AdminRolesController {
             permission = await prisma.permission.create({
               data: {
                 name: `${permissionResource}_read`,
-                displayName: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+                description: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 resource: permissionResource,
                 action: 'read'
               }
@@ -179,7 +179,7 @@ export class AdminRolesController {
         return;
       }
 
-      if (role.isSystemRole) {
+      if (role.isSystem) {
         res.status(400).json({ error: 'Cannot delete system roles' });
         return;
       }
