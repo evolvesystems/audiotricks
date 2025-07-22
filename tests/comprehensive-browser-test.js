@@ -196,51 +196,72 @@ class AudioTricksTestSuite {
 
   async testNavigationMenus() {
     await this.runTest('Navigation Menu Functionality', async () => {
-      // Test main navigation elements
-      const navSelectors = [
-        'nav a',
-        '.nav-link',
-        '.menu-item',
-        'header a',
-        '.navbar a',
-        '[role="navigation"] a'
-      ];
-
-      let navItems = [];
-      for (const selector of navSelectors) {
-        try {
-          const items = await this.page.$$(selector);
-          if (items.length > 0) {
-            navItems = items;
-            break;
-          }
-        } catch (e) {
-          // Try next selector
-        }
+      // Test AudioTricks header buttons and navigation elements
+      const navigationElements = [];
+      
+      // Check for header buttons (Help, Settings, History, New Upload)
+      const headerButtons = await this.page.$$('button[title="History"], button[title="Help"], button[title="Settings"]');
+      const newUploadButton = await this.page.$('button:has-text("New Upload")');
+      
+      if (newUploadButton) headerButtons.push(newUploadButton);
+      
+      // Check for any anchor links
+      const links = await this.page.$$('a[href]');
+      
+      // Check for user auth elements
+      const authElements = await this.page.$$('button:has-text("Login"), button:has-text("Register"), button:has-text("Logout")');
+      
+      const totalElements = headerButtons.length + links.length + authElements.length;
+      
+      if (totalElements === 0) {
+        throw new Error('No navigation elements found');
       }
+      
+      console.log(`  ✓ Found ${totalElements} navigation elements (${headerButtons.length} buttons, ${links.length} links, ${authElements.length} auth elements)`);
 
-      if (navItems.length === 0) {
-        throw new Error('No navigation menu items found');
-      }
-
-      // Test first few navigation items
-      for (let i = 0; i < Math.min(3, navItems.length); i++) {
+      // Test clicking on header buttons
+      for (let i = 0; i < Math.min(2, headerButtons.length); i++) {
         try {
-          const linkText = await navItems[i].evaluate(el => el.textContent);
-          const href = await navItems[i].evaluate(el => el.href);
-          
-          if (href && !href.includes('javascript:') && !href.includes('#')) {
-            await navItems[i].click();
-            await new Promise(resolve => setTimeout(resolve, 2000));
+          const button = headerButtons[i];
+          const isVisible = await button.isIntersectingViewport();
+          if (isVisible) {
+            const title = await button.evaluate(el => el.getAttribute('title') || el.textContent);
+            console.log(`  ➜ Testing navigation button: ${title}`);
+            await button.click();
+            await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Check if navigation worked
-            const newUrl = this.page.url();
-            console.log(`  ➜ Navigated to: ${linkText} (${newUrl})`);
+            // Close any opened modals/dropdowns by pressing Escape
+            await this.page.keyboard.press('Escape');
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
         } catch (e) {
-          console.log(`  ⚠️ Navigation item ${i} failed: ${e.message}`);
+          console.log(`  ⚠️ Button test ${i} failed: ${e.message}`);
         }
       }
+      
+      // Test a few links if available (but skip external ones)
+      for (let i = 0; i < Math.min(2, links.length); i++) {
+        try {
+          const link = links[i];
+          const href = await link.evaluate(el => el.getAttribute('href'));
+          const linkText = await link.evaluate(el => el.textContent?.trim() || el.getAttribute('title') || 'Link');
+          
+          // Skip external links, javascript links, and fragments
+          if (href && !href.startsWith('javascript:') && !href.startsWith('mailto:') && !href.includes('://')) {
+            console.log(`  ➜ Testing link: ${linkText} (${href})`);
+            await link.click();
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Go back to main page if we navigated away
+            if (this.page.url() !== this.baseUrl) {
+              await this.page.goto(this.baseUrl, { waitUntil: 'networkidle0' });
+            }
+          }
+        } catch (e) {
+          console.log(`  ⚠️ Link test ${i} failed: ${e.message}`);
+        }
+      }
+      
     }, 'Navigation');
   }
 
