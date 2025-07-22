@@ -47,7 +47,6 @@ export const createWorkspace = async (req: Request, res: Response) => {
         name,
         description,
         slug,
-        createdBy: userId,
         users: {
           create: {
             userId: userId,
@@ -63,7 +62,8 @@ export const createWorkspace = async (req: Request, res: Response) => {
               select: {
                 id: true,
                 email: true,
-                name: true
+                firstName: true,
+                lastName: true
               }
             }
           }
@@ -103,7 +103,8 @@ export const getWorkspaces = async (req: Request, res: Response) => {
               select: {
                 id: true,
                 email: true,
-                name: true
+                firstName: true,
+                lastName: true
               }
             }
           }
@@ -152,7 +153,8 @@ export const getWorkspace = async (req: Request, res: Response) => {
               select: {
                 id: true,
                 email: true,
-                name: true
+                firstName: true,
+                lastName: true
               }
             }
           }
@@ -217,7 +219,8 @@ export const updateWorkspace = async (req: Request, res: Response) => {
               select: {
                 id: true,
                 email: true,
-                name: true
+                firstName: true,
+                lastName: true
               }
             }
           }
@@ -260,8 +263,7 @@ export const deleteWorkspace = async (req: Request, res: Response) => {
     await prisma.workspace.update({
       where: { id },
       data: {
-        isActive: false,
-        deletedAt: new Date()
+        isActive: false
       }
     });
 

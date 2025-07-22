@@ -10,7 +10,7 @@ import { logger } from '../utils/logger';
 export class SubscriptionController {
   private subscriptionService: SubscriptionService;
 
-  constructor(prisma: PrismaClient) {
+  constructor(_prisma: PrismaClient) {
     this.subscriptionService = new SubscriptionService();
   }
 
@@ -19,7 +19,7 @@ export class SubscriptionController {
    */
   async getPlans(req: Request, res: Response): Promise<void> {
     try {
-      const { currency = 'AUD', region } = req.query;
+      const { currency = 'AUD', region: _region } = req.query;
       
       const plans = await this.subscriptionService.getAvailablePlans(
         currency as string
@@ -43,7 +43,7 @@ export class SubscriptionController {
   /**
    * Get supported currencies
    */
-  async getCurrencies(req: Request, res: Response): Promise<void> {
+  async getCurrencies(_req: Request, res: Response): Promise<void> {
     try {
       const currencies = await this.subscriptionService.getCurrencies();
 

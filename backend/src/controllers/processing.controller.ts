@@ -79,7 +79,13 @@ export const startProcessing = async (req: Request, res: Response) => {
       }
     }
 
-    const result = await audioProcessor.processAudio(uploadId, jobType, options);
+    const result = await audioProcessor.processAudio({
+      userId: upload.userId,
+      workspaceId: upload.workspaceId,
+      audioUploadId: uploadId,
+      operations: [jobType],
+      config: options
+    });
 
     res.json({
       success: true,
@@ -138,23 +144,22 @@ export const listJobs = async (req: Request, res: Response) => {
       offset = '0'
     } = req.query;
 
-    const options = {
-      workspaceId: workspaceId as string,
+    const jobOptions = {
       status: status as string,
       jobType: jobType as string,
       limit: parseInt(limit as string),
       offset: parseInt(offset as string)
     };
 
-    const result = await audioProcessor.listJobs(userId, options);
+    const result = await audioProcessor.listJobs(userId, workspaceId as string, jobOptions);
 
     res.json({
       jobs: result.jobs,
       pagination: {
         total: result.total,
-        limit: options.limit,
-        offset: options.offset,
-        hasMore: options.offset + options.limit < result.total
+        limit: jobOptions.limit,
+        offset: jobOptions.offset,
+        hasMore: jobOptions.offset + jobOptions.limit < result.total
       }
     });
     return;

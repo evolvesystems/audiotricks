@@ -33,7 +33,7 @@ export class HealthController {
    * Detailed health check with database and Redis connectivity
    * Returns comprehensive health status
    */
-  async detailedHealth(req: Request, res: Response): Promise<void> {
+  async detailedHealth(_req: Request, res: Response): Promise<void> {
     const startTime = Date.now();
     const healthStatus: any = {
       status: 'healthy',
@@ -132,7 +132,7 @@ export class HealthController {
    * Readiness probe for Kubernetes/Docker
    * Checks if service is ready to accept traffic
    */
-  async readiness(req: Request, res: Response): Promise<void> {
+  async readiness(_req: Request, res: Response): Promise<void> {
     try {
       // Check database connection
       await this.prisma.$queryRaw`SELECT 1`;
@@ -161,7 +161,7 @@ export class HealthController {
    * Liveness probe for Kubernetes/Docker
    * Simple check to verify service is alive
    */
-  async liveness(req: Request, res: Response): Promise<void> {
+  async liveness(_req: Request, res: Response): Promise<void> {
     res.status(200).json({
       status: 'alive',
       timestamp: new Date().toISOString(),
@@ -174,7 +174,7 @@ export class HealthController {
    * Metrics endpoint for monitoring systems
    * Returns basic metrics in a format suitable for Prometheus
    */
-  async metrics(req: Request, res: Response): Promise<void> {
+  async metrics(_req: Request, res: Response): Promise<void> {
     const memUsage = process.memoryUsage();
     const metrics = [
       `# HELP nodejs_memory_rss_bytes Resident Set Size in bytes`,

@@ -7,7 +7,7 @@ import { HealthController } from '../controllers/health.controller';
  * Health check routes
  * Provides various health check endpoints for monitoring and orchestration
  */
-export function createHealthRoutes(prisma: PrismaClient, redis: Redis): Router {
+export function createHealthRoutes(prisma: PrismaClient, redis: Redis | null): Router {
   const router = Router();
   const healthController = new HealthController(prisma, redis);
 

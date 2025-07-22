@@ -19,7 +19,7 @@ export class PaymentMethodController {
     this.prisma = prisma;
     this.stripeService = new StripeService();
     this.ewayService = new EwayService();
-    this.currencyService = new CurrencyService();
+    this.currencyService = new CurrencyService(prisma);
   }
 
   /**
@@ -149,10 +149,9 @@ export class PaymentMethodController {
         toCurrency
       );
 
-      const exchangeRate = await this.currencyService.getExchangeRate(
-        fromCurrency,
-        toCurrency
-      );
+      const fromRate = await this.currencyService.getExchangeRate(fromCurrency);
+      const toRate = await this.currencyService.getExchangeRate(toCurrency);
+      const exchangeRate = toRate / fromRate;
 
       res.status(200).json({
         success: true,

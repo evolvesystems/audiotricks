@@ -8,7 +8,7 @@ import { env } from './config/environment.js';
 import { testDatabaseConnection, closeDatabaseConnection, prisma } from './config/database.js';
 import { redis, testRedisConnection, closeRedisConnection } from './config/redis';
 import { logger } from './utils/logger.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { errorHandler, notFoundHandler as _notFoundHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import workspaceRoutes from './routes/workspace.routes.js';
@@ -63,12 +63,12 @@ const frontendPath = path.join(__dirname, '../../dist');
 app.use(express.static(frontendPath));
 
 // API 404 handler (before catch-all)
-app.use('/api/*', (req, res) => {
+app.use('/api/*', (_req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
 // Serve frontend for all non-API routes (SPA routing)
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 

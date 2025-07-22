@@ -9,12 +9,11 @@ import { logger } from '../utils/logger';
  * Controller for handling payment gateway webhooks
  */
 export class WebhookController {
-  private prisma: PrismaClient;
   private stripeService: StripeService;
   private ewayService: EwayService;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(_prisma: PrismaClient) {
+    // prisma is accepted for interface consistency but not used
     this.stripeService = new StripeService();
     this.ewayService = new EwayService();
   }

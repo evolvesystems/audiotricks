@@ -44,7 +44,8 @@ export const getWorkspaceUsers = async (req: Request, res: Response) => {
           select: {
             id: true,
             email: true,
-            name: true,
+            firstName: true,
+                lastName: true,
             createdAt: true
           }
         }
@@ -130,7 +131,8 @@ export const addUserToWorkspace = async (req: Request, res: Response) => {
           select: {
             id: true,
             email: true,
-            name: true
+            firstName: true,
+                lastName: true
           }
         }
       }
@@ -207,7 +209,8 @@ export const updateWorkspaceUser = async (req: Request, res: Response) => {
           select: {
             id: true,
             email: true,
-            name: true
+            firstName: true,
+                lastName: true
           }
         }
       }
@@ -311,7 +314,7 @@ export const getAvailableUsers = async (req: Request, res: Response) => {
         AND: [
           {
             NOT: {
-              workspaceUsers: {
+              workspaces: {
                 some: {
                   workspaceId: workspaceId
                 }
@@ -321,7 +324,8 @@ export const getAvailableUsers = async (req: Request, res: Response) => {
           search ? {
             OR: [
               { email: { contains: search as string, mode: 'insensitive' } },
-              { name: { contains: search as string, mode: 'insensitive' } }
+              { firstName: { contains: search as string, mode: 'insensitive' } },
+              { lastName: { contains: search as string, mode: 'insensitive' } }
             ]
           } : {}
         ]
@@ -329,7 +333,8 @@ export const getAvailableUsers = async (req: Request, res: Response) => {
       select: {
         id: true,
         email: true,
-        name: true,
+        firstName: true,
+                lastName: true,
         createdAt: true
       },
       take: 50 // Limit results

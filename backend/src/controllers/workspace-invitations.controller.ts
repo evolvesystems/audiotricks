@@ -45,13 +45,13 @@ export const inviteToWorkspace = async (req: Request, res: Response) => {
     const existingUser = await prisma.user.findUnique({
       where: { email },
       include: {
-        workspaceUsers: {
+        workspaces: {
           where: { workspaceId }
         }
       }
     });
 
-    if (existingUser && existingUser.workspaceUsers.length > 0) {
+    if (existingUser && existingUser.workspaces.length > 0) {
       res.status(400).json({ error: 'User is already in this workspace' });
       return;
     }
@@ -61,7 +61,7 @@ export const inviteToWorkspace = async (req: Request, res: Response) => {
       where: {
         workspaceId: workspaceId,
         email: email,
-        status: 'pending'
+        acceptedAt: null
       }
     });
 
@@ -80,21 +80,13 @@ export const inviteToWorkspace = async (req: Request, res: Response) => {
         email: email,
         role: role,
         token: token,
-        invitedBy: userId,
-        expiresAt: expiresAt,
-        status: 'pending'
+        expiresAt: expiresAt
       },
       include: {
         workspace: {
           select: {
             name: true,
             slug: true
-          }
-        },
-        inviter: {
-          select: {
-            name: true,
-            email: true
           }
         }
       }
@@ -140,10 +132,10 @@ export const getWorkspaceInvitations = async (req: Request, res: Response) => {
         workspaceId: workspaceId
       },
       include: {
-        inviter: {
+        workspace: {
           select: {
             name: true,
-            email: true
+            slug: true
           }
         }
       },
@@ -173,7 +165,7 @@ export const acceptInvitation = async (req: Request, res: Response) => {
     const invitation = await prisma.workspaceInvitation.findFirst({
       where: {
         token: token,
-        status: 'pending',
+        acceptedAt: null,
         expiresAt: {
           gt: new Date()
         }
@@ -225,7 +217,6 @@ export const acceptInvitation = async (req: Request, res: Response) => {
     await prisma.workspaceInvitation.update({
       where: { id: invitation.id },
       data: {
-        status: 'accepted',
         acceptedAt: new Date()
       }
     });
@@ -270,7 +261,7 @@ export const revokeInvitation = async (req: Request, res: Response) => {
       where: {
         id: invitationId,
         workspaceId: workspaceId,
-        status: 'pending'
+        acceptedAt: null
       }
     });
 
@@ -279,14 +270,9 @@ export const revokeInvitation = async (req: Request, res: Response) => {
       return;
     }
 
-    // Revoke invitation
-    await prisma.workspaceInvitation.update({
-      where: { id: invitationId },
-      data: {
-        status: 'revoked',
-        revokedAt: new Date(),
-        revokedBy: userId
-      }
+    // Delete invitation (since model doesn't support revocation tracking)
+    await prisma.workspaceInvitation.delete({
+      where: { id: invitationId }
     });
 
     res.json({

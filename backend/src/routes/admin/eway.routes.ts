@@ -4,15 +4,15 @@
 
 import { Router } from 'express';
 import { AdminEwayController } from '../../controllers/admin/admin-eway.controller';
-import { authMiddleware } from '../../middleware/auth';
-import { adminMiddleware } from '../../middleware/admin';
+import { authenticate } from '../../middleware/auth';
+import { requireAdmin } from '../../middleware/admin';
 
 const router = Router();
 const adminEwayController = new AdminEwayController();
 
 // Apply auth and admin middleware to all routes
-router.use(authMiddleware);
-router.use(adminMiddleware);
+router.use(authenticate);
+router.use(requireAdmin);
 
 // Transaction management
 router.get('/overview', adminEwayController.getTransactionOverview.bind(adminEwayController));

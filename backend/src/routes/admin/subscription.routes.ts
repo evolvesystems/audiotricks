@@ -4,15 +4,15 @@
 
 import { Router } from 'express';
 import { AdminSubscriptionController } from '../../controllers/admin/admin-subscription.controller';
-import { authMiddleware } from '../../middleware/auth';
-import { adminMiddleware } from '../../middleware/admin';
+import { authenticate } from '../../middleware/auth';
+import { requireAdmin } from '../../middleware/admin';
 
 const router = Router();
 const adminSubscriptionController = new AdminSubscriptionController();
 
 // Apply auth and admin middleware to all routes
-router.use(authMiddleware);
-router.use(adminMiddleware);
+router.use(authenticate);
+router.use(requireAdmin);
 
 // Subscription plan management
 router.get('/plans', adminSubscriptionController.getSubscriptionPlans.bind(adminSubscriptionController));
