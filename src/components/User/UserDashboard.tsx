@@ -73,7 +73,22 @@ export const UserDashboard: React.FC = () => {
       const statsResponse = await fetch('/api/dashboard/stats', { headers });
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
-        setStats(statsData);
+        // Ensure data structure is complete
+        const safeStatsData = {
+          totalProjects: statsData.totalProjects || 0,
+          totalJobs: statsData.totalJobs || 0,
+          completedJobs: statsData.completedJobs || 0,
+          processingJobs: statsData.processingJobs || 0,
+          failedJobs: statsData.failedJobs || 0,
+          usageThisMonth: {
+            audioFiles: statsData.usageThisMonth?.audioFiles || 0,
+            storageUsed: statsData.usageThisMonth?.storageUsed || 0,
+            apiCalls: statsData.usageThisMonth?.apiCalls || 0
+          }
+        };
+        setStats(safeStatsData);
+      } else {
+        logger.error('Dashboard stats API returned error:', statsResponse.status);
       }
 
       // Load recent activity (projects and jobs)
@@ -198,17 +213,17 @@ export const UserDashboard: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900 mb-4">This Month's Usage</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.usageThisMonth.audioFiles}</div>
+            <div className="text-2xl font-bold text-blue-600">{stats?.usageThisMonth?.audioFiles || 0}</div>
             <div className="text-sm text-gray-500">Audio Files</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
-              {(stats.usageThisMonth.storageUsed / 1024).toFixed(1)} GB
+              {stats?.usageThisMonth?.storageUsed ? (stats.usageThisMonth.storageUsed / 1024).toFixed(1) : '0.0'} GB
             </div>
             <div className="text-sm text-gray-500">Storage Used</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.usageThisMonth.apiCalls}</div>
+            <div className="text-2xl font-bold text-purple-600">{stats?.usageThisMonth?.apiCalls || 0}</div>
             <div className="text-sm text-gray-500">API Calls</div>
           </div>
         </div>
