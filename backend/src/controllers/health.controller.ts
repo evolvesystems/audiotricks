@@ -19,7 +19,7 @@ export class HealthController {
    * Basic health check endpoint
    * Returns 200 OK if service is running
    */
-  async basicHealth(req: Request, res: Response): Promise<void> {
+  async basicHealth(_req: Request, res: Response): Promise<void> {
     res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),

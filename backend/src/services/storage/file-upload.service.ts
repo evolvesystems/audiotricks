@@ -1,35 +1,27 @@
-import { CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+/**
+ * File Upload Service
+ * Handles file uploads with validation and multipart support
+ */
+
 import { PrismaClient } from '@prisma/client';
 import { StorageService } from './storage.service';
+import { MultipartUploadManager } from './upload/MultipartUploadManager';
+import { UploadValidator } from './upload/UploadValidator';
 import { logger } from '../../utils/logger';
-import { config } from '../../config';
 import { getErrorMessage } from '../../utils/error-handler';
 import crypto from 'crypto';
-
-interface MultipartUpload {
-  uploadId: string;
-  key: string;
-  parts: Array<{
-    partNumber: number;
-    etag: string;
-  }>;
-}
-
-interface ChunkUploadResult {
-  partNumber: number;
-  etag: string;
-  size: number;
-}
 
 export class FileUploadService {
   private prisma: PrismaClient;
   private storageService: StorageService;
-  private activeUploads: Map<string, MultipartUpload> = new Map();
+  private uploadManager: MultipartUploadManager;
+  private validator: UploadValidator;
 
   constructor(storageService: StorageService) {
     this.prisma = new PrismaClient();
     this.storageService = storageService;
+    this.uploadManager = new MultipartUploadManager(storageService);
+    this.validator = new UploadValidator();
   }
 
   /**
@@ -43,6 +35,19 @@ export class FileUploadService {
     mimeType: string
   ): Promise<string> {
     try {
+      // Validate upload
+      const validation = await this.validator.validateUpload(
+        userId,
+        workspaceId,
+        filename,
+        fileSize,
+        mimeType
+      );
+
+      if (!validation.valid) {
+        throw new Error(validation.error);
+      }
+
       // Create upload record in database
       const upload = await this.prisma.audioUpload.create({
         data: {
@@ -65,19 +70,8 @@ export class FileUploadService {
 
       // For large files, initialize multipart upload
       if (fileSize > 100 * 1024 * 1024) { // 100MB
-        const uploadId = await this.initializeMultipartUpload(storageKey, mimeType);
-        
-        this.activeUploads.set(upload.id, {
-          uploadId,
-          key: storageKey,
-          parts: []
-        });
-
-        logger.info('Initialized multipart upload', {
-          uploadId: upload.id,
-          fileSize,
-          storageKey
-        });
+        await this.uploadManager.initializeMultipartUpload(upload.id, storageKey);
+        logger.info('Initialized multipart upload', { uploadId: upload.id, fileSize });
       }
 
       // Update upload record with storage path
@@ -99,10 +93,7 @@ export class FileUploadService {
   /**
    * Upload a single file (for small files)
    */
-  async uploadSingleFile(
-    uploadId: string,
-    fileBuffer: Buffer
-  ): Promise<void> {
+  async uploadSingleFile(uploadId: string, fileBuffer: Buffer): Promise<void> {
     try {
       const upload = await this.prisma.audioUpload.findUnique({
         where: { id: uploadId }
@@ -137,22 +128,7 @@ export class FileUploadService {
       });
 
       // Create file storage record
-      await this.prisma.fileStorage.create({
-        data: {
-          uploadId,
-          providerId: await this.getStorageProviderId(),
-          storageKey: upload.storagePath,
-          fileName: upload.originalFileName,
-          fileSize: upload.fileSize,
-          mimeType: upload.mimeType,
-          checksum: this.calculateChecksum(fileBuffer),
-          cdnUrl: result.cdnUrl,
-          metadata: {
-            uploadedAt: new Date().toISOString()
-          }
-        }
-      });
-
+      await this.createFileStorageRecord(uploadId, upload, fileBuffer);
       logger.info('Single file upload completed', { uploadId });
     } catch (error) {
       await this.markUploadFailed(uploadId, getErrorMessage(error));
@@ -168,13 +144,8 @@ export class FileUploadService {
     chunkData: Buffer,
     chunkIndex: number,
     totalChunks: number
-  ): Promise<ChunkUploadResult> {
+  ): Promise<{ partNumber: number; etag: string; size: number }> {
     try {
-      const multipartUpload = this.activeUploads.get(uploadId);
-      if (!multipartUpload) {
-        throw new Error('Multipart upload not initialized');
-      }
-
       const upload = await this.prisma.audioUpload.findUnique({
         where: { id: uploadId }
       });
@@ -183,31 +154,11 @@ export class FileUploadService {
         throw new Error('Upload not found');
       }
 
-      // Upload chunk to S3
       const partNumber = chunkIndex + 1;
-      const etag = await this.uploadPart(
-        multipartUpload.key,
-        multipartUpload.uploadId,
-        chunkData,
-        partNumber
-      );
-
-      // Store chunk info
-      multipartUpload.parts.push({ partNumber, etag });
+      const result = await this.uploadManager.uploadChunk(uploadId, partNumber, chunkData);
 
       // Create chunk record
-      await this.prisma.audioChunk.create({
-        data: {
-          uploadId,
-          chunkIndex,
-          startByte: BigInt(chunkIndex * 10 * 1024 * 1024), // 10MB chunks
-          endByte: BigInt((chunkIndex + 1) * 10 * 1024 * 1024),
-          size: BigInt(chunkData.length),
-          storageKey: `${multipartUpload.key}-part${partNumber}`,
-          checksum: this.calculateChecksum(chunkData),
-          uploadedAt: new Date()
-        }
-      });
+      await this.createChunkRecord(uploadId, chunkIndex, chunkData, partNumber);
 
       // Update progress
       const progress = (chunkIndex + 1) / totalChunks * 100;
@@ -221,11 +172,7 @@ export class FileUploadService {
         await this.completeMultipartUpload(uploadId);
       }
 
-      return {
-        partNumber,
-        etag,
-        size: chunkData.length
-      };
+      return result;
     } catch (error) {
       logger.error('Failed to upload chunk', { uploadId, chunkIndex, error });
       throw error;
@@ -237,11 +184,6 @@ export class FileUploadService {
    */
   private async completeMultipartUpload(uploadId: string): Promise<void> {
     try {
-      const multipartUpload = this.activeUploads.get(uploadId);
-      if (!multipartUpload) {
-        throw new Error('Multipart upload not found');
-      }
-
       const upload = await this.prisma.audioUpload.findUnique({
         where: { id: uploadId }
       });
@@ -250,24 +192,11 @@ export class FileUploadService {
         throw new Error('Upload not found');
       }
 
-      // Complete S3 multipart upload
-      const command = new CompleteMultipartUploadCommand({
-        Bucket: config.storage.digitalOcean.bucket,
-        Key: multipartUpload.key,
-        UploadId: multipartUpload.uploadId,
-        MultipartUpload: {
-          Parts: multipartUpload.parts.sort((a, b) => a.partNumber - b.partNumber).map(part => ({
-            ETag: part.etag,
-            PartNumber: part.partNumber
-          }))
-        }
-      });
+      const location = await this.uploadManager.completeMultipartUpload(uploadId);
 
-      await this.storageService['s3Client'].send(command);
-
-      // Get file URL
-      const url = await this.storageService.getFileUrl(multipartUpload.key);
-      const cdnUrl = this.storageService.getCdnUrl(multipartUpload.key);
+      // Get file URLs
+      const url = await this.storageService.getFileUrl(upload.storagePath!);
+      const cdnUrl = this.storageService.getCdnUrl(upload.storagePath!);
 
       // Update upload record
       await this.prisma.audioUpload.update({
@@ -280,27 +209,8 @@ export class FileUploadService {
         }
       });
 
-      // Create file storage record
-      await this.prisma.fileStorage.create({
-        data: {
-          uploadId,
-          providerId: await this.getStorageProviderId(),
-          storageKey: multipartUpload.key,
-          fileName: upload.originalFileName,
-          fileSize: upload.fileSize,
-          mimeType: upload.mimeType,
-          checksum: 'multipart-' + uploadId,
-          cdnUrl,
-          metadata: {
-            uploadedAt: new Date().toISOString(),
-            multipart: true
-          }
-        }
-      });
-
-      // Clean up
-      this.activeUploads.delete(uploadId);
-
+      // Create file storage record for multipart upload
+      await this.createMultipartFileStorageRecord(uploadId, upload, cdnUrl);
       logger.info('Multipart upload completed', { uploadId });
     } catch (error) {
       await this.markUploadFailed(uploadId, getErrorMessage(error));
@@ -309,58 +219,11 @@ export class FileUploadService {
   }
 
   /**
-   * Initialize a multipart upload on S3
-   */
-  private async initializeMultipartUpload(key: string, contentType: string): Promise<string> {
-    const command = new CreateMultipartUploadCommand({
-      Bucket: config.storage.digitalOcean.bucket,
-      Key: key,
-      ContentType: contentType
-    });
-
-    const response = await this.storageService['s3Client'].send(command);
-    return response.UploadId!;
-  }
-
-  /**
-   * Upload a single part of a multipart upload
-   */
-  private async uploadPart(
-    key: string,
-    uploadId: string,
-    body: Buffer,
-    partNumber: number
-  ): Promise<string> {
-    const command = new UploadPartCommand({
-      Bucket: config.storage.digitalOcean.bucket,
-      Key: key,
-      UploadId: uploadId,
-      Body: body,
-      PartNumber: partNumber
-    });
-
-    const response = await this.storageService['s3Client'].send(command);
-    return response.ETag!;
-  }
-
-  /**
    * Cancel an upload
    */
   async cancelUpload(uploadId: string): Promise<void> {
     try {
-      const multipartUpload = this.activeUploads.get(uploadId);
-      
-      if (multipartUpload) {
-        // Abort S3 multipart upload
-        const command = new AbortMultipartUploadCommand({
-          Bucket: config.storage.digitalOcean.bucket,
-          Key: multipartUpload.key,
-          UploadId: multipartUpload.uploadId
-        });
-
-        await this.storageService['s3Client'].send(command);
-        this.activeUploads.delete(uploadId);
-      }
+      await this.uploadManager.abortMultipartUpload(uploadId);
 
       // Update database
       await this.prisma.audioUpload.update({
@@ -384,35 +247,94 @@ export class FileUploadService {
   /**
    * Generate presigned URLs for direct browser upload
    */
-  async generateUploadUrls(
+  async generateUploadUrls(uploadId: string, partCount: number): Promise<string[]> {
+    try {
+      return await this.uploadManager.getSignedUrls(uploadId, partCount);
+    } catch (error) {
+      logger.error('Failed to generate upload URLs', { uploadId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get upload progress
+   */
+  getUploadProgress(uploadId: string): number {
+    return this.uploadManager.getUploadProgress(uploadId);
+  }
+
+  /**
+   * Create file storage record for single file upload
+   */
+  private async createFileStorageRecord(
     uploadId: string,
-    partCount: number
-  ): Promise<string[]> {
-    const multipartUpload = this.activeUploads.get(uploadId);
-    if (!multipartUpload) {
-      throw new Error('Multipart upload not initialized');
-    }
+    upload: any,
+    fileBuffer: Buffer
+  ): Promise<void> {
+    await this.prisma.fileStorage.create({
+      data: {
+        uploadId,
+        providerId: await this.getStorageProviderId(),
+        storageKey: upload.storagePath,
+        fileName: upload.originalFileName,
+        fileSize: upload.fileSize,
+        mimeType: upload.mimeType,
+        checksum: this.calculateChecksum(fileBuffer),
+        cdnUrl: upload.cdnUrl,
+        metadata: {
+          uploadedAt: new Date().toISOString()
+        }
+      }
+    });
+  }
 
-    const urls: string[] = [];
+  /**
+   * Create file storage record for multipart upload
+   */
+  private async createMultipartFileStorageRecord(
+    uploadId: string,
+    upload: any,
+    cdnUrl: string
+  ): Promise<void> {
+    await this.prisma.fileStorage.create({
+      data: {
+        uploadId,
+        providerId: await this.getStorageProviderId(),
+        storageKey: upload.storagePath,
+        fileName: upload.originalFileName,
+        fileSize: upload.fileSize,
+        mimeType: upload.mimeType,
+        checksum: 'multipart-' + uploadId,
+        cdnUrl,
+        metadata: {
+          uploadedAt: new Date().toISOString(),
+          multipart: true
+        }
+      }
+    });
+  }
 
-    for (let i = 0; i < partCount; i++) {
-      const command = new UploadPartCommand({
-        Bucket: config.storage.digitalOcean.bucket,
-        Key: multipartUpload.key,
-        UploadId: multipartUpload.uploadId,
-        PartNumber: i + 1
-      });
-
-      const url = await getSignedUrl(
-        this.storageService['s3Client'],
-        command,
-        { expiresIn: 3600 } // 1 hour
-      );
-
-      urls.push(url);
-    }
-
-    return urls;
+  /**
+   * Create chunk record
+   */
+  private async createChunkRecord(
+    uploadId: string,
+    chunkIndex: number,
+    chunkData: Buffer,
+    partNumber: number
+  ): Promise<void> {
+    await this.prisma.audioChunk.create({
+      data: {
+        uploadId,
+        chunkIndex,
+        startByte: BigInt(chunkIndex * 10 * 1024 * 1024), // 10MB chunks
+        endByte: BigInt((chunkIndex + 1) * 10 * 1024 * 1024),
+        size: BigInt(chunkData.length),
+        storageKey: `chunk-${partNumber}`,
+        checksum: this.calculateChecksum(chunkData),
+        uploadedAt: new Date()
+      }
+    });
   }
 
   /**
@@ -451,10 +373,10 @@ export class FileUploadService {
         data: {
           name: 'digitalocean-spaces',
           type: 'digitalocean',
-          endpoint: config.storage.digitalOcean.endpoint,
-          region: config.storage.digitalOcean.region,
-          bucket: config.storage.digitalOcean.bucket,
-          cdnEndpoint: config.storage.digitalOcean.cdnEndpoint,
+          endpoint: process.env.DO_SPACES_ENDPOINT || '',
+          region: process.env.DO_SPACES_REGION || 'nyc3',
+          bucket: process.env.DO_SPACES_BUCKET || '',
+          cdnEndpoint: process.env.DO_SPACES_CDN_ENDPOINT || '',
           isActive: true,
           isDefault: true,
           config: {

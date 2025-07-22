@@ -7,97 +7,102 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ========================================
-// CORE USER & WORKSPACE MODELS (EXISTING)
-// ========================================
-
-model Workspace {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  isActive    Boolean  @default(true) @map("is_active")
-
-  // Core Relations
-  users         WorkspaceUser[]
-  invitations   WorkspaceInvitation[]
-  
-  // Enhanced Relations
-  audioHistory  AudioHistory[]
-  audioUploads  AudioUpload[]
-  projects      AudioProject[]
-  settings      WorkspaceSettings?
-  usageMetrics  UsageMetric[]
-  storageQuota  StorageQuota?
-  subscriptions WorkspaceSubscription[]
-  auditLogs     AuditLog[]
-
-  @@map("workspaces")
-}
+// ==================== USER & AUTH MODELS ====================
 
 model User {
-  id           String         @id @default(uuid())
-  email        String         @unique
-  username     String         @unique
-  passwordHash String         @map("password_hash")
-  role         String         @default("user") // user, admin, superadmin
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
-  lastLoginAt  DateTime?      @map("last_login_at")
-  isActive     Boolean        @default(true) @map("is_active")
-  
-  // Profile Information
-  firstName    String?        @map("first_name")
-  lastName     String?        @map("last_name")
-  avatarUrl    String?        @map("avatar_url")
-  timezone     String?        @default("UTC")
-  
-  // Business Information
-  businessName String?        @map("business_name")
-  mobileNumber String?        @map("mobile_number")
-  country      String?        @default("AU")
-  currency     String?        @default("AUD")
-  businessAddress String?     @map("business_address")
-  businessPhone String?       @map("business_phone")
-  taxNumber    String?        @map("tax_number")
-  companySize  String?        @map("company_size") // startup, small, medium, large, enterprise
-  industry     String?
-  
-  // Core Relations
-  audioHistory     AudioHistory[]
-  sessions         Session[]
-  settings         UserSettings?
-  workspaces       WorkspaceUser[]
-  refreshTokens    RefreshToken[]
-  
-  // Enhanced Relations
-  audioUploads     AudioUpload[]
-  projects         AudioProject[]
-  processingJobs   ProcessingJob[]
-  usageMetrics     UsageMetric[]
-  exports          ExportHistory[]
-  apiKeys          ApiKeyManagement[]
-  quota            UserQuota?
-  auditLogs        AuditLog[]
-  securityEvents   SecurityEvent[]
-  processingTemplates ProcessingTemplate[]
-  customPlans      CustomPlan[]
-  planRecommendations PlanRecommendation[]
-  usageCounters    UsageCounter[]
-  ewayCustomers    EwayCustomer[]
-  ewayTransactions EwayTransaction[]
-  ewayRecurringSchedules EwayRecurringSchedule[]
-  
-  // Role-based access control
-  userRoles        UserRole[]
-  assignedRoles    UserRole[] @relation("UserRoleAssignedBy")
-  
-  // Website & Marketing
-  testimonials     Testimonial[]
+  id                String    @id @default(uuid())
+  email             String    @unique
+  username          String    @unique
+  passwordHash      String    @map("password_hash")
+  role              String    @default("user") // user, admin, superadmin
+  firstName         String?   @map("first_name")
+  lastName          String?   @map("last_name")
+  avatar            String?
+  phoneNumber       String?   @map("phone_number")
+  timezone          String    @default("UTC")
+  lastLoginAt       DateTime? @map("last_login_at")
+  emailVerified     Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  isActive          Boolean   @default(true) @map("is_active")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspaces        WorkspaceUser[]
+  audioHistory      AudioHistory[]
+  audioUploads      AudioUpload[]
+  apiKeys           ApiKeyManagement[]
+  sessions          Session[]
+  refreshTokens     RefreshToken[]
+  settings          UserSettings?
+  auditLogs         AuditLog[]
+  securityEvents    SecurityEvent[]
+  notifications     Notification[]
+  audioSegments     AudioSegment[]
+  emailPreferences  EmailPreference?
+  quotaUsage        UserQuota[]
+  aiTokenUsage      AiTokenUsage[]
 
   @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  token       String   @unique
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  revokedAt   DateTime? @map("revoked_at")
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+// ==================== WORKSPACE MODELS ====================
+
+model Workspace {
+  id                String   @id @default(uuid())
+  name              String
+  slug              String   @unique
+  description       String?
+  logo              String?
+  website           String?
+  industry          String?
+  size              String?  // small, medium, large, enterprise
+  isActive          Boolean  @default(true) @map("is_active")
+  settings          Json     @default("{}") // Workspace-specific settings
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users             WorkspaceUser[]
+  invitations       WorkspaceInvitation[]
+  audioHistory      AudioHistory[]
+  audioUploads      AudioUpload[]
+  subscriptions     WorkspaceSubscription[]
+  storageQuotas     StorageQuota[]
+  integrations      Integration[]
+  automations       WorkspaceAutomation[]
+  webhooks          Webhook[]
+  customFields      CustomField[]
+  tags              Tag[]
+  aiAgents          AiAgent[]
+
+  @@map("workspaces")
 }
 
 model WorkspaceUser {
@@ -105,8 +110,8 @@ model WorkspaceUser {
   workspaceId String    @map("workspace_id")
   userId      String    @map("user_id")
   role        String    @default("member") // member, admin, owner
+  permissions Json      @default("{}") // Custom permissions
   joinedAt    DateTime  @default(now()) @map("joined_at")
-  permissions Json?     @default("{}") // Custom permissions
   lastActiveAt DateTime? @map("last_active_at")
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -125,68 +130,318 @@ model WorkspaceInvitation {
   expiresAt   DateTime  @map("expires_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   acceptedAt  DateTime? @map("accepted_at")
-  invitedById String?   @map("invited_by_id")
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("workspace_invitations")
 }
 
-// ========================================
-// AUTHENTICATION & SECURITY
-// ========================================
+// ==================== AUDIO PROCESSING MODELS ====================
 
-model RefreshToken {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  token       String   @unique
-  expiresAt   DateTime @map("expires_at")
-  createdAt   DateTime @default(now()) @map("created_at")
-  revokedAt   DateTime? @map("revoked_at")
-  
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@map("refresh_tokens")
-}
+model AudioUpload {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  workspaceId       String   @map("workspace_id")
+  originalFileName  String   @map("original_file_name")
+  fileSize          BigInt   @map("file_size")
+  mimeType          String   @map("mime_type")
+  uploadStatus      String   @default("pending") @map("upload_status") // pending, uploading, completed, failed
+  uploadProgress    Float    @default(0) @map("upload_progress")
+  storageProvider   String   @map("storage_provider") // digitalocean, aws, azure
+  storagePath       String?  @map("storage_path")
+  storageUrl        String?  @map("storage_url")
+  cdnUrl            String?  @map("cdn_url")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
-model Session {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  tokenHash String   @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([tokenHash])
-  @@map("sessions")
-}
-
-model SecurityEvent {
-  id          String   @id @default(uuid())
-  userId      String?  @map("user_id")
-  eventType   String   @map("event_type") // failed_login, suspicious_activity, account_locked
-  severity    String   @default("medium") // low, medium, high, critical
-  description String?
-  metadata    Json?
-  ipAddress   String?  @map("ip_address")
-  userAgent   String?  @map("user_agent")
-  createdAt   DateTime @default(now()) @map("created_at")
-  resolvedAt  DateTime? @map("resolved_at")
-  
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Relations
+  user              User                @relation(fields: [userId], references: [id])
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id])
+  processingJobs    ProcessingJob[]
+  audioChunks       AudioChunk[]
+  fileStorage       FileStorage?
 
   @@index([userId, createdAt])
-  @@index([eventType, createdAt])
-  @@map("security_events")
+  @@index([workspaceId, createdAt])
+  @@map("audio_uploads")
 }
 
-// ========================================
-// USER SETTINGS & PREFERENCES
-// ========================================
+model ProcessingJob {
+  id              String   @id @default(uuid())
+  uploadId        String   @map("upload_id")
+  jobType         String   @map("job_type") // transcription, summary, analysis
+  status          String   @default("queued") // queued, processing, completed, failed
+  priority        Int      @default(0)
+  progress        Float    @default(0)
+  startedAt       DateTime? @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  error           String?
+  result          Json?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  audioHistory    AudioHistory?
+
+  @@index([status, priority])
+  @@map("processing_jobs")
+}
+
+model AudioHistory {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  workspaceId       String?  @map("workspace_id")
+  processingJobId   String?  @unique @map("processing_job_id")
+  title             String?  @db.VarChar(500)
+  audioUrl          String?  @map("audio_url")
+  fileSizeBytes     BigInt?  @map("file_size_bytes")
+  durationSeconds   Int?     @map("duration_seconds")
+  transcript        String?
+  summary           String?
+  keyMoments        Json?    @map("key_moments")
+  processingOptions Json?    @map("processing_options")
+  language          String?
+  confidence        Float?
+  speakers          Int?
+  tags              String[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace         Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  processingJob     ProcessingJob? @relation(fields: [processingJobId], references: [id])
+  segments          AudioSegment[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("audio_history")
+}
+
+model AudioSegment {
+  id              String   @id @default(uuid())
+  audioHistoryId  String   @map("audio_history_id")
+  userId          String   @map("user_id")
+  startTime       Float    @map("start_time")
+  endTime         Float    @map("end_time")
+  text            String
+  speaker         String?
+  confidence      Float?
+  keywords        String[]
+  sentiment       String?  // positive, negative, neutral
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  audioHistory    AudioHistory @relation(fields: [audioHistoryId], references: [id], onDelete: Cascade)
+  user            User @relation(fields: [userId], references: [id])
+
+  @@index([audioHistoryId, startTime])
+  @@map("audio_segments")
+}
+
+model AudioChunk {
+  id              String   @id @default(uuid())
+  uploadId        String   @map("upload_id")
+  chunkIndex      Int      @map("chunk_index")
+  startByte       BigInt   @map("start_byte")
+  endByte         BigInt   @map("end_byte")
+  size            BigInt
+  storageKey      String   @map("storage_key")
+  checksum        String
+  uploadedAt      DateTime? @map("uploaded_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@unique([uploadId, chunkIndex])
+  @@map("audio_chunks")
+}
+
+// ==================== STORAGE MODELS ====================
+
+model StorageProvider {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  type            String   // digitalocean, aws, azure, gcp
+  endpoint        String?
+  region          String?
+  bucket          String?
+  cdnEndpoint     String?  @map("cdn_endpoint")
+  isActive        Boolean  @default(true) @map("is_active")
+  isDefault       Boolean  @default(false) @map("is_default")
+  config          Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  files           FileStorage[]
+
+  @@map("storage_providers")
+}
+
+model FileStorage {
+  id              String   @id @default(uuid())
+  uploadId        String   @unique @map("upload_id")
+  providerId      String   @map("provider_id")
+  storageKey      String   @unique @map("storage_key")
+  fileName        String   @map("file_name")
+  fileSize        BigInt   @map("file_size")
+  mimeType        String   @map("mime_type")
+  checksum        String
+  publicUrl       String?  @map("public_url")
+  cdnUrl          String?  @map("cdn_url")
+  expiresAt       DateTime? @map("expires_at")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  lastAccessedAt  DateTime? @map("last_accessed_at")
+
+  // Relations
+  provider        StorageProvider @relation(fields: [providerId], references: [id])
+  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, createdAt])
+  @@map("file_storage")
+}
+
+// ==================== SUBSCRIPTION & BILLING MODELS ====================
+
+model SubscriptionPlan {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  displayName       String   @map("display_name")
+  description       String?
+  tier              String   // free, pro, enterprise
+  price             Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD")
+  billingPeriod     String   @map("billing_period") // monthly, yearly
+  features          Json     // Feature list and limits
+  quotas            Json     // Usage quotas
+  isActive          Boolean  @default(true) @map("is_active")
+  isPublic          Boolean  @default(true) @map("is_public")
+  trialDays         Int      @default(0) @map("trial_days")
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subscriptions     WorkspaceSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model WorkspaceSubscription {
+  id                String   @id @default(uuid())
+  workspaceId       String   @map("workspace_id")
+  planId            String   @map("plan_id")
+  status            String   // active, cancelled, expired, past_due
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd  DateTime @map("current_period_end")
+  cancelledAt       DateTime? @map("cancelled_at")
+  cancelReason      String?   @map("cancel_reason")
+  trialEnd          DateTime? @map("trial_end")
+  metadata          Json      @default("{}")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
+  billingRecords    BillingRecord[]
+  usageRecords      UsageRecord[]
+
+  @@unique([workspaceId])
+  @@map("workspace_subscriptions")
+}
+
+model BillingRecord {
+  id                String   @id @default(uuid())
+  subscriptionId    String   @map("subscription_id")
+  amount            Decimal  @db.Decimal(10, 2)
+  currency          String
+  status            String   // pending, paid, failed, refunded
+  invoiceNumber     String?  @unique @map("invoice_number")
+  invoiceUrl        String?  @map("invoice_url")
+  paymentMethod     String?  @map("payment_method")
+  paymentIntentId   String?  @map("payment_intent_id")
+  failureReason     String?  @map("failure_reason")
+  paidAt            DateTime? @map("paid_at")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  subscription      WorkspaceSubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId, createdAt])
+  @@map("billing_records")
+}
+
+model PaymentMethod {
+  id                String   @id @default(uuid())
+  workspaceId       String   @map("workspace_id")
+  type              String   // card, bank_account
+  provider          String   // eway, stripe
+  isDefault         Boolean  @default(false) @map("is_default")
+  lastFour          String?  @map("last_four")
+  expiryMonth       Int?     @map("expiry_month")
+  expiryYear        Int?     @map("expiry_year")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_methods")
+}
+
+// ==================== API KEY MANAGEMENT ====================
+
+model ApiKeyManagement {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  provider          String   // openai, elevenlabs, custom
+  keyHash           String   @map("key_hash")
+  keyPrefix         String   @map("key_prefix") // First 8 chars for identification
+  encryptedKey      String   @map("encrypted_key")
+  isActive          Boolean  @default(true) @map("is_active")
+  lastUsedAt        DateTime? @map("last_used_at")
+  usageCount        Int      @default(0) @map("usage_count")
+  expiresAt         DateTime? @map("expires_at")
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageLogs         ApiKeyUsageLog[]
+
+  @@unique([userId, provider])
+  @@index([keyHash])
+  @@map("api_key_management")
+}
+
+model ApiKeyUsageLog {
+  id              String   @id @default(uuid())
+  apiKeyId        String   @map("api_key_id")
+  endpoint        String
+  method          String
+  statusCode      Int      @map("status_code")
+  responseTime    Int      @map("response_time") // milliseconds
+  tokensUsed      Int?     @map("tokens_used")
+  cost            Decimal? @db.Decimal(10, 6)
+  error           String?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  apiKey          ApiKeyManagement @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, createdAt])
+  @@map("api_key_usage_logs")
+}
+
+// ==================== USER SETTINGS & PREFERENCES ====================
 
 model UserSettings {
   userId                    String   @id @map("user_id")
@@ -194,15 +449,9 @@ model UserSettings {
   elevenlabsApiKeyEncrypted String?  @map("elevenlabs_api_key_encrypted")
   preferredLanguage         String   @default("en") @map("preferred_language")
   summaryQuality            String   @default("balanced") @map("summary_quality")
-  
-  // Enhanced Settings
-  defaultSummaryStyle       String   @default("formal") @map("default_summary_style")
-  defaultTemperature        Float    @default(0.3) @map("default_temperature")
-  defaultMaxTokens          Int      @default(2000) @map("default_max_tokens")
-  showCostEstimates         Boolean  @default(true) @map("show_cost_estimates")
-  emailNotifications        Boolean  @default(true) @map("email_notifications")
-  processingNotifications   Boolean  @default(true) @map("processing_notifications")
-  
+  theme                     String   @default("light")
+  notifications             Json     @default("{}")
+  privacy                   Json     @default("{}")
   settingsJson              Json     @default("{}") @map("settings_json")
   updatedAt                 DateTime @updatedAt @map("updated_at")
   
@@ -211,1277 +460,461 @@ model UserSettings {
   @@map("user_settings")
 }
 
-model WorkspaceSettings {
-  workspaceId               String   @id @map("workspace_id")
-  
-  // Processing Defaults
-  defaultProcessingOptions  Json     @default("{}") @map("default_processing_options")
-  allowedFileTypes          String[] @default(["mp3", "wav", "m4a", "flac", "ogg"]) @map("allowed_file_types")
-  maxFileSize               BigInt   @default(157286400) @map("max_file_size") // 150MB default
-  maxProcessingTime         Int      @default(3600) @map("max_processing_time") // 1 hour default
-  
-  // Collaboration Settings
-  allowPublicSharing        Boolean  @default(false) @map("allow_public_sharing")
-  allowGuestAccess          Boolean  @default(false) @map("allow_guest_access")
-  requireApprovalForUploads Boolean  @default(false) @map("require_approval_for_uploads")
-  
-  // Integration Settings
-  webhookUrl                String?  @map("webhook_url")
-  webhookSecret             String?  @map("webhook_secret")
-  
-  settingsJson              Json     @default("{}") @map("settings_json")
-  updatedAt                 DateTime @updatedAt @map("updated_at")
-  
-  workspace                 Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@map("workspace_settings")
-}
-
-model ProcessingTemplate {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  workspaceId   String?  @map("workspace_id")
-  name          String
-  description   String?
-  
-  // Processing Configuration
-  summaryStyle  String   @default("formal") @map("summary_style")
-  temperature   Float    @default(0.3)
-  maxTokens     Int      @default(2000) @map("max_tokens")
-  language      String   @default("en")
-  
-  configJson    Json     @default("{}") @map("config_json")
-  isPublic      Boolean  @default(false) @map("is_public")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("processing_templates")
-}
-
-// ========================================
-// API KEY MANAGEMENT
-// ========================================
-
-model ApiKeyManagement {
-  id              String   @id @default(uuid())
-  userId          String   @map("user_id")
-  workspaceId     String?  @map("workspace_id")
-  
-  provider        String   // openai, elevenlabs, custom
-  keyName         String   @map("key_name")
-  encryptedKey    String   @map("encrypted_key")
-  keyHash         String   @map("key_hash") // For verification without decryption
-  
-  isActive        Boolean  @default(true) @map("is_active")
-  lastUsedAt      DateTime? @map("last_used_at")
-  expiresAt       DateTime? @map("expires_at")
-  
-  // Usage Tracking
-  totalRequests   BigInt   @default(0) @map("total_requests")
-  totalTokens     BigInt   @default(0) @map("total_tokens")
-  totalCost       Decimal  @default(0.0) @db.Decimal(10,4) @map("total_cost")
-  
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-  
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, provider, keyName])
-  @@index([provider, isActive])
-  @@map("api_key_management")
-}
-
-// ========================================
-// ENHANCED AUDIO PROCESSING
-// ========================================
-
-model AudioUpload {
-  id                  String   @id @default(uuid())
-  userId              String   @map("user_id")
-  workspaceId         String?  @map("workspace_id")
-  
-  // File Information
-  originalFilename    String   @map("original_filename")
-  fileSize            BigInt   @map("file_size")
-  fileType            String   @map("file_type")
-  mimeType            String   @map("mime_type")
-  duration            Float?   // in seconds
-  sampleRate          Int?     @map("sample_rate")
-  channels            Int?
-  bitrate             Int?
-  
-  // Storage Information - Updated for DigitalOcean Spaces
-  storageProvider     String   @default("digitalocean_spaces") @map("storage_provider") // digitalocean_spaces, s3, gcs
-  storagePath         String   @map("storage_path")
-  storageUrl          String?  @map("storage_url")
-  cdnUrl              String?  @map("cdn_url") // DigitalOcean Spaces CDN URL
-  checksumMd5         String?  @map("checksum_md5")
-  checksumSha256      String?  @map("checksum_sha256")
-  
-  // Processing Status
-  status              String   @default("uploaded") @map("status") // uploaded, processing, completed, failed
-  uploadedAt          DateTime @default(now()) @map("uploaded_at")
-  processingStartedAt DateTime? @map("processing_started_at")
-  completedAt         DateTime? @map("completed_at")
-  
-  // Relations
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace           Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
-  audioHistory        AudioHistory[]
-  processingJobs      ProcessingJob[]
-  audioChunks         AudioChunk[]
-
-  @@index([userId, uploadedAt])
-  @@index([workspaceId, uploadedAt])
-  @@index([status])
-  @@map("audio_uploads")
-}
-
-model ProcessingJob {
-  id              String   @id @default(uuid())
-  userId          String   @map("user_id")
-  uploadId        String   @map("upload_id")
-  
-  // Job Configuration
-  jobType         String   @map("job_type") // transcription, summarization, voice_synthesis
-  priority        Int      @default(5) // 1-10, higher is more urgent
-  
-  // Processing Parameters
-  processingOptions Json   @map("processing_options")
-  
-  // Status Tracking
-  status          String   @default("queued") @map("status") // queued, running, completed, failed, cancelled
-  progress        Float    @default(0.0) // 0.0 - 1.0
-  
-  // Resource Usage
-  cpuTimeMs       BigInt?  @map("cpu_time_ms")
-  memoryUsageMb   Int?     @map("memory_usage_mb")
-  
-  // Timing
-  queuedAt        DateTime @default(now()) @map("queued_at")
-  startedAt       DateTime? @map("started_at")
-  completedAt     DateTime? @map("completed_at")
-  
-  // Error Handling
-  errorMessage    String?  @map("error_message")
-  retryCount      Int      @default(0) @map("retry_count")
-  maxRetries      Int      @default(3) @map("max_retries")
-  
-  // Relations
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
-
-  @@index([status, priority, queuedAt])
-  @@index([userId, queuedAt])
-  @@map("processing_jobs")
-}
-
-model AudioHistory {
-  id                String   @id @default(uuid())
-  userId            String   @map("user_id")
-  workspaceId       String?  @map("workspace_id")
-  uploadId          String?  @map("upload_id")
-  
-  // Basic Information
-  title             String?  @db.VarChar(500)
-  audioUrl          String?  @map("audio_url")
-  cdnUrl            String?  @map("cdn_url") // DigitalOcean Spaces CDN URL
-  fileSizeBytes     BigInt?  @map("file_size_bytes")
-  durationSeconds   Int?     @map("duration_seconds")
-  
-  // Processing Results
-  transcript        String?
-  summary           String?
-  keyMoments        Json?    @map("key_moments")
-  
-  // Enhanced Processing Data
-  language          String?
-  confidence        Float?   // Overall confidence score
-  wordCount         Int?     @map("word_count")
-  speakerCount      Int?     @map("speaker_count")
-  
-  // Processing Metadata
-  processingOptions Json?    @map("processing_options")
-  processingTime    Float?   @map("processing_time") // in seconds
-  apiProvider       String?  @map("api_provider")
-  modelVersion      String?  @map("model_version")
-  
-  // Cost Tracking
-  transcriptionCost Decimal? @db.Decimal(10,4) @map("transcription_cost")
-  summarizationCost Decimal? @db.Decimal(10,4) @map("summarization_cost")
-  totalCost         Decimal? @db.Decimal(10,4) @map("total_cost")
-  
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  
-  // Relations
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace         Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  upload            AudioUpload? @relation(fields: [uploadId], references: [id], onDelete: SetNull)
-  
-  segments          AudioSegment[]
-
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([workspaceId, createdAt(sort: Desc)])
-  @@index([uploadId])
-  @@map("audio_history")
-}
-
-model AudioSegment {
-  id            String   @id @default(uuid())
-  historyId     String   @map("history_id")
-  
-  // Segment Information
-  segmentIndex  Int      @map("segment_index")
-  startTime     Float    @map("start_time") // in seconds
-  endTime       Float    @map("end_time") // in seconds
-  text          String
-  
-  // Analysis Data
-  confidence    Float?
-  language      String?
-  speakerId     String?  @map("speaker_id")
-  emotion       String?  // happy, sad, neutral, etc.
-  sentiment     String?  // positive, negative, neutral
-  
-  // Technical Data
-  tokens        Int[]    // Token IDs from the model
-  logprobs      Float[]  // Log probabilities
-  temperature   Float?
-  avgLogprob    Float?   @map("avg_logprob")
-  compressionRatio Float? @map("compression_ratio")
-  noSpeechProb  Float?   @map("no_speech_prob")
-  
-  history       AudioHistory @relation(fields: [historyId], references: [id], onDelete: Cascade)
-
-  @@index([historyId, segmentIndex])
-  @@map("audio_segments")
-}
-
-model AudioChunk {
-  id              String   @id @default(uuid())
-  uploadId        String   @map("upload_id")
-  
-  // Chunk Information
-  chunkIndex      Int      @map("chunk_index")
-  startTime       Float    @map("start_time")
-  endTime         Float    @map("end_time")
-  fileSize        BigInt   @map("file_size")
-  
-  // Storage
-  storagePath     String   @map("storage_path")
-  checksumMd5     String?  @map("checksum_md5")
-  
-  // Processing Status
-  status          String   @default("pending") @map("status")
-  processedAt     DateTime? @map("processed_at")
-  
-  upload          AudioUpload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
-
-  @@index([uploadId, chunkIndex])
-  @@map("audio_chunks")
-}
-
-// ========================================
-// PROJECT MANAGEMENT
-// ========================================
-
-model AudioProject {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  workspaceId   String?  @map("workspace_id")
-  
-  name          String
-  description   String?
-  color         String?  @default("#3B82F6") // Hex color for UI
-  
-  // Status
-  status        String   @default("active") // active, archived, completed
-  isPublic      Boolean  @default(false) @map("is_public")
-  
-  // Metadata
-  tags          String[] @default([])
-  metadata      Json?    @default("{}")
-  
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  
-  // Relations
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace     Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@index([workspaceId, createdAt])
-  @@map("audio_projects")
-}
-
-// ========================================
-// USAGE TRACKING & ANALYTICS
-// ========================================
+// ==================== ANALYTICS & METRICS ====================
 
 model UsageMetric {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  workspaceId   String?  @map("workspace_id")
-  
-  // Metric Information
-  metricType    String   @map("metric_type") // api_call, token_usage, processing_time, storage_used
-  provider      String?  // openai, elevenlabs, internal
-  
-  // Usage Data
-  quantity      BigInt   // Number of units (tokens, seconds, bytes, etc.)
-  cost          Decimal  @db.Decimal(10,4) // Cost in USD
-  currency      String   @default("USD")
-  
-  // Metadata
-  metadata      Json?    @default("{}")
-  
-  // Timing
-  periodStart   DateTime @map("period_start")
-  periodEnd     DateTime @map("period_end")
-  recordedAt    DateTime @default(now()) @map("recorded_at")
-  
-  // Relations
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace     Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  metricType      String   @map("metric_type") // audio_minutes, storage_bytes, api_calls
+  value           BigInt
+  period          String   // daily, monthly
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  @@index([userId, metricType, periodStart])
-  @@index([workspaceId, metricType, periodStart])
-  @@index([recordedAt])
+  @@unique([workspaceId, metricType, periodStart])
+  @@index([workspaceId, periodStart])
   @@map("usage_metrics")
 }
 
 model UserQuota {
-  userId              String   @id @map("user_id")
-  
-  // Monthly Limits
-  monthlyApiCalls     BigInt   @default(1000) @map("monthly_api_calls")
-  monthlyTokens       BigInt   @default(100000) @map("monthly_tokens")
-  monthlyStorageMb    BigInt   @default(1024) @map("monthly_storage_mb")
-  monthlyProcessingMin BigInt  @default(60) @map("monthly_processing_min")
-  
-  // Current Usage (reset monthly)
-  currentApiCalls     BigInt   @default(0) @map("current_api_calls")
-  currentTokens       BigInt   @default(0) @map("current_tokens")
-  currentStorageMb    BigInt   @default(0) @map("current_storage_mb")
-  currentProcessingMin BigInt  @default(0) @map("current_processing_min")
-  
-  // Period Tracking
-  periodStart         DateTime @map("period_start")
-  periodEnd           DateTime @map("period_end")
-  lastResetAt         DateTime @default(now()) @map("last_reset_at")
-  
-  // Overages
-  allowOverages       Boolean  @default(false) @map("allow_overages")
-  overageCostPerToken Decimal  @db.Decimal(10,8) @default(0.0001) @map("overage_cost_per_token")
-  
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  workspaceId     String   @map("workspace_id")
+  quotaType       String   @map("quota_type") // audio_minutes, storage_gb, api_calls
+  used            BigInt   @default(0)
+  limit           BigInt
+  resetPeriod     String   @map("reset_period") // daily, monthly, never
+  nextResetAt     DateTime @map("next_reset_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
+  // Relations
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, workspaceId, quotaType])
   @@map("user_quotas")
 }
 
-// ========================================
-// STORAGE MANAGEMENT
-// ========================================
-
 model StorageQuota {
-  workspaceId         String   @id @map("workspace_id")
-  
-  // Quota Limits
-  maxStorageBytes     BigInt   @map("max_storage_bytes")
-  maxFileCount        Int      @map("max_file_count")
-  maxFileSize         BigInt   @map("max_file_size")
-  
-  // Current Usage
-  currentStorageBytes BigInt   @default(0) @map("current_storage_bytes")
-  currentFileCount    Int      @default(0) @map("current_file_count")
-  
-  // Cleanup Policies
-  retentionDays       Int?     @map("retention_days")
-  autoCleanup         Boolean  @default(false) @map("auto_cleanup")
-  
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  
-  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@map("storage_quotas")
-}
-
-// ========================================
-// ENHANCED SUBSCRIPTION & BILLING SYSTEM
-// ========================================
-
-model SubscriptionPlan {
-  id                  String   @id @default(uuid())
-  name                String   @unique
-  displayName         String   @map("display_name")
-  description         String?
-  planCode            String   @default("") @map("plan_code")
-  
-  // Pricing
-  price               Decimal  @db.Decimal(10,2)
-  currency            String   @default("AUD")
-  billingInterval     String   @default("monthly") @map("billing_interval") // monthly, yearly
-  
-  // Plan Classification
-  tier                String   @default("personal") // personal, business, enterprise
-  sortOrder           Float    @default(0) @map("sort_order")
-  
-  // Basic Limits
-  maxApiCalls         BigInt   @default(1000) @map("max_api_calls")
-  maxTokens           BigInt   @default(100000) @map("max_tokens")
-  maxStorageMb        BigInt   @default(1024) @map("max_storage_mb")
-  maxProcessingMin    BigInt   @default(60) @map("max_processing_min")
-  maxWorkspaces       Int      @default(1) @map("max_workspaces")
-  maxUsers            Int      @default(1) @map("max_users")
-  maxFileSize         BigInt   @default(157286400) @map("max_file_size") // 150MB default
-  
-  // Enhanced Granular Limits
-  maxTranscriptionsMonthly    BigInt   @default(0) @map("max_transcriptions_monthly")
-  maxFilesDaily              Int      @default(0) @map("max_files_daily")
-  maxFilesMonthly            Int      @default(0) @map("max_files_monthly")
-  maxConcurrentJobs          Int      @default(1) @map("max_concurrent_jobs")
-  maxVoiceSynthesisMonthly   BigInt   @default(0) @map("max_voice_synthesis_monthly")
-  maxExportOperationsMonthly Int      @default(0) @map("max_export_operations_monthly")
-  maxAudioDurationMinutes    Int      @default(0) @map("max_audio_duration_minutes") // 0 = unlimited
-  priorityLevel              Int      @default(5) @map("priority_level") // 1-10, higher = more priority
-  
-  // Plan Features
-  planCategory        String   @default("personal") @map("plan_category") // personal, business, enterprise, custom
-  trialDays           Int      @default(0) @map("trial_days")
-  isCustom            Boolean  @default(false) @map("is_custom")
-  isEnterprise        Boolean  @default(false) @map("is_enterprise")
-  
-  // Feature Arrays
-  features            Json     @default("[]") // JSON array of features
-  recommendedFor      String[] @map("recommended_for")
-  allowedFileTypes    String[] @map("allowed_file_types")
-  analysisFeatures    String[] @map("analysis_features")
-  collaborationFeatures String[] @map("collaboration_features")
-  integrationFeatures String[] @map("integration_features")
-  
-  // Status
-  isActive            Boolean  @default(true) @map("is_active")
-  isPublic            Boolean  @default(true) @map("is_public")
-  
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  
-  // Relations
-  subscriptions       WorkspaceSubscription[]
-  planPricing         PlanPricing[]
-  planFeatures        PlanFeatureMatrix[]
-  currentPlanRecommendations PlanRecommendation[] @relation("CurrentPlanRecommendations")
-  recommendedPlanRecommendations PlanRecommendation[] @relation("RecommendedPlanRecommendations")
-  customPlans         CustomPlan[]
-
-  @@map("subscription_plans")
-}
-
-model PlanPricing {
-  id              String           @id @default(uuid())
-  planId          String           @map("plan_id")
-  currency        String
-  price           Decimal          @db.Decimal(10,2)
-  billingPeriod   String           @map("billing_period") // monthly, yearly
-  region          String?          // US, AU, EU, etc.
-  isActive        Boolean          @default(true) @map("is_active")
-  
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  
-  plan            SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-
-  @@unique([planId, currency, billingPeriod, region])
-  @@map("plan_pricing")
-}
-
-model Currency {
-  id          String   @id @default(uuid())
-  code        String   @unique // USD, AUD, EUR, etc.
-  name        String   // US Dollar, Australian Dollar, etc.
-  symbol      String   // $, €, £, etc.
-  
-  // Exchange Rate Data
-  exchangeRate Decimal @db.Decimal(10,6) @default(1.0) @map("exchange_rate") // Rate to USD
-  lastUpdated DateTime @default(now()) @map("last_updated")
-  
-  // Status
-  isActive    Boolean  @default(true) @map("is_active")
-  isPrimary   Boolean  @default(false) @map("is_primary") // Primary currency for the system
-  
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  @@map("currencies")
-}
-
-model WorkspaceSubscription {
-  id                  String   @id @default(uuid())
-  workspaceId         String   @map("workspace_id")
-  planId              String   @map("plan_id")
-  
-  // Subscription Status
-  status              String   @default("active") @map("status") // active, cancelled, expired, past_due, trialing
-  
-  // Billing
-  currentPeriodStart  DateTime @map("current_period_start")
-  currentPeriodEnd    DateTime @map("current_period_end")
-  nextBillingDate     DateTime? @map("next_billing_date")
-  trialEnd            DateTime? @map("trial_end")
-  
-  // Payment Gateway (Updated for eWAY)
-  paymentGateway      String   @default("eway") @map("payment_gateway") // eway, stripe
-  paymentMethodId     String?  @map("payment_method_id")
-  currency            String   @default("AUD")
-  amount              Decimal  @db.Decimal(10,2)
-  
-  // eWAY Integration
-  ewayCustomerId      String?  @map("eway_customer_id")
-  
-  // Stripe Integration (Legacy)
-  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
-  stripeCustomerId     String? @map("stripe_customer_id")
-  
-  // Cancellation
-  cancelledAt         DateTime? @map("cancelled_at")
-  cancelReason        String?   @map("cancel_reason")
-  
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  
-  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  plan                SubscriptionPlan @relation(fields: [planId], references: [id])
-  
-  billingRecords      BillingRecord[]
-  usageRecords        UsageRecord[]
-
-  @@map("workspace_subscriptions")
-}
-
-model BillingRecord {
   id              String   @id @default(uuid())
-  subscriptionId  String   @map("subscription_id")
-  
-  // Invoice Information
-  invoiceNumber   String   @unique @map("invoice_number")
-  amount          Decimal  @db.Decimal(10,2)
-  currency        String   @default("AUD")
-  
-  // Status
-  status          String   // draft, open, paid, void, uncollectible, failed
-  paymentMethod   String?  @map("payment_method") // card, bank_transfer, etc.
-  
-  // Dates
-  invoiceDate     DateTime @map("invoice_date")
-  dueDate         DateTime @map("due_date")
-  paidAt          DateTime? @map("paid_at")
-  
-  // External References
-  stripeInvoiceId String?  @unique @map("stripe_invoice_id")
-  ewayTransactionId String? @map("eway_transaction_id")
-  
-  // File Storage
-  invoiceUrl      String?  @map("invoice_url")
-  
-  // Payment Details
-  failureReason   String?  @map("failure_reason")
-  
-  // Usage Details
-  usageDetails    Json?    @map("usage_details")
-  
+  workspaceId     String   @map("workspace_id")
+  totalBytes      BigInt   @map("total_bytes")
+  usedBytes       BigInt   @map("used_bytes")
+  fileCount       Int      @map("file_count")
+  lastCalculated  DateTime @map("last_calculated")
   createdAt       DateTime @default(now()) @map("created_at")
-  
-  subscription    WorkspaceSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
-  @@map("billing_records")
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([workspaceId])
+  @@map("storage_quotas")
 }
 
 model UsageRecord {
   id              String   @id @default(uuid())
   subscriptionId  String   @map("subscription_id")
-  
-  // Record Type and Details
-  recordType      String   @map("record_type") // transcription_minutes, api_calls, storage_gb, etc.
-  quantity        Decimal  @db.Decimal(15,6)
-  unitPrice       Decimal? @db.Decimal(10,6) @map("unit_price")
-  totalCost       Decimal? @db.Decimal(10,2) @map("total_cost")
-  
-  // Billing Period
+  recordType      String   @map("record_type") // minutes_transcribed, storage_used, api_calls
+  quantity        BigInt
+  unitPrice       Decimal? @db.Decimal(10, 6) @map("unit_price")
+  totalCost       Decimal? @db.Decimal(10, 2) @map("total_cost")
   periodStart     DateTime @map("period_start")
   periodEnd       DateTime @map("period_end")
-  
-  // Metadata
-  metadata        Json?    @default("{}")
-  
+  metadata        Json     @default("{}")
   createdAt       DateTime @default(now()) @map("created_at")
-  
-  subscription    WorkspaceSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
-  @@index([subscriptionId, recordType, periodStart])
+  // Relations
+  subscription    WorkspaceSubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId, periodStart])
   @@map("usage_records")
 }
 
-// ========================================
-// ENHANCED SUBSCRIPTION FEATURES
-// ========================================
+// ==================== AUDIT & SECURITY ====================
 
-model UsageCounter {
+model AuditLog {
   id              String   @id @default(uuid())
-  userId          String   @map("user_id")
+  userId          String?  @map("user_id")
   workspaceId     String?  @map("workspace_id")
-  
-  // Period tracking
-  periodType      String   @map("period_type") // daily, weekly, monthly, yearly
-  periodStart     DateTime @map("period_start")
-  periodEnd       DateTime @map("period_end")
-  
-  // Usage counters
-  transcriptionsUsed        Int     @default(0) @map("transcriptions_used")
-  filesUploaded            Int     @default(0) @map("files_uploaded")
-  voiceSynthesisUsed       Int     @default(0) @map("voice_synthesis_used")
-  exportOperationsUsed     Int     @default(0) @map("export_operations_used")
-  
-  // Processing metrics
-  totalProcessingMinutes   Decimal @default(0) @db.Decimal(10,2) @map("total_processing_minutes")
-  concurrentJobsPeak       Int     @default(0) @map("concurrent_jobs_peak")
-  
-  // Feature usage tracking
-  featureUsage             Json    @default("{}") @map("feature_usage") // Track specific feature usage
-  
-  // Reset tracking
-  lastResetAt              DateTime @default(now()) @map("last_reset_at")
-  autoReset                Boolean  @default(true) @map("auto_reset")
-  
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @updatedAt @map("updated_at")
-  
-  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, workspaceId, periodType, periodStart])
-  @@index([userId, periodType, periodStart])
-  @@index([workspaceId, periodType, periodStart])
-  @@index([lastResetAt])
-  @@map("usage_counters")
-}
-
-model PlanRecommendation {
-  id                      String   @id @default(uuid())
-  userId                  String   @map("user_id")
-  workspaceId             String?  @map("workspace_id")
-  
-  // Current state
-  currentPlanId           String   @map("current_plan_id")
-  recommendedPlanId       String   @map("recommended_plan_id")
-  
-  // Recommendation context
-  recommendationReason    String   @map("recommendation_reason") // quota_exceeded, feature_needed, cost_optimization
-  confidenceScore         Decimal? @db.Decimal(3,2) @map("confidence_score") // 0.00 to 1.00
-  
-  // Usage analysis
-  usagePattern            Json?    @map("usage_pattern") // Detailed usage analysis
-  projectedSavings        Decimal? @db.Decimal(10,2) @map("projected_savings") // Monthly savings/cost
-  roiMonths               Int?     @map("roi_months") // Months to break even
-  
-  // Recommendation details
-  triggeredBy             String?  @map("triggered_by") // specific limit or feature that triggered
-  benefits                String[] @map("benefits") // List of benefits from upgrade
-  limitationsRemoved      String[] @map("limitations_removed") // Current limitations that would be removed
-  
-  // Status
-  status                  String   @default("pending") @map("status") // pending, viewed, dismissed, accepted
-  viewedAt                DateTime? @map("viewed_at")
-  dismissedAt             DateTime? @map("dismissed_at")
-  acceptedAt              DateTime? @map("accepted_at")
-  
-  // Expiry
-  expiresAt               DateTime? @map("expires_at")
-  
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
-  
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  currentPlan             SubscriptionPlan @relation("CurrentPlanRecommendations", fields: [currentPlanId], references: [id])
-  recommendedPlan         SubscriptionPlan @relation("RecommendedPlanRecommendations", fields: [recommendedPlanId], references: [id])
-
-  @@index([userId, status, createdAt(sort: Desc)])
-  @@index([workspaceId, status, createdAt(sort: Desc)])
-  @@index([expiresAt])
-  @@map("plan_recommendations")
-}
-
-model CustomPlan {
-  id              String   @id @default(uuid())
-  workspaceId     String   @map("workspace_id")
-  basePlanId      String?  @map("base_plan_id")
-  
-  // Plan details
-  planName        String   @map("plan_name")
-  description     String?
-  
-  // Custom limits (NULL = use base plan limit)
-  customMaxTranscriptionsMonthly    BigInt?  @map("custom_max_transcriptions_monthly")
-  customMaxFilesDaily              Int?     @map("custom_max_files_daily")
-  customMaxFilesMonthly            Int?     @map("custom_max_files_monthly")
-  customMaxConcurrentJobs          Int?     @map("custom_max_concurrent_jobs")
-  customMaxVoiceSynthesisMonthly   BigInt?  @map("custom_max_voice_synthesis_monthly")
-  customMaxExportOperationsMonthly Int?     @map("custom_max_export_operations_monthly")
-  customMaxAudioDurationMinutes    Int?     @map("custom_max_audio_duration_minutes")
-  customPriorityLevel              Int?     @map("custom_priority_level")
-  
-  // Custom features
-  customFeatures                   String[] @map("custom_features")
-  excludedFeatures                 String[] @map("excluded_features")
-  additionalFeatures               String[] @map("additional_features")
-  
-  // Pricing
-  customPrice                      Decimal? @db.Decimal(10,2) @map("custom_price")
-  pricingModel                     String   @default("fixed") @map("pricing_model") // fixed, usage_based, hybrid
-  billingInterval                  String   @default("monthly") @map("billing_interval")
-  
-  // Contract details
-  contractStartDate                DateTime? @map("contract_start_date")
-  contractEndDate                  DateTime? @map("contract_end_date")
-  autoRenew                        Boolean  @default(false) @map("auto_renew")
-  noticePeriodDays                 Int      @default(30) @map("notice_period_days")
-  
-  // Approval workflow
-  requestedBy                      String?  @map("requested_by")
-  approvedBy                       String?  @map("approved_by")
-  approvalStatus                   String   @default("pending") @map("approval_status") // pending, approved, rejected
-  approvalNotes                    String?  @map("approval_notes")
-  
-  // Activation
-  isActive                         Boolean  @default(false) @map("is_active")
-  activatedAt                      DateTime? @map("activated_at")
-  
-  createdAt                        DateTime @default(now()) @map("created_at")
-  updatedAt                        DateTime @updatedAt @map("updated_at")
-  
-  requestedByUser                  User?    @relation(fields: [requestedBy], references: [id])
-  basePlan                         SubscriptionPlan? @relation(fields: [basePlanId], references: [id])
-
-  @@map("custom_plans")
-}
-
-model FeatureFlag {
-  id              String   @id @default(uuid())
-  featureName     String   @unique @map("feature_name")
-  displayName     String   @map("display_name")
-  description     String?
-  
-  // Feature classification
-  category        String?  // core, premium, experimental, enterprise
-  featureType     String?  @map("feature_type") // ui_component, api_endpoint, processing_option, integration
-  
-  // Availability
-  minPlanLevel    Int      @default(1) @map("min_plan_level") // Minimum plan level required
-  requiredPlans   String[] @map("required_plans") // Specific plans that include this feature
-  excludedPlans   String[] @map("excluded_plans") // Plans that explicitly exclude this feature
-  
-  // Status
-  isEnabled       Boolean  @default(true) @map("is_enabled")
-  isBeta          Boolean  @default(false) @map("is_beta")
-  isDeprecated    Boolean  @default(false) @map("is_deprecated")
-  
-  // Usage tracking
-  usageCount      BigInt   @default(0) @map("usage_count")
-  lastUsedAt      DateTime? @map("last_used_at")
-  
+  action          String   // create, update, delete, access
+  resource        String   // user, workspace, audio, etc
+  resourceId      String?  @map("resource_id")
+  changes         Json?    // before/after values
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent")
+  metadata        Json     @default("{}")
   createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-  
-  planFeatures    PlanFeatureMatrix[]
 
-  @@map("feature_flags")
-}
-
-model PlanFeatureMatrix {
-  id              String      @id @default(uuid())
-  planId          String      @map("plan_id")
-  featureFlagId   String      @map("feature_flag_id")
-  
-  // Feature configuration for this plan
-  isEnabled       Boolean     @default(true) @map("is_enabled")
-  usageLimit      Int?        @map("usage_limit") // Specific limit for this feature on this plan
-  
-  // Billing
-  includedUsage   Int         @default(0) @map("included_usage") // Included in base plan
-  overageRate     Decimal?    @db.Decimal(10,6) @map("overage_rate") // Cost per unit over included usage
-  
-  createdAt       DateTime    @default(now()) @map("created_at")
-  
-  plan            SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  featureFlag     FeatureFlag @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
-
-  @@unique([planId, featureFlagId])
-  @@map("plan_feature_matrix")
-}
-
-// ========================================
-// EWAY PAYMENT INTEGRATION
-// ========================================
-
-model EwayCustomer {
-  id                    String   @id @default(uuid())
-  userId                String   @map("user_id")
-  ewayCustomerToken     String   @unique @map("eway_customer_token")
-  
-  // Customer Details
-  firstName             String   @map("first_name")
-  lastName              String   @map("last_name")
-  email                 String
-  companyName           String?  @map("company_name")
-  
-  // Address
-  country               String   @default("AU")
-  streetAddress         String?  @map("street_address")
-  city                  String?
-  state                 String?
-  postalCode            String?  @map("postal_code")
-  
-  // Contact
-  phoneNumber           String?  @map("phone_number")
-  
-  // Card Details (for display only - not stored in full)
-  cardLastFour          String?  @map("card_last_four")
-  cardType              String?  @map("card_type")
-  cardExpiryMonth       Int?     @map("card_expiry_month")
-  cardExpiryYear        Int?     @map("card_expiry_year")
-  
-  // eWAY References
-  ewayReference         String?  @map("eway_reference")
-  
-  // Status
-  isActive              Boolean  @default(true) @map("is_active")
-  lastUsedAt            DateTime? @map("last_used_at")
-  
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
-  
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  transactions          EwayTransaction[]
-  recurringSchedules    EwayRecurringSchedule[]
-
-  @@index([userId])
-  @@index([ewayCustomerToken])
-  @@map("eway_customers")
-}
-
-model EwayTransaction {
-  id                    String   @id @default(uuid())
-  userId                String   @map("user_id")
-  workspaceId           String?  @map("workspace_id")
-  ewayCustomerId        String   @map("eway_customer_id")
-  subscriptionId        String?  @map("subscription_id")
-  
-  // Transaction Details
-  transactionType       String   @map("transaction_type") // purchase, recurring, refund
-  amount                Decimal  @db.Decimal(10,2)
-  currency              String   @default("AUD")
-  
-  // eWAY Response Data
-  ewayTransactionId     BigInt?  @map("eway_transaction_id")
-  ewayAccessCode        String?  @map("eway_access_code")
-  ewayAuthCode          String?  @map("eway_auth_code")
-  responseCode          String?  @map("response_code")
-  responseMessage       String?  @map("response_message")
-  
-  // Status
-  transactionStatus     String   @map("transaction_status") // pending, approved, declined, failed
-  isRecurring           Boolean  @default(false) @map("is_recurring")
-  
-  // Invoice Details
-  ewayInvoiceNumber     String?  @map("eway_invoice_number")
-  ewayInvoiceReference  String?  @map("eway_invoice_reference")
-  
-  // Fraud Prevention
-  fraudAction           String?  @map("fraud_action")
-  verificationStatus    String?  @map("verification_status")
-  beagleScore           Float?   @map("beagle_score")
-  
-  // Error Handling
-  errorCode             String?  @map("error_code")
-  errorMessage          String?  @map("error_message")
-  
-  // Timestamps
-  processedAt           DateTime? @map("processed_at")
-  createdAt             DateTime @default(now()) @map("created_at")
-  
-  // Raw Response (for debugging)
-  ewayRawResponse       Json?    @map("eway_raw_response")
-  
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ewayCustomer          EwayCustomer @relation(fields: [ewayCustomerId], references: [id], onDelete: Cascade)
+  // Relations
+  user            User?    @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
-  @@index([ewayCustomerId, transactionStatus])
-  @@index([subscriptionId])
-  @@index([ewayTransactionId])
+  @@index([workspaceId, createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+model SecurityEvent {
+  id              String   @id @default(uuid())
+  userId          String?  @map("user_id")
+  eventType       String   @map("event_type") // login_failed, suspicious_activity, api_limit_exceeded
+  severity        String   // low, medium, high, critical
+  description     String
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent")
+  metadata        Json     @default("{}")
+  resolved        Boolean  @default(false)
+  resolvedAt      DateTime? @map("resolved_at")
+  resolvedBy      String?   @map("resolved_by")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user            User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([eventType, severity])
+  @@map("security_events")
+}
+
+// ==================== NOTIFICATIONS & EMAIL ====================
+
+model Notification {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  type            String   // system, workspace, billing, security
+  title           String
+  message         String
+  actionUrl       String?  @map("action_url")
+  read            Boolean  @default(false)
+  readAt          DateTime? @map("read_at")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@map("notifications")
+}
+
+model EmailTemplate {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  subject         String
+  htmlContent     String   @map("html_content")
+  textContent     String   @map("text_content")
+  variables       Json     // Required variables
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  emailLogs       EmailLog[]
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id              String   @id @default(uuid())
+  templateId      String?  @map("template_id")
+  recipientEmail  String   @map("recipient_email")
+  subject         String
+  status          String   // sent, failed, bounced, opened
+  provider        String   // sendgrid
+  providerMessageId String? @map("provider_message_id")
+  openedAt        DateTime? @map("opened_at")
+  clickedAt       DateTime? @map("clicked_at")
+  error           String?
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  template        EmailTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([recipientEmail, createdAt])
+  @@map("email_logs")
+}
+
+model EmailPreference {
+  userId          String   @id @map("user_id")
+  marketing       Boolean  @default(true)
+  transactional   Boolean  @default(true)
+  security        Boolean  @default(true)
+  newsletter      Boolean  @default(true)
+  productUpdates  Boolean  @default(true) @map("product_updates")
+  unsubscribeToken String  @unique @map("unsubscribe_token")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_preferences")
+}
+
+// ==================== WORKSPACE FEATURES ====================
+
+model Integration {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  type            String   // slack, teams, zapier, webhook
+  name            String
+  config          Json     // Encrypted configuration
+  isActive        Boolean  @default(true) @map("is_active")
+  lastSyncAt      DateTime? @map("last_sync_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, type])
+  @@map("integrations")
+}
+
+model WorkspaceAutomation {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  description     String?
+  trigger         Json     // Trigger conditions
+  actions         Json     // Actions to perform
+  isActive        Boolean  @default(true) @map("is_active")
+  lastRunAt       DateTime? @map("last_run_at")
+  runCount        Int      @default(0) @map("run_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("workspace_automations")
+}
+
+model Webhook {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  url             String
+  events          String[] // audio.processed, workspace.updated, etc
+  secret          String
+  isActive        Boolean  @default(true) @map("is_active")
+  lastTriggeredAt DateTime? @map("last_triggered_at")
+  failureCount    Int      @default(0) @map("failure_count")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("webhooks")
+}
+
+model CustomField {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  fieldType       String   @map("field_type") // text, number, date, select
+  isRequired      Boolean  @default(false) @map("is_required")
+  options         Json?    // For select fields
+  defaultValue    String?  @map("default_value")
+  sortOrder       Int      @default(0) @map("sort_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@map("custom_fields")
+}
+
+model Tag {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  color           String
+  description     String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@map("tags")
+}
+
+// ==================== AI FEATURES ====================
+
+model AiAgent {
+  id              String   @id @default(uuid())
+  workspaceId     String   @map("workspace_id")
+  name            String
+  description     String?
+  systemPrompt    String   @map("system_prompt")
+  model           String   @default("gpt-4")
+  temperature     Float    @default(0.7)
+  maxTokens       Int      @default(2048) @map("max_tokens")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversations   AiConversation[]
+
+  @@map("ai_agents")
+}
+
+model AiConversation {
+  id              String   @id @default(uuid())
+  agentId         String   @map("agent_id")
+  userId          String   @map("user_id")
+  title           String?
+  context         Json?    // Conversation context
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agent           AiAgent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages        AiMessage[]
+
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id              String   @id @default(uuid())
+  conversationId  String   @map("conversation_id")
+  role            String   // user, assistant, system
+  content         String
+  tokensUsed      Int?     @map("tokens_used")
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  conversation    AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+model AiTokenUsage {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  workspaceId     String   @map("workspace_id")
+  provider        String   // openai, anthropic
+  model           String
+  tokensUsed      Int      @map("tokens_used")
+  cost            Decimal  @db.Decimal(10, 6)
+  purpose         String   // transcription, summary, chat
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@map("ai_token_usage")
+}
+
+// ==================== EWAY PAYMENT MODELS ====================
+
+model EwayTransaction {
+  id              String   @id @default(uuid())
+  transactionId   String   @unique @map("transaction_id")
+  customerToken   String?  @map("customer_token")
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("AUD")
+  status          String   // pending, approved, declined, failed
+  responseCode    String?  @map("response_code")
+  responseMessage String?  @map("response_message")
+  authCode        String?  @map("auth_code")
+  beagleScore     Int?     @map("beagle_score")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
   @@map("eway_transactions")
 }
 
-model EwayRecurringSchedule {
-  id                    String   @id @default(uuid())
-  userId                String   @map("user_id")
-  workspaceId           String?  @map("workspace_id")
-  ewayCustomerId        String   @map("eway_customer_id")
-  subscriptionId        String   @map("subscription_id")
-  
-  // Schedule Details
-  scheduleType          String   @map("schedule_type") // monthly, yearly
-  billingAmount         Decimal  @db.Decimal(10,2) @map("billing_amount")
-  currency              String   @default("AUD")
-  
-  // Schedule Timing
-  startDate             DateTime @map("start_date")
-  nextBillingDate       DateTime @map("next_billing_date")
-  lastProcessedAt       DateTime? @map("last_processed_at")
-  
-  // Status and Tracking
-  status                String   @default("active") @map("status") // active, paused, cancelled, failed
-  failedAttempts        Int      @default(0) @map("failed_attempts")
-  lastTransactionId     String?  @map("last_transaction_id")
-  
-  // Cancellation
-  cancelledAt           DateTime? @map("cancelled_at")
-  
-  // Metadata
-  metadata              Json?    @default("{}")
-  
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
-  
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ewayCustomer          EwayCustomer @relation(fields: [ewayCustomerId], references: [id], onDelete: Cascade)
+model EwayCustomer {
+  id              String   @id @default(uuid())
+  customerToken   String   @unique @map("customer_token")
+  firstName       String?  @map("first_name")
+  lastName        String?  @map("last_name")
+  email           String?
+  phone           String?
+  address         Json?    // Address details
+  cardNumber      String?  @map("card_number") // Masked
+  cardName        String?  @map("card_name")
+  cardExpiryMonth String?  @map("card_expiry_month")
+  cardExpiryYear  String?  @map("card_expiry_year")
+  isActive        Boolean  @default(true) @map("is_active")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
-  @@index([userId, status])
-  @@index([nextBillingDate, status])
-  @@index([subscriptionId])
+  @@map("eway_customers")
+}
+
+model EwayRecurringSchedule {
+  id              String   @id @default(uuid())
+  customerToken   String   @map("customer_token")
+  interval        String   // weekly, monthly, yearly
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("AUD")
+  status          String   // active, paused, cancelled
+  nextPayment     DateTime @map("next_payment")
+  lastPayment     DateTime? @map("last_payment")
+  paymentCount    Int      @default(0) @map("payment_count")
+  maxPayments     Int?     @map("max_payments")
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
   @@map("eway_recurring_schedules")
 }
 
 model EwayWebhookEvent {
-  id                    String   @id @default(uuid())
-  
-  // Event Details
-  eventType             String   @map("event_type")
-  ewayTransactionId     BigInt?  @map("eway_transaction_id")
-  ewayCustomerToken     String?  @map("eway_customer_token")
-  
-  // Event Data
-  eventData             Json     @map("event_data")
-  rawPayload            String   @map("raw_payload")
-  
-  // Processing Status
-  processed             Boolean  @default(false)
-  processedAt           DateTime? @map("processed_at")
-  
-  // Request Context
-  sourceIp              String?  @map("source_ip")
-  
-  createdAt             DateTime @default(now()) @map("created_at")
+  id              String   @id @default(uuid())
+  eventType       String   @map("event_type")
+  transactionId   String?  @map("transaction_id")
+  customerToken   String?  @map("customer_token")
+  payload         Json
+  processed       Boolean  @default(false)
+  processedAt     DateTime? @map("processed_at")
+  error           String?
+  retryCount      Int      @default(0) @map("retry_count")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   @@index([eventType, processed])
-  @@index([ewayTransactionId])
-  @@index([createdAt])
   @@map("eway_webhook_events")
 }
 
-// ========================================
-// EXPORT & SHARING
-// ========================================
+// ==================== SYSTEM MODELS ====================
 
-model ExportHistory {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  
-  // Export Details
-  exportType    String   @map("export_type") // json, txt, pdf, csv
-  dataType      String   @map("data_type") // transcript, summary, full_history
-  
-  // Filters Applied
-  dateFrom      DateTime? @map("date_from")
-  dateTo        DateTime? @map("date_to")
-  workspaceIds  String[] @map("workspace_ids")
-  filters       Json?    @default("{}")
-  
-  // File Information
-  filename      String
-  fileSize      BigInt   @map("file_size")
-  storagePath   String?  @map("storage_path")
-  downloadUrl   String?  @map("download_url")
-  expiresAt     DateTime? @map("expires_at")
-  
-  // Status
-  status        String   @default("processing") @map("status") // processing, completed, failed, expired
-  downloadCount Int      @default(0) @map("download_count")
-  
-  createdAt     DateTime @default(now()) @map("created_at")
-  completedAt   DateTime? @map("completed_at")
-  
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, createdAt])
-  @@map("export_history")
-}
-
-// ========================================
-// AUDIT & COMPLIANCE
-// ========================================
-
-model AuditLog {
-  id            String   @id @default(uuid())
-  userId        String?  @map("user_id")
-  workspaceId   String?  @map("workspace_id")
-  
-  // Event Information
-  action        String   // create, update, delete, view, export, etc.
-  resource      String   // user, workspace, audio_file, etc.
-  resourceId    String?  @map("resource_id")
-  
-  // Request Information
-  ipAddress     String?  @map("ip_address")
-  userAgent     String?  @map("user_agent")
-  requestId     String?  @map("request_id")
-  
-  // Event Details
-  details       Json?    @default("{}")
-  oldValues     Json?    @map("old_values")
-  newValues     Json?    @map("new_values")
-  
-  // Metadata
-  severity      String   @default("info") @map("severity") // debug, info, warn, error, critical
-  category      String?  // security, data, system, user_action
-  
-  createdAt     DateTime @default(now()) @map("created_at")
-  
-  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  workspace     Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-
-  @@index([userId, createdAt])
-  @@index([workspaceId, createdAt])
-  @@index([action, createdAt])
-  @@index([resource, createdAt])
-  @@map("audit_logs")
-}
-
-model DataRetentionPolicy {
-  id              String   @id @default(uuid())
-  
-  // Policy Details
-  name            String   @unique
+model SystemConfig {
+  key             String   @id
+  value           Json
   description     String?
-  
-  // Data Types
-  dataType        String   @map("data_type") // audio_files, transcripts, usage_logs, etc.
-  
-  // Retention Rules
-  retentionDays   Int      @map("retention_days")
-  autoDelete      Boolean  @default(false) @map("auto_delete")
-  archiveBeforeDelete Boolean @default(true) @map("archive_before_delete")
-  
-  // Scope
-  appliesToWorkspaces String[] @map("applies_to_workspaces") // empty = all workspaces
-  excludeWorkspaces   String[] @map("exclude_workspaces")
-  
-  // Status
-  isActive        Boolean  @default(true) @map("is_active")
-  
-  createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
-  lastRunAt       DateTime? @map("last_run_at")
 
-  @@map("data_retention_policies")
+  @@map("system_config")
 }
 
-// ========================================
-// ADDITIONAL MODELS FOR LEGACY COMPATIBILITY
-// ========================================
-
-model PaymentMethod {
+model HealthCheck {
   id              String   @id @default(uuid())
-  workspaceId     String   @map("workspace_id")
-  
-  // Payment Method Details
-  provider        String   // stripe, eway
-  providerMethodId String  @map("provider_method_id")
-  type            String   // card, bank_account
-  
-  // Display Information
-  last4           String?
-  brand           String?
-  expiryMonth     Int?     @map("expiry_month")
-  expiryYear      Int?     @map("expiry_year")
-  
-  // Status
-  isDefault       Boolean  @default(false) @map("is_default")
-  isActive        Boolean  @default(true) @map("is_active")
-  
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  service         String   // api, database, storage, email
+  status          String   // healthy, degraded, down
+  responseTime    Int      @map("response_time") // milliseconds
+  details         Json?
+  checkedAt       DateTime @default(now()) @map("checked_at")
 
-  @@index([workspaceId])
-  @@map("payment_methods")
+  @@index([service, checkedAt])
+  @@map("health_checks")
 }
-
-// ========================================
-// WEBSITE CONTENT & TESTIMONIALS
-// ========================================
-
-model Testimonial {
-  id                String   @id @default(uuid())
-  
-  // Customer Information
-  customerName      String   @map("customer_name")
-  customerRole      String?  @map("customer_role")
-  companyName       String?  @map("company_name")
-  avatarUrl         String?  @map("avatar_url")
-  
-  // Testimonial Content
-  content           String
-  rating            Int      @default(5)
-  
-  // Meta Information
-  featuredOn        String?  @map("featured_on") // homepage, pricing, about
-  useCase           String?  @map("use_case") // business, education, content, research
-  
-  // Verification
-  isVerified        Boolean  @default(false) @map("is_verified")
-  verificationMethod String? @map("verification_method") // email, linkedin, direct_contact
-  
-  // Display Control
-  isActive          Boolean  @default(true) @map("is_active")
-  displayOrder      Int      @default(0) @map("display_order")
-  
-  // Timestamps
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  
-  // Optional: Link to actual user
-  userId            String?  @map("user_id")
-  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([isActive, displayOrder])
-  @@index([featuredOn, isActive])
-  @@index([useCase, isActive])
-  @@map("testimonials")
-}
-
-model WebsiteContent {
-  id              String   @id @default(uuid())
-  
-  // Content Identification
-  contentKey      String   @unique @map("content_key")
-  contentType     String   @map("content_type") // text, html, json, image_url
-  
-  // Content
-  contentValue    String   @map("content_value")
-  contentMetadata Json?    @default("{}") @map("content_metadata")
-  
-  // Organization
-  section         String?  // hero, features, pricing, footer
-  page            String   @default("homepage") // homepage, pricing, about, contact
-  
-  // Display Control
-  isActive        Boolean  @default(true) @map("is_active")
-  displayOrder    Int      @default(0) @map("display_order")
-  
-  // Timestamps
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  @@index([contentKey, isActive])
-  @@index([section, page, isActive])
-  @@index([page, isActive, displayOrder])
-  @@map("website_content")
-}
-
-// ========================================
-// INDEXES FOR PERFORMANCE
-// ========================================
-
-// Additional composite indexes for common queries
-// ========================================
-// ROLES AND PERMISSIONS SYSTEM
-// ========================================
-
-model Role {
-  id              String   @id @default(uuid())
-  name            String   @unique
-  displayName     String   @map("display_name")
-  description     String?
-  isSystemRole    Boolean  @default(false) @map("is_system_role")
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  permissions     RolePermission[]
-  users          UserRole[]
-
-  @@map("roles")
-}
-
-model Permission {
-  id                  String   @id @default(uuid())
-  name                String   @unique
-  displayName         String   @map("display_name")
-  description         String?
-  resource            String   // e.g., 'users', 'projects', 'settings'
-  action              String   // e.g., 'read', 'write', 'delete', 'manage'
-  isSystemPermission  Boolean  @default(false) @map("is_system_permission")
-  createdAt           DateTime @default(now()) @map("created_at")
-
-  // Relations
-  roles              RolePermission[]
-
-  @@map("permissions")
-}
-
-model RolePermission {
-  id           String   @id @default(uuid())
-  roleId       String   @map("role_id")
-  permissionId String   @map("permission_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, permissionId])
-  @@map("role_permissions")
-}
-
-model UserRole {
-  id         String    @id @default(uuid())
-  userId     String    @map("user_id")
-  roleId     String    @map("role_id")
-  assignedBy String?   @map("assigned_by")
-  assignedAt DateTime  @default(now()) @map("assigned_at")
-  expiresAt  DateTime? @map("expires_at")
-  isActive   Boolean   @default(true) @map("is_active")
-
-  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role       Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  assignedByUser User? @relation("UserRoleAssignedBy", fields: [assignedBy], references: [id])
-
-  @@unique([userId, roleId])
-  @@map("user_roles")
-}
-
-// These are defined within the models above, but here's a summary:
-
-// High-priority performance indexes:
-// - audio_history: [userId, createdAt], [workspaceId, createdAt]
-// - usage_metrics: [userId, metricType, periodStart], [workspaceId, metricType, periodStart]
-// - audit_logs: [userId, createdAt], [action, createdAt], [resource, createdAt]
-// - audio_segments: [historyId, segmentIndex]
-// - processing_jobs: [status, priority, queuedAt]
-// - sessions: [userId], [tokenHash]
-// - security_events: [userId, createdAt], [eventType, createdAt]
-// - user_roles: [userId], [roleId]
-// - role_permissions: [roleId], [permissionId]

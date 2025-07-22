@@ -1,15 +1,15 @@
 /**
  * Plan Creation and Editing Modal
- * Modal for creating new subscription plans or editing existing ones
+ * Refactored modal for creating new subscription plans or editing existing ones
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  XMarkIcon,
-  CurrencyDollarIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import ActionButton from '../Dashboard/ActionButton';
+import { PlanBasicInfo } from './Modal/PlanBasicInfo';
+import { PlanPricing } from './Modal/PlanPricing';
+import { PlanLimits } from './Modal/PlanLimits';
+import { PlanFeatures } from './Modal/PlanFeatures';
 
 interface SubscriptionPlan {
   id: string;
@@ -23,14 +23,10 @@ interface SubscriptionPlan {
   priceEUR: number;
   currency: string;
   billingInterval: string;
-  
-  // Basic Limits
   maxApiCalls: number;
   maxStorageMb: number;
   maxProcessingMin: number;
   maxFileSize: number;
-  
-  // Transcription Limits
   maxTranscriptionsMonthly: number;
   maxFilesDaily: number;
   maxFilesMonthly: number;
@@ -38,43 +34,24 @@ interface SubscriptionPlan {
   maxConcurrentJobs: number;
   maxVoiceSynthesisMonthly: number;
   maxExportOperationsMonthly: number;
-  
-  // Team Features
   maxWorkspaces: number;
   maxUsers: number;
-  
-  // Other
   priorityLevel: number;
   features: string[];
   collaborationFeatures: string[];
   isActive: boolean;
-  isPublic: boolean;
-  planCategory: string;
-  
-  // Legacy fields for compatibility
-  audioProcessingLimit?: number;
-  storageLimit?: number;
-  apiCallsLimit?: number;
-  advancedFeatures?: boolean;
-  customBranding?: boolean;
-  prioritySupport?: boolean;
-  activeSubscriptions?: number;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 interface PlanModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (plan: Partial<SubscriptionPlan>) => Promise<void>;
   plan?: SubscriptionPlan | null;
-  token: string;
+  onSave: (plan: Partial<SubscriptionPlan>) => void;
 }
 
-const initialFormData = {
+const DEFAULT_PLAN: Partial<SubscriptionPlan> = {
   name: '',
-  displayName: '',
-  tier: 'personal',
+  tier: '',
   description: '',
   price: 0,
   priceAUD: 0,
@@ -82,90 +59,44 @@ const initialFormData = {
   priceEUR: 0,
   currency: 'AUD',
   billingInterval: 'monthly',
-  
-  // Basic Limits
   maxApiCalls: 1000,
-  maxStorageMb: 1024,
+  maxStorageMb: 1000,
   maxProcessingMin: 60,
-  maxFileSize: 157286400, // 150MB
-  
-  // Transcription Limits
+  maxFileSize: 100,
   maxTranscriptionsMonthly: 50,
   maxFilesDaily: 10,
   maxFilesMonthly: 100,
   maxAudioDurationMinutes: 120,
-  maxConcurrentJobs: 1,
-  maxVoiceSynthesisMonthly: 10,
+  maxConcurrentJobs: 3,
+  maxVoiceSynthesisMonthly: 20,
   maxExportOperationsMonthly: 50,
-  
-  // Team Features
   maxWorkspaces: 1,
-  maxUsers: 1,
-  
-  // Other
+  maxUsers: 5,
   priorityLevel: 5,
   features: [],
   collaborationFeatures: [],
-  isActive: true,
-  isPublic: true,
-  planCategory: 'personal'
+  isActive: true
 };
 
-export default function PlanModal({ isOpen, onClose, onSave, plan, token }: PlanModalProps) {
-  const [formData, setFormData] = useState(initialFormData);
-  const [saving, setSaving] = useState(false);
+export const PlanModal: React.FC<PlanModalProps> = ({ isOpen, onClose, plan, onSave }) => {
+  const [formData, setFormData] = useState<Partial<SubscriptionPlan>>(DEFAULT_PLAN);
+  const [activeTab, setActiveTab] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isEditing = !!plan;
+  const tabs = ['Basic Info', 'Pricing', 'Limits', 'Features'];
 
   useEffect(() => {
     if (plan) {
-      setFormData({
-        name: plan.name,
-        displayName: plan.displayName || plan.name,
-        tier: plan.tier,
-        description: plan.description,
-        price: plan.price || plan.priceAUD || 0,
-        priceAUD: plan.priceAUD || plan.price || 0,
-        priceUSD: plan.priceUSD || 0,
-        priceEUR: plan.priceEUR || 0,
-        currency: plan.currency || 'AUD',
-        billingInterval: plan.billingInterval || 'monthly',
-        
-        // Basic Limits
-        maxApiCalls: plan.maxApiCalls || plan.apiCallsLimit || 1000,
-        maxStorageMb: plan.maxStorageMb || (plan.storageLimit ? plan.storageLimit * 1024 : 1024),
-        maxProcessingMin: plan.maxProcessingMin || 60,
-        maxFileSize: plan.maxFileSize || 157286400,
-        
-        // Transcription Limits
-        maxTranscriptionsMonthly: plan.maxTranscriptionsMonthly || plan.audioProcessingLimit || 50,
-        maxFilesDaily: plan.maxFilesDaily || 10,
-        maxFilesMonthly: plan.maxFilesMonthly || 100,
-        maxAudioDurationMinutes: plan.maxAudioDurationMinutes || 120,
-        maxConcurrentJobs: plan.maxConcurrentJobs || 1,
-        maxVoiceSynthesisMonthly: plan.maxVoiceSynthesisMonthly || 10,
-        maxExportOperationsMonthly: plan.maxExportOperationsMonthly || 50,
-        
-        // Team Features
-        maxWorkspaces: plan.maxWorkspaces || 1,
-        maxUsers: plan.maxUsers || 1,
-        
-        // Other
-        priorityLevel: plan.priorityLevel || 5,
-        features: plan.features || [],
-        collaborationFeatures: plan.collaborationFeatures || [],
-        isActive: plan.isActive !== undefined ? plan.isActive : true,
-        isPublic: plan.isPublic !== undefined ? plan.isPublic : true,
-        planCategory: plan.planCategory || 'personal'
-      });
+      setFormData(plan);
     } else {
-      setFormData(initialFormData);
+      setFormData(DEFAULT_PLAN);
     }
+    setActiveTab(0);
     setErrors({});
   }, [plan, isOpen]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -175,293 +106,142 @@ export default function PlanModal({ isOpen, onClose, onSave, plan, token }: Plan
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       newErrors.name = 'Plan name is required';
     }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+    if (!formData.tier) {
+      newErrors.tier = 'Tier is required';
     }
-    if (formData.priceAUD < 0) {
-      newErrors.priceAUD = 'Price must be non-negative';
+    if (!formData.billingInterval) {
+      newErrors.billingInterval = 'Billing interval is required';
     }
-    if (formData.priceUSD < 0) {
-      newErrors.priceUSD = 'Price must be non-negative';
-    }
-    if (formData.priceEUR < 0) {
-      newErrors.priceEUR = 'Price must be non-negative';
-    }
-    if (formData.audioProcessingLimit <= 0) {
-      newErrors.audioProcessingLimit = 'Audio processing limit must be positive';
-    }
-    if (formData.storageLimit <= 0) {
-      newErrors.storageLimit = 'Storage limit must be positive';
-    }
-    if (formData.apiCallsLimit <= 0) {
-      newErrors.apiCallsLimit = 'API calls limit must be positive';
+    if (formData.price === undefined || formData.price < 0) {
+      newErrors.price = 'Valid price is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    setSaving(true);
+    setIsLoading(true);
     try {
       await onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Error saving plan:', error);
+      setErrors({ general: 'Failed to save plan. Please try again.' });
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 0:
+        return <PlanBasicInfo plan={formData} onChange={handleChange} errors={errors} />;
+      case 1:
+        return <PlanPricing plan={formData} onChange={handleChange} errors={errors} />;
+      case 2:
+        return <PlanLimits plan={formData} onChange={handleChange} errors={errors} />;
+      case 3:
+        return <PlanFeatures plan={formData} onChange={handleChange} errors={errors} />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-            <CurrencyDollarIcon className="h-5 w-5" />
-            {isEditing ? 'Edit Subscription Plan' : 'Create New Plan'}
-          </h3>
+        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {plan ? 'Edit Subscription Plan' : 'Create New Subscription Plan'}
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Basic Information */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Basic Information</h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Plan Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-300' : ''
-                  }`}
-                  placeholder="e.g., Professional Plan"
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Tier</label>
-                <select
-                  value={formData.tier}
-                  onChange={(e) => handleInputChange('tier', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="free">Free</option>
-                  <option value="basic">Basic</option>
-                  <option value="pro">Pro</option>
-                  <option value="enterprise">Enterprise</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                rows={3}
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                  errors.description ? 'border-red-300' : ''
+        {/* Tab Navigation */}
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {tabs.map((tab, index) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(index)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === index
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
-                placeholder="Describe what this plan offers..."
-              />
-              {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto max-h-96">
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{errors.general}</p>
             </div>
+          )}
+          
+          {renderTabContent()}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex space-x-2">
+            {activeTab > 0 && (
+              <button
+                onClick={() => setActiveTab(activeTab - 1)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Previous
+              </button>
+            )}
+            {activeTab < tabs.length - 1 && (
+              <button
+                onClick={() => setActiveTab(activeTab + 1)}
+                className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100"
+              >
+                Next
+              </button>
+            )}
           </div>
 
-          {/* Pricing */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Pricing</h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price (AUD)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.priceAUD}
-                  onChange={(e) => handleInputChange('priceAUD', parseFloat(e.target.value) || 0)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.priceAUD ? 'border-red-300' : ''
-                  }`}
-                />
-                {errors.priceAUD && <p className="mt-1 text-sm text-red-600">{errors.priceAUD}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price (USD)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.priceUSD}
-                  onChange={(e) => handleInputChange('priceUSD', parseFloat(e.target.value) || 0)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.priceUSD ? 'border-red-300' : ''
-                  }`}
-                />
-                {errors.priceUSD && <p className="mt-1 text-sm text-red-600">{errors.priceUSD}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Price (EUR)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.priceEUR}
-                  onChange={(e) => handleInputChange('priceEUR', parseFloat(e.target.value) || 0)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.priceEUR ? 'border-red-300' : ''
-                  }`}
-                />
-                {errors.priceEUR && <p className="mt-1 text-sm text-red-600">{errors.priceEUR}</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Usage Limits */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Usage Limits</h4>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Audio Processing Limit</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.audioProcessingLimit}
-                  onChange={(e) => handleInputChange('audioProcessingLimit', parseInt(e.target.value) || 1)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.audioProcessingLimit ? 'border-red-300' : ''
-                  }`}
-                />
-                <p className="text-xs text-gray-500">Files per month</p>
-                {errors.audioProcessingLimit && <p className="mt-1 text-sm text-red-600">{errors.audioProcessingLimit}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Storage Limit (GB)</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.storageLimit}
-                  onChange={(e) => handleInputChange('storageLimit', parseInt(e.target.value) || 1)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.storageLimit ? 'border-red-300' : ''
-                  }`}
-                />
-                {errors.storageLimit && <p className="mt-1 text-sm text-red-600">{errors.storageLimit}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">API Calls Limit</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.apiCallsLimit}
-                  onChange={(e) => handleInputChange('apiCallsLimit', parseInt(e.target.value) || 1)}
-                  className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
-                    errors.apiCallsLimit ? 'border-red-300' : ''
-                  }`}
-                />
-                <p className="text-xs text-gray-500">Calls per month</p>
-                {errors.apiCallsLimit && <p className="mt-1 text-sm text-red-600">{errors.apiCallsLimit}</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Features */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">Features</h4>
-            
-            <div className="space-y-3">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={formData.advancedFeatures}
-                  onChange={(e) => handleInputChange('advancedFeatures', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Advanced Features</span>
-              </label>
-
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={formData.customBranding}
-                  onChange={(e) => handleInputChange('customBranding', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Custom Branding</span>
-              </label>
-
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={formData.prioritySupport}
-                  onChange={(e) => handleInputChange('prioritySupport', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Priority Support</span>
-              </label>
-
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={formData.isActive}
-                  onChange={(e) => handleInputChange('isActive', e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Active (Available to users)</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
-            <ActionButton
-              variant="secondary"
+          <div className="flex space-x-3">
+            <button
               onClick={onClose}
-              disabled={saving}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancel
-            </ActionButton>
+            </button>
             <ActionButton
+              onClick={handleSave}
+              disabled={isLoading}
               variant="primary"
-              type="submit"
-              loading={saving}
-              icon={CheckIcon}
             >
-              {isEditing ? 'Update Plan' : 'Create Plan'}
+              {isLoading ? 'Saving...' : plan ? 'Update Plan' : 'Create Plan'}
             </ActionButton>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default PlanModal;
