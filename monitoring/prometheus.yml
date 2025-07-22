@@ -11,7 +11,7 @@ scrape_configs:
   # AudioTricks Backend Metrics
   - job_name: 'audiotricks-backend'
     static_configs:
-      - targets: ['backend:3001']
+      - targets: ['backend:3000']
     metrics_path: '/health/metrics'
     scrape_interval: 30s
     scrape_timeout: 10s

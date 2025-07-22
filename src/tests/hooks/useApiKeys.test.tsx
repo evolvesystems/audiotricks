@@ -1,304 +1,196 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useApiKeys } from '../../hooks/useApiKeys';
-import ApiKeyService from '../../services/apikey.service';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook, waitFor } from '@testing-library/react'
+import { useApiKeys } from '../../hooks/useApiKeys'
+import { logger } from '../../utils/logger'
 
-// Mock the API key service
-vi.mock('../../services/apikey.service', () => ({
-  default: {
-    getAllApiKeys: vi.fn(),
-    getApiKeyInfo: vi.fn(),
-    validateApiKey: vi.fn(),
-    saveApiKey: vi.fn(),
-    deleteApiKey: vi.fn(),
-    updateApiKey: vi.fn(),
-  },
-}));
+// Mock the logger
+vi.mock('../../utils/logger', () => ({
+  logger: {
+    error: vi.fn()
+  }
+}))
 
-/**
- * Test suite for useApiKeys hook - API key management state
- * Follows CLAUDE.md requirements: expected use, edge case, failure case
- */
+// Mock fetch globally
+const mockFetch = vi.fn()
+global.fetch = mockFetch
 
 describe('useApiKeys Hook', () => {
-  const mockApiKeyService = vi.mocked(ApiKeyService);
-
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Reset localStorage mock
-    vi.mocked(localStorage.getItem).mockReturnValue(null);
-    vi.mocked(localStorage.setItem).mockImplementation(() => {});
-  });
+    vi.clearAllMocks()
+    localStorage.clear()
+  })
 
-  test('expected use case - loads API keys on mount', async () => {
-    const mockKeys = {
-      openai: { value: 'sk-test...', isValid: true, lastValidated: new Date() },
-      elevenlabs: { value: 'test-key', isValid: true, lastValidated: new Date() }
-    };
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
 
-    mockApiKeyService.getAllApiKeys.mockResolvedValue(mockKeys);
+  // Expected use case: Successful API key check for authenticated user
+  it('should check API keys successfully for authenticated user', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        hasOpenAI: true,
+        hasElevenLabs: false
+      })
+    })
 
-    const { result } = renderHook(() => useApiKeys());
+    const { result } = renderHook(() => useApiKeys('valid-token'))
 
     // Initially loading
-    expect(result.current.loading).toBe(true);
-    expect(result.current.keys).toEqual({});
-
-    // Wait for keys to load
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.keys).toEqual(mockKeys);
-    expect(result.current.error).toBeNull();
-  });
-
-  test('expected use case - saves new API key successfully', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.saveApiKey.mockResolvedValue({ success: true });
-    mockApiKeyService.validateApiKey.mockResolvedValue({ isValid: true });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await act(async () => {
-      await result.current.saveKey('openai', 'sk-test-key');
-    });
-
-    expect(mockApiKeyService.saveApiKey).toHaveBeenCalledWith('openai', 'sk-test-key');
-    expect(mockApiKeyService.validateApiKey).toHaveBeenCalledWith('openai', 'sk-test-key');
-    expect(result.current.error).toBeNull();
-  });
-
-  test('expected use case - validates API key before saving', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.validateApiKey.mockResolvedValue({ isValid: true });
-    mockApiKeyService.saveApiKey.mockResolvedValue({ success: true });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    const isValid = await act(async () => {
-      return await result.current.validateKey('openai', 'sk-test-key');
-    });
-
-    expect(isValid).toBe(true);
-    expect(mockApiKeyService.validateApiKey).toHaveBeenCalledWith('openai', 'sk-test-key');
-  });
-
-  test('expected use case - deletes API key successfully', async () => {
-    const mockKeys = {
-      openai: { value: 'sk-test...', isValid: true, lastValidated: new Date() }
-    };
-
-    mockApiKeyService.getAllApiKeys.mockResolvedValue(mockKeys);
-    mockApiKeyService.deleteApiKey.mockResolvedValue({ success: true });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await act(async () => {
-      await result.current.deleteKey('openai');
-    });
-
-    expect(mockApiKeyService.deleteApiKey).toHaveBeenCalledWith('openai');
-  });
-
-  test('edge case - handles key validation during save', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.validateApiKey.mockResolvedValue({ isValid: false, error: 'Invalid key format' });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await act(async () => {
-      await result.current.saveKey('openai', 'invalid-key');
-    });
-
-    expect(result.current.error).toBe('Invalid key format');
-    expect(mockApiKeyService.saveApiKey).not.toHaveBeenCalled();
-  });
-
-  test('edge case - tracks validation status correctly', async () => {
-    const mockKeys = {
-      openai: { value: 'sk-test...', isValid: true, lastValidated: new Date() },
-      elevenlabs: { value: 'invalid-key', isValid: false, lastValidated: new Date() }
-    };
-
-    mockApiKeyService.getAllApiKeys.mockResolvedValue(mockKeys);
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(result.current.hasValidKey('openai')).toBe(true);
-    expect(result.current.hasValidKey('elevenlabs')).toBe(false);
-    expect(result.current.hasValidKey('nonexistent')).toBe(false);
-  });
-
-  test('edge case - refreshes keys manually', async () => {
-    const initialKeys = {
-      openai: { value: 'sk-old...', isValid: true, lastValidated: new Date() }
-    };
-    const updatedKeys = {
-      openai: { value: 'sk-new...', isValid: true, lastValidated: new Date() }
-    };
-
-    mockApiKeyService.getAllApiKeys
-      .mockResolvedValueOnce(initialKeys)
-      .mockResolvedValueOnce(updatedKeys);
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(result.current.keys).toEqual(initialKeys);
-
-    await act(async () => {
-      await result.current.refreshKeys();
-    });
-
-    expect(result.current.keys).toEqual(updatedKeys);
-    expect(mockApiKeyService.getAllApiKeys).toHaveBeenCalledTimes(2);
-  });
-
-  test('failure case - handles API service errors gracefully', async () => {
-    mockApiKeyService.getAllApiKeys.mockRejectedValue(new Error('Service unavailable'));
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBe('Failed to load API keys');
-    expect(result.current.keys).toEqual({});
-  });
-
-  test('failure case - handles save operation failures', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.validateApiKey.mockResolvedValue({ isValid: true });
-    mockApiKeyService.saveApiKey.mockRejectedValue(new Error('Save failed'));
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await act(async () => {
-      await result.current.saveKey('openai', 'sk-test-key');
-    });
-
-    expect(result.current.error).toBe('Failed to save API key');
-  });
-
-  test('failure case - handles validation errors', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.validateApiKey.mockRejectedValue(new Error('Validation service down'));
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    const isValid = await act(async () => {
-      return await result.current.validateKey('openai', 'sk-test-key');
-    });
-
-    expect(isValid).toBe(false);
-    expect(result.current.error).toBe('Validation service down');
-  });
-
-  test('edge case - handles concurrent operations', async () => {
-    mockApiKeyService.getAllApiKeys.mockResolvedValue({});
-    mockApiKeyService.saveApiKey.mockImplementation(() => 
-      new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
-    );
-    mockApiKeyService.validateApiKey.mockResolvedValue({ isValid: true });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    // Start multiple save operations simultaneously
-    const promises = [
-      result.current.saveKey('openai', 'sk-key-1'),
-      result.current.saveKey('elevenlabs', 'el-key-1'),
-    ];
-
-    await act(async () => {
-      await Promise.all(promises);
-    });
-
-    expect(mockApiKeyService.saveApiKey).toHaveBeenCalledTimes(2);
-  });
-
-  test('edge case - maintains key list consistency', async () => {
-    const mockKeys = {
-      openai: { value: 'sk-test...', isValid: true, lastValidated: new Date() }
-    };
-
-    mockApiKeyService.getAllApiKeys.mockResolvedValue(mockKeys);
-    mockApiKeyService.deleteApiKey.mockResolvedValue({ success: true });
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    expect(result.current.getKeyList()).toEqual(['openai']);
-
-    await act(async () => {
-      await result.current.deleteKey('openai');
-    });
-
-    // Should remove key from local state immediately
-    expect(result.current.getKeyList()).toEqual([]);
-  });
-
-  test('failure case - handles delete operation failures', async () => {
-    const mockKeys = {
-      openai: { value: 'sk-test...', isValid: true, lastValidated: new Date() }
-    };
-
-    mockApiKeyService.getAllApiKeys.mockResolvedValue(mockKeys);
-    mockApiKeyService.deleteApiKey.mockRejectedValue(new Error('Delete failed'));
-
-    const { result } = renderHook(() => useApiKeys());
-
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 0));
-    });
-
-    await act(async () => {
-      await result.current.deleteKey('openai');
-    });
-
-    expect(result.current.error).toBe('Failed to delete API key');
-    // Key should still be present after failed delete
-    expect(result.current.getKeyList()).toEqual(['openai']);
-  });
-});
+    expect(result.current.loading).toBe(true)
+    expect(result.current.hasKeys).toEqual({ hasOpenAI: false, hasElevenLabs: false })
+
+    // Wait for API call to complete
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Verify API keys state
+    expect(result.current.hasKeys).toEqual({ hasOpenAI: true, hasElevenLabs: false })
+    expect(result.current.error).toBe(null)
+
+    // Verify fetch was called correctly
+    expect(mockFetch).toHaveBeenCalledWith('/api/settings/api-keys', {
+      headers: {
+        'Authorization': 'Bearer valid-token'
+      }
+    })
+  })
+
+  // Edge case: No token provided
+  it('should not make API calls when no token is provided', async () => {
+    const { result } = renderHook(() => useApiKeys(null))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Should not have made any API calls
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(result.current.hasKeys).toEqual({ hasOpenAI: false, hasElevenLabs: false })
+  })
+
+  // Failure case: API endpoint not implemented (404)
+  it('should fall back to localStorage when API endpoint returns 404', async () => {
+    localStorage.setItem('openai_api_key', 'sk-local-key')
+    localStorage.setItem('elevenlabs_api_key', 'el-local-key')
+
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 404
+    })
+
+    const { result } = renderHook(() => useApiKeys('valid-token'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Should check localStorage as fallback
+    expect(result.current.hasKeys).toEqual({ hasOpenAI: true, hasElevenLabs: true })
+  })
+
+  // Failure case: Network error
+  it('should handle network errors gracefully', async () => {
+    localStorage.setItem('openai_api_key', 'sk-backup-key')
+
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+
+    const { result } = renderHook(() => useApiKeys('valid-token'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Should log error
+    expect(logger.error).toHaveBeenCalledWith('Failed to check API keys:', expect.any(Error))
+
+    // Should fall back to localStorage
+    expect(result.current.hasKeys).toEqual({ hasOpenAI: true, hasElevenLabs: false })
+  })
+
+  // Expected use case: Save API keys successfully
+  it('should save API keys successfully to backend', async () => {
+    // Mock successful save
+    mockFetch.mockResolvedValueOnce({
+      ok: true
+    })
+
+    // Mock successful check after save
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        hasOpenAI: true,
+        hasElevenLabs: false
+      })
+    })
+
+    const { result } = renderHook(() => useApiKeys('valid-token'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Call saveApiKeys
+    const success = await result.current.saveApiKeys({
+      openai: 'sk-new-key',
+      elevenLabs: 'el-new-key'
+    })
+
+    expect(success).toBe(true)
+
+    // Verify save API call
+    expect(mockFetch).toHaveBeenCalledWith('/api/settings/api-keys', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer valid-token',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        openaiKey: 'sk-new-key',
+        elevenLabsKey: 'el-new-key'
+      })
+    })
+  })
+
+  // Failure case: Save API keys with no token
+  it('should return false when trying to save without token', async () => {
+    const { result } = renderHook(() => useApiKeys(null))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    const success = await result.current.saveApiKeys({
+      openai: 'sk-test-key'
+    })
+
+    expect(success).toBe(false)
+    expect(result.current.error).toBe('Authentication required')
+  })
+
+  // Edge case: Clear error function
+  it('should clear error when clearError is called', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({ message: 'Test error' })
+    })
+
+    const { result } = renderHook(() => useApiKeys('valid-token'))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Trigger error
+    await result.current.saveApiKeys({ openai: 'sk-test' })
+
+    expect(result.current.error).toBe('Test error')
+
+    // Clear error
+    result.current.clearError()
+
+    expect(result.current.error).toBe(null)
+  })
+})

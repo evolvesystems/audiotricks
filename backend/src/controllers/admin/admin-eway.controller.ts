@@ -65,7 +65,7 @@ export class AdminEwayController {
           include: {
             ewayCustomer: {
               select: { 
-                ewayCustomerToken: true,
+                customerToken: true,
                 firstName: true,
                 lastName: true,
                 email: true
@@ -123,7 +123,7 @@ export class AdminEwayController {
           include: {
             ewayCustomer: {
               select: {
-                ewayCustomerToken: true,
+        customerToken: true,
                 firstName: true,
                 lastName: true,
                 email: true
@@ -220,7 +220,7 @@ export class AdminEwayController {
           include: {
             ewayCustomer: {
               select: {
-                ewayCustomerToken: true,
+        customerToken: true,
                 firstName: true,
                 lastName: true,
                 email: true
@@ -308,17 +308,17 @@ export class AdminEwayController {
       });
 
       logger.info('Admin marked webhook event for retry:', { eventId });
-      res.json({ success: true, message: 'Webhook event marked for retry' });
+      return res.json({ success: true, message: 'Webhook event marked for retry' });
     } catch (error) {
       logger.error('Failed to retry webhook event:', error);
-      res.status(500).json({ error: 'Failed to retry webhook event' });
+      return res.status(500).json({ error: 'Failed to retry webhook event' });
     }
   }
 
   /**
    * Get eWAY system health and configuration status
    */
-  async getSystemHealth(req: Request, res: Response) {
+  async getSystemHealth(_req: Request, res: Response) {
     try {
       const [
         recentTransactionCount,

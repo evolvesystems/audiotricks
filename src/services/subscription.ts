@@ -1,4 +1,4 @@
-import { ApiService } from './api';
+import { apiClient } from './api';
 
 export interface SubscriptionPlan {
   id: string;
@@ -80,7 +80,7 @@ export interface ConversionResult {
 /**
  * Subscription service for managing payments and billing
  */
-export class SubscriptionService extends ApiService {
+export class SubscriptionService {
   /**
    * Get available subscription plans
    */
@@ -88,7 +88,7 @@ export class SubscriptionService extends ApiService {
     const params = new URLSearchParams({ currency });
     if (region) params.append('region', region);
 
-    const response = await this.get(`/payment/plans?${params}`);
+    const response = await apiClient.get(`/payment/plans?${params}`);
     return response.plans;
   }
 
@@ -96,7 +96,7 @@ export class SubscriptionService extends ApiService {
    * Get supported currencies
    */
   async getCurrencies(): Promise<Currency[]> {
-    const response = await this.get('/payment/currencies');
+    const response = await apiClient.get('/payment/currencies');
     return response.currencies;
   }
 
@@ -104,7 +104,7 @@ export class SubscriptionService extends ApiService {
    * Create payment setup intent
    */
   async createSetupIntent(workspaceId: string): Promise<{ clientSecret: string; customerId: string }> {
-    return await this.post(`/payment/workspaces/${workspaceId}/setup-intent`, {});
+    return await apiClient.post(`/payment/workspaces/${workspaceId}/setup-intent`, {});
   }
 
   /**
@@ -116,7 +116,7 @@ export class SubscriptionService extends ApiService {
     paymentMethodId: string;
     currency?: string;
   }): Promise<SubscriptionDetails> {
-    const response = await this.post(`/payment/workspaces/${params.workspaceId}/subscription`, {
+    const response = await apiClient.post(`/payment/workspaces/${params.workspaceId}/subscription`, {
       planId: params.planId,
       paymentMethodId: params.paymentMethodId,
       currency: params.currency || 'USD'
@@ -129,7 +129,7 @@ export class SubscriptionService extends ApiService {
    */
   async getSubscription(workspaceId: string): Promise<SubscriptionDetails | null> {
     try {
-      const response = await this.get(`/payment/workspaces/${workspaceId}/subscription`);
+      const response = await apiClient.get(`/payment/workspaces/${workspaceId}/subscription`);
       return response.subscription;
     } catch (error: any) {
       if (error.status === 404) {
@@ -143,7 +143,7 @@ export class SubscriptionService extends ApiService {
    * Update subscription plan
    */
   async updateSubscription(workspaceId: string, planId: string): Promise<SubscriptionDetails> {
-    const response = await this.put(`/payment/workspaces/${workspaceId}/subscription`, {
+    const response = await apiClient.put(`/payment/workspaces/${workspaceId}/subscription`, {
       planId
     });
     return response.subscription;
@@ -153,16 +153,14 @@ export class SubscriptionService extends ApiService {
    * Cancel subscription
    */
   async cancelSubscription(workspaceId: string, reason?: string): Promise<void> {
-    await this.delete(`/payment/workspaces/${workspaceId}/subscription`, {
-      reason
-    });
+    await apiClient.delete(`/payment/workspaces/${workspaceId}/subscription`);
   }
 
   /**
    * Get billing history
    */
   async getBillingHistory(workspaceId: string, limit = 10): Promise<BillingRecord[]> {
-    const response = await this.get(`/payment/workspaces/${workspaceId}/billing?limit=${limit}`);
+    const response = await apiClient.get(`/payment/workspaces/${workspaceId}/billing?limit=${limit}`);
     return response.billingHistory;
   }
 
@@ -170,7 +168,7 @@ export class SubscriptionService extends ApiService {
    * Get current usage
    */
   async getCurrentUsage(workspaceId: string): Promise<UsageData> {
-    const response = await this.get(`/payment/workspaces/${workspaceId}/usage`);
+    const response = await apiClient.get(`/payment/workspaces/${workspaceId}/usage`);
     return response.usage;
   }
 
@@ -178,7 +176,7 @@ export class SubscriptionService extends ApiService {
    * Get payment methods
    */
   async getPaymentMethods(workspaceId: string): Promise<any[]> {
-    const response = await this.get(`/payment/workspaces/${workspaceId}/payment-methods`);
+    const response = await apiClient.get(`/payment/workspaces/${workspaceId}/payment-methods`);
     return response.paymentMethods;
   }
 
@@ -192,7 +190,7 @@ export class SubscriptionService extends ApiService {
       toCurrency
     });
 
-    const response = await this.get(`/payment/convert?${params}`);
+    const response = await apiClient.get(`/payment/convert?${params}`);
     return response.conversion;
   }
 

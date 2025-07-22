@@ -56,7 +56,7 @@ services:
       
       # Server
       NODE_ENV: production
-      PORT: 3001
+      PORT: 3000
       
       # Security
       JWT_SECRET: ${JWT_SECRET}
@@ -82,7 +82,7 @@ services:
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "${BACKEND_PORT:-3001}:3001"
+      - "${BACKEND_PORT:-3000}:3000"
     volumes:
       - backend_logs:/app/logs
     networks:
@@ -93,7 +93,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -107,7 +107,7 @@ services:
     container_name: audiotricks-frontend
     restart: unless-stopped
     environment:
-      VITE_API_URL: ${FRONTEND_API_URL:-http://localhost:3001/api}
+      VITE_API_URL: ${FRONTEND_API_URL:-http://localhost:3000/api}
       VITE_ENABLE_SECURE_API_KEYS: "true"
       VITE_ENABLE_WORKSPACE_FEATURES: "true"
     ports:
@@ -178,7 +178,7 @@ services:
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     ports:
-      - "3001:3000"
+      - "3002:3000"
     networks:
       - audiotricks-network
     depends_on:

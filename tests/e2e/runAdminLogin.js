@@ -6,7 +6,7 @@
  * Usage: node tests/e2e/runAdminLogin.js
  * 
  * Prerequisites:
- * 1. Make sure the app is running on http://localhost:3001
+ * 1. Make sure the app is running on http://localhost:3000
  * 2. Ensure you have a test user with email: test@example.com and password: TestPass123
  */
 
@@ -22,7 +22,7 @@ async function runTest() {
     const page = await browser.newPage();
     
     console.log('1. Navigating to admin page...');
-    await page.goto('http://localhost:3001/admin');
+    await page.goto('http://localhost:3000/admin');
     
     console.log('2. Filling login form...');
     await page.type('input[type="email"]', 'test@example.com');

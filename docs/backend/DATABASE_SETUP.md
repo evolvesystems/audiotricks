@@ -37,7 +37,7 @@ ENCRYPTION_KEY="another-32-character-secure-string"
 # Server Configuration
 NODE_ENV="development"
 PORT=3000
-FRONTEND_URL="http://localhost:3001"
+FRONTEND_URL="http://localhost:3000"
 ```
 
 ### Security Considerations
@@ -134,7 +134,7 @@ Expected output:
 ```
 [INFO] Database connection established successfully
 [INFO] Server running on port 3000 in development mode
-[INFO] Frontend URL: http://localhost:3001
+[INFO] Frontend URL: http://localhost:3000
 ```
 
 ### 2. Test Health Endpoint

@@ -27,10 +27,10 @@ async function testAdminLogin() {
     page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
 
-    console.log('📍 Step 1: Navigating to http://localhost:3001/admin');
+    console.log('📍 Step 1: Navigating to http://localhost:3000/admin');
     
     // Navigate to admin page
-    await page.goto('http://localhost:3001/admin', {
+    await page.goto('http://localhost:3000/admin', {
       waitUntil: 'networkidle0',
       timeout: 30000
     });

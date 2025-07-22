@@ -209,7 +209,7 @@ health_check() {
     log "Checking backend health..."
     timeout=60
     while [ $timeout -gt 0 ]; do
-        if curl -f http://localhost:3001/health &>/dev/null; then
+        if curl -f http://localhost:3000/health &>/dev/null; then
             success "Backend is healthy"
             break
         fi
@@ -258,8 +258,8 @@ show_status() {
     echo ""
     log "Service URLs:"
     echo "  Frontend: http://localhost:3000"
-    echo "  Backend API: http://localhost:3001"
-    echo "  Health Checks: http://localhost:3000/health and http://localhost:3001/health"
+    echo "  Backend API: http://localhost:3000"
+    echo "  Health Checks: http://localhost:3000/health"
     echo ""
     log "Logs can be viewed with: docker-compose logs -f [service_name]"
 }
