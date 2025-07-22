@@ -108,7 +108,7 @@ mkdir -p test-screenshots
 mkdir -p tests/browser
 
 # Run the browser tests
-node tests/browser/browser-test.js
+node tests/browser/browser-test.cjs
 
 TEST_EXIT_CODE=$?
 

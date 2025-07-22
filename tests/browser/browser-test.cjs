@@ -174,7 +174,7 @@ class AudioTricksBrowserTester {
 
         await button.click();
         clickedCount++;
-        await this.page.waitForTimeout(1500); // Wait for any animations or state changes
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for any animations or state changes
         
         // Check if we're still on a reasonable page
         const currentUrl = this.page.url();
@@ -267,7 +267,7 @@ class AudioTricksBrowserTester {
                 break;
             }
             
-            await this.page.waitForTimeout(500); // Small delay between fields
+            await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between fields
           } catch (error) {
             console.log(`      Error filling field: ${error.message}`);
           }
@@ -312,7 +312,7 @@ class AudioTricksBrowserTester {
         }
         
         await link.click();
-        await this.page.waitForTimeout(2000);
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Check if navigation was successful
         const newUrl = this.page.url();
