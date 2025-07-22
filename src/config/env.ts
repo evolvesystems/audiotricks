@@ -1,4 +1,6 @@
 // Environment configuration
+import { logger } from '../utils/logger';
+
 export const config = {
   // API Configuration - now everything runs on the same port
   apiUrl: import.meta.env.VITE_API_URL || '',  // Empty string means same origin
@@ -50,7 +52,7 @@ export function validateConfig() {
   }
   
   if (missing.length > 0) {
-    console.warn(`Missing required environment variables: ${missing.join(', ')}`);
+    logger.warn(`Missing required environment variables: ${missing.join(', ')}`);
   }
   
   return missing.length === 0;

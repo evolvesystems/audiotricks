@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { logger } from '../../utils/logger';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import ModernAdminLayout from '../Admin/Layout/ModernAdminLayout';
 import UserDashboard from './UserDashboard';
@@ -30,7 +31,7 @@ export default function UserApp() {
   const location = useLocation();
   const handleLogout = () => {
     // In a real app, this would clear authentication state
-    console.log('User logged out');
+    logger.log('User logged out');
   };
 
   // Route to appropriate component based on current path

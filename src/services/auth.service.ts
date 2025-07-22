@@ -1,4 +1,5 @@
 import { apiClient, tokenManager, ApiError, User } from './api';
+import { logger } from '../utils/logger';
 
 export interface LoginRequest {
   email: string;
@@ -70,7 +71,7 @@ export class AuthService {
       await apiClient.post('/auth/logout');
     } catch (error) {
       // Ignore logout errors, just clear local storage
-      console.warn('Logout request failed:', error);
+      logger.warn('Logout request failed:', error);
     } finally {
       tokenManager.clearToken();
     }

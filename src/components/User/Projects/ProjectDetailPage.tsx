@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ProjectHeader } from './Detail/ProjectHeader';
 import { ProjectStats } from './Detail/ProjectStats';
 import { ProjectJobs } from './Detail/ProjectJobs';
+import { logger } from '../../../utils/logger';
 
 interface ProjectJob {
   id: string;
@@ -110,7 +111,7 @@ export default function ProjectDetailPage() {
         });
       }
     } catch (error) {
-      console.error('Error fetching project details:', error);
+      logger.error('Error fetching project details:', error);
     } finally {
       setLoading(false);
     }
@@ -123,7 +124,7 @@ export default function ProjectDetailPage() {
       // API call would go here
       navigate('/projects');
     } catch (error) {
-      console.error('Error archiving project:', error);
+      logger.error('Error archiving project:', error);
     }
   };
 
@@ -134,7 +135,7 @@ export default function ProjectDetailPage() {
       // API call would go here
       navigate('/projects');
     } catch (error) {
-      console.error('Error deleting project:', error);
+      logger.error('Error deleting project:', error);
     }
   };
 
@@ -143,7 +144,7 @@ export default function ProjectDetailPage() {
       // API call would go here
       setProject(prev => prev ? { ...prev, name: newName } : null);
     } catch (error) {
-      console.error('Error updating project name:', error);
+      logger.error('Error updating project name:', error);
     }
   };
 

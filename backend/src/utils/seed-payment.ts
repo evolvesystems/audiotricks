@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { CurrencyService } from '../services/currency/currency.service';
-import { logger } from './logger';
+// import { logger } from './logger'; // Removed unused import
 
 const prisma = new PrismaClient();
 

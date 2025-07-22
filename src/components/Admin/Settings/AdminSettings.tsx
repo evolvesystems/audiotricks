@@ -18,6 +18,7 @@ import {
   ApiKeySettings,
   AdminProfile 
 } from './types';
+import { logger } from '../../../utils/logger';
 
 export default function AdminSettings() {
   const { user } = useAdminAuthContext();
@@ -96,7 +97,7 @@ export default function AdminSettings() {
       await new Promise(resolve => setTimeout(resolve, 500));
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching admin settings:', error);
+      logger.error('Error fetching admin settings:', error);
       setLoading(false);
     }
   };
@@ -104,11 +105,11 @@ export default function AdminSettings() {
   const handleSavePreferences = async () => {
     setSaving(true);
     try {
-      console.log('Saving preferences:', preferences);
+      logger.log('Saving preferences:', preferences);
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSaving(false);
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      logger.error('Error saving preferences:', error);
       setSaving(false);
     }
   };
@@ -121,7 +122,7 @@ export default function AdminSettings() {
     
     setSaving(true);
     try {
-      console.log('Changing password...');
+      logger.log('Changing password...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSecurity({
         ...security,
@@ -131,7 +132,7 @@ export default function AdminSettings() {
       });
       setSaving(false);
     } catch (error) {
-      console.error('Error changing password:', error);
+      logger.error('Error changing password:', error);
       setSaving(false);
     }
   };
@@ -139,12 +140,12 @@ export default function AdminSettings() {
   const handleToggle2FA = async () => {
     setSaving(true);
     try {
-      console.log('Toggling 2FA...');
+      logger.log('Toggling 2FA...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled });
       setSaving(false);
     } catch (error) {
-      console.error('Error toggling 2FA:', error);
+      logger.error('Error toggling 2FA:', error);
       setSaving(false);
     }
   };
@@ -152,12 +153,12 @@ export default function AdminSettings() {
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      console.log('Saving profile:', profile);
+      logger.log('Saving profile:', profile);
       await new Promise(resolve => setTimeout(resolve, 1000));
       setEditingProfile(false);
       setSaving(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      logger.error('Error saving profile:', error);
       setSaving(false);
     }
   };
@@ -165,11 +166,11 @@ export default function AdminSettings() {
   const handleSaveApiKeys = async () => {
     setSaving(true);
     try {
-      console.log('Saving API keys...');
+      logger.log('Saving API keys...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSaving(false);
     } catch (error) {
-      console.error('Error saving API keys:', error);
+      logger.error('Error saving API keys:', error);
       setSaving(false);
     }
   };

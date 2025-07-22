@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   ChartBarIcon, 
   CurrencyDollarIcon, 
@@ -84,7 +85,7 @@ export default function BillingAnalyticsDashboard({ token }: BillingAnalyticsDas
         setUsageAnalytics(usageData.analytics);
       }
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      logger.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }

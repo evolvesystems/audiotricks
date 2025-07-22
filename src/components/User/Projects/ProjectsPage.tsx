@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { Link } from 'react-router-dom';
 import { 
   FolderIcon,
@@ -41,7 +42,7 @@ export default function ProjectsPage() {
     try {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) {
-        console.error('No authentication token found');
+        logger.error('No authentication token found');
         setLoading(false);
         return;
       }
@@ -67,12 +68,12 @@ export default function ProjectsPage() {
           totalDuration: 0 // TODO: Calculate from job durations
         })));
       } else {
-        console.error('Failed to fetch projects:', response.status);
+        logger.error('Failed to fetch projects:', response.status);
       }
       
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      logger.error('Error fetching projects:', error);
       setLoading(false);
     }
   };

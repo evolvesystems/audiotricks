@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   UserCircleIcon,
   PencilIcon,
@@ -47,7 +48,7 @@ export default function ProfileSection({ profile, onUpdate }: ProfileSectionProp
         onUpdate();
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile:', error);
     } finally {
       setLoading(false);
     }

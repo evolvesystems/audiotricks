@@ -10,6 +10,7 @@ import {
   DocumentDuplicateIcon,
   ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
+import { logger } from '../../../../utils/logger';
 
 interface JobDetail {
   transcriptionText?: string;
@@ -31,7 +32,7 @@ export const JobContent: React.FC<JobContentProps> = ({ job }) => {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      logger.error('Failed to copy text: ', err);
     }
   };
 

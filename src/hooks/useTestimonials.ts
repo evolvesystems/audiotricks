@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { logger } from '../utils/logger'
 
 export interface Testimonial {
   id: string
@@ -72,7 +73,7 @@ export function useTestimonials(options: UseTestimonialsOptions = {}): UseTestim
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
       setError(errorMessage)
-      console.error('Error fetching testimonials:', err)
+      logger.error('Error fetching testimonials:', err)
       
       // Fallback: Don't show any testimonials instead of placeholder data
       setTestimonials([])

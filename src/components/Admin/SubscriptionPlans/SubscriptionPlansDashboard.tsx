@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -65,10 +66,10 @@ export default function SubscriptionPlansDashboard({ token }: SubscriptionPlansD
         const data = await response.json();
         setPlans(data.plans || []);
       } else {
-        console.error('Failed to fetch subscription plans');
+        logger.error('Failed to fetch subscription plans');
       }
     } catch (error) {
-      console.error('Error fetching subscription plans:', error);
+      logger.error('Error fetching subscription plans:', error);
     } finally {
       setLoading(false);
     }
@@ -97,15 +98,15 @@ export default function SubscriptionPlansDashboard({ token }: SubscriptionPlansD
   };
 
   const handleSavePlan = async (planData: Partial<SubscriptionPlan>) => {
-    console.log('Attempting to save plan:', planData);
+    logger.debug('Attempting to save plan:', planData);
     try {
       const url = editingPlan 
         ? `/api/admin/subscriptions/plans/${editingPlan.id}`
         : '/api/admin/subscriptions/plans';
       
       const method = editingPlan ? 'PUT' : 'POST';
-      console.log('Request URL:', url);
-      console.log('Request method:', method);
+      logger.debug('Request URL:', url);
+      logger.debug('Request method:', method);
 
       const response = await fetch(url, {
         method,
@@ -116,8 +117,8 @@ export default function SubscriptionPlansDashboard({ token }: SubscriptionPlansD
         body: JSON.stringify(planData)
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
+      logger.debug('Response status:', response.status);
+      logger.debug('Response ok:', response.ok);
 
       if (response.ok) {
         const savedPlan = await response.json();
@@ -136,11 +137,11 @@ export default function SubscriptionPlansDashboard({ token }: SubscriptionPlansD
         setEditingPlan(null);
       } else {
         const error = await response.json();
-        console.log('Error response:', error);
+        logger.debug('Error response:', error);
         throw new Error(error.error || 'Failed to save plan');
       }
     } catch (error) {
-      console.error('Error saving plan:', error);
+      logger.error('Error saving plan:', error);
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('Network error: Cannot connect to server. Is the backend running?');
       }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ApiKeyService from '../../services/apikey.service';
 import { ApiError } from '../../services/api';
 import { KeyState, PROVIDERS } from './types';
+import { logger } from '../../utils/logger';
 
 export function useApiKeyManager(onKeysUpdated?: () => void) {
   const [keyStates, setKeyStates] = useState<KeyState>({});
@@ -57,7 +58,7 @@ export function useApiKeyManager(onKeysUpdated?: () => void) {
         return newState;
       });
     } catch (error) {
-      console.error('Failed to load API keys:', error);
+      logger.error('Failed to load API keys:', error);
       setError('Failed to load API keys');
     } finally {
       setLoading(false);

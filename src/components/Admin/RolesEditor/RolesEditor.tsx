@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   ShieldCheckIcon, 
   PlusIcon, 
@@ -79,7 +80,7 @@ export default function RolesEditor() {
         }
       }
     } catch (error) {
-      console.error('Error fetching roles:', error);
+      logger.error('Error fetching roles:', error);
     } finally {
       setLoading(false);
     }
@@ -119,7 +120,7 @@ export default function RolesEditor() {
 
       await fetchRoles();
     } catch (error) {
-      console.error('Error creating default roles:', error);
+      logger.error('Error creating default roles:', error);
     }
   };
 
@@ -168,7 +169,7 @@ export default function RolesEditor() {
 
       await fetchRoles();
     } catch (error) {
-      console.error('Error saving role:', error);
+      logger.error('Error saving role:', error);
     } finally {
       setSaving(false);
     }

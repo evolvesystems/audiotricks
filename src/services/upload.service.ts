@@ -1,4 +1,5 @@
 import { apiClient, ApiError, Upload, PaginatedResponse } from './api';
+import { logger } from '../utils/logger';
 
 export interface InitializeUploadRequest {
   filename: string;
@@ -172,7 +173,7 @@ export class UploadService {
         try {
           await this.cancelUpload(uploadId);
         } catch (cancelError) {
-          console.warn('Failed to cancel upload:', cancelError);
+          logger.warn('Failed to cancel upload:', cancelError);
         }
         throw error;
       }

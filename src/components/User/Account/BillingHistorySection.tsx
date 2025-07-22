@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   DocumentTextIcon,
   ArrowDownTrayIcon,
@@ -46,7 +47,7 @@ export default function BillingHistorySection() {
         setBillingHistory([]);
       }
     } catch (error) {
-      console.error('Error fetching billing history:', error);
+      logger.error('Error fetching billing history:', error);
       setBillingHistory([]);
     } finally {
       setLoading(false);

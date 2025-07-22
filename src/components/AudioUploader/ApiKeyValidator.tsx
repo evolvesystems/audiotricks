@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle, Key } from 'lucide-react';
 import { Button } from '../ui/Button';
 import ApiKeyService from '../../services/apikey.service';
+import { logger } from '../../utils/logger';
 
 interface ApiKeyValidatorProps {
   requiredKeys: string[];
@@ -44,7 +45,7 @@ export const ApiKeyValidator: React.FC<ApiKeyValidatorProps> = ({
       
       onValidationChange(allValid, missingKeys);
     } catch (error) {
-      console.error('Error checking API keys:', error);
+      logger.error('Error checking API keys:', error);
       onValidationChange(false, requiredKeys);
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../utils/logger';
 import { BackendAudioUploader } from '../AudioUploader/BackendAudioUploader';
 import { AudioProcessingResponse } from '../../types';
 import { useNavigate } from 'react-router-dom';
@@ -49,7 +50,7 @@ export default function UploadPage() {
   };
 
   const handleError = (error: string) => {
-    console.error('Processing error:', error);
+    logger.error('Processing error:', error);
   };
 
   const handleApiKeyUpdate = (newKey: string) => {

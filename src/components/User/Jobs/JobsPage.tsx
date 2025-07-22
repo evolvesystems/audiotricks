@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { Link } from 'react-router-dom';
 import { 
   DocumentTextIcon,
@@ -48,7 +49,7 @@ export default function JobsPage() {
     try {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) {
-        console.error('No authentication token found');
+        logger.error('No authentication token found');
         setLoading(false);
         return;
       }
@@ -78,12 +79,12 @@ export default function JobsPage() {
           language: 'en' // Default to English for now
         })));
       } else {
-        console.error('Failed to fetch jobs:', response.status);
+        logger.error('Failed to fetch jobs:', response.status);
       }
       
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      logger.error('Error fetching jobs:', error);
       setLoading(false);
     }
   };

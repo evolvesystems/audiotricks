@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   CreditCardIcon, 
   UserGroupIcon, 
@@ -84,7 +85,7 @@ export default function EwayDashboard({ token }: EwayDashboardProps) {
         setHealth(healthData.health);
       }
     } catch (error) {
-      console.error('Error fetching eWAY dashboard data:', error);
+      logger.error('Error fetching eWAY dashboard data:', error);
     } finally {
       setLoading(false);
     }

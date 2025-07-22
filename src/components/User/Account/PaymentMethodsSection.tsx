@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   CreditCardIcon,
   PlusIcon,
@@ -50,7 +51,7 @@ export default function PaymentMethodsSection({ onUpdate }: PaymentMethodsSectio
         setPaymentMethods(mockPaymentMethods);
       }
     } catch (error) {
-      console.error('Error fetching payment methods:', error);
+      logger.error('Error fetching payment methods:', error);
       setPaymentMethods(mockPaymentMethods);
     } finally {
       setLoading(false);
@@ -71,7 +72,7 @@ export default function PaymentMethodsSection({ onUpdate }: PaymentMethodsSectio
         fetchPaymentMethods();
       }
     } catch (error) {
-      console.error('Error setting default payment method:', error);
+      logger.error('Error setting default payment method:', error);
     }
   };
 
@@ -91,7 +92,7 @@ export default function PaymentMethodsSection({ onUpdate }: PaymentMethodsSectio
         fetchPaymentMethods();
       }
     } catch (error) {
-      console.error('Error removing payment method:', error);
+      logger.error('Error removing payment method:', error);
     }
   };
 

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   CreditCardIcon,
   CheckIcon,
@@ -79,7 +80,7 @@ export default function MyAccountPage() {
         setSubscription(subData);
       }
     } catch (error) {
-      console.error('Error fetching account data:', error);
+      logger.error('Error fetching account data:', error);
     } finally {
       setLoading(false);
     }

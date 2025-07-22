@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { User, Stats } from './types';
 import { apiRequest } from '../../../utils/api';
+import { logger } from '../../../utils/logger';
 
 interface UseAdminDashboardProps {
   token: string;
@@ -46,19 +47,19 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       });
 
       if (!response.ok) {
-        console.error('Failed to fetch users - Status:', response.status);
+        logger.error('Failed to fetch users - Status:', response.status);
         await handleApiError(response, 'Failed to fetch users');
         return;
       }
 
       const data = await response.json();
-      console.log('Fetched users:', data);
-      console.log('Users array:', data.users);
-      console.log('Setting users state to:', data.users || []);
+      logger.debug('Fetched users:', data);
+      logger.debug('Users array:', data.users);
+      logger.debug('Setting users state to:', data.users || []);
       setUsers(data.users || []);
       setTotalPages(data.pagination?.pages || 1);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.error('Error fetching users:', error);
       setUsers([]);
     }
   };
@@ -72,16 +73,16 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       });
 
       if (!response.ok) {
-        console.error('Failed to fetch stats - Status:', response.status);
+        logger.error('Failed to fetch stats - Status:', response.status);
         await handleApiError(response, 'Failed to fetch stats');
         return;
       }
 
       const data = await response.json();
-      console.log('Fetched stats:', data);
+      logger.debug('Fetched stats:', data);
       setStats(data.stats || null);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      logger.error('Error fetching stats:', error);
       setStats(null);
     }
   };
@@ -101,18 +102,18 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       });
 
       if (!response.ok) {
-        console.error('Failed to fetch users - Status:', response.status);
+        logger.error('Failed to fetch users - Status:', response.status);
         return;
       }
 
       const data = await response.json();
-      console.log('Fetched users with stored token:', data);
-      console.log('Users array from stored token:', data.users);
-      console.log('Setting users state from stored token to:', data.users || []);
+      logger.debug('Fetched users with stored token:', data);
+      logger.debug('Users array from stored token:', data.users);
+      logger.debug('Setting users state from stored token to:', data.users || []);
       setUsers(data.users || []);
       setTotalPages(data.pagination?.pages || 1);
     } catch (error) {
-      console.error('Error fetching users with token:', error);
+      logger.error('Error fetching users with token:', error);
       setUsers([]);
     }
   };
@@ -126,28 +127,28 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       });
 
       if (!response.ok) {
-        console.error('Failed to fetch stats - Status:', response.status);
+        logger.error('Failed to fetch stats - Status:', response.status);
         return;
       }
 
       const data = await response.json();
-      console.log('Fetched stats with stored token:', data);
+      logger.debug('Fetched stats with stored token:', data);
       setStats(data.stats || null);
     } catch (error) {
-      console.error('Error fetching stats with token:', error);
+      logger.error('Error fetching stats with token:', error);
       setStats(null);
     }
   };
 
   useEffect(() => {
     if (!token) {
-      console.log('No token available, trying localStorage...');
+      logger.debug('No token available, trying localStorage...');
       const storedToken = localStorage.getItem('authToken');
       if (!storedToken) {
-        console.log('No token in localStorage either');
+        logger.debug('No token in localStorage either');
         return;
       }
-      console.log('Using token from localStorage');
+      logger.debug('Using token from localStorage');
       // Use the stored token directly for this request
       const loadDataWithStoredToken = async () => {
         setLoading(true);
@@ -157,7 +158,7 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
             fetchStatsWithToken(storedToken)
           ]);
         } catch (error) {
-          console.error('Failed to load admin data:', error);
+          logger.error('Failed to load admin data:', error);
         } finally {
           setLoading(false);
         }
@@ -171,7 +172,7 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       try {
         await Promise.all([fetchUsers(), fetchStats()]);
       } catch (error) {
-        console.error('Failed to load admin data:', error);
+        logger.error('Failed to load admin data:', error);
       } finally {
         setLoading(false);
       }

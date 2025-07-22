@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   UserPlusIcon, 
   PencilIcon, 
@@ -52,7 +53,7 @@ export default function TeamPage() {
         setTeamMembers([]);
       }
     } catch (error) {
-      console.error('Error fetching team members:', error);
+      logger.error('Error fetching team members:', error);
       setTeamMembers([]);
     } finally {
       setLoading(false);
@@ -77,7 +78,7 @@ export default function TeamPage() {
         );
       }
     } catch (error) {
-      console.error('Error updating member role:', error);
+      logger.error('Error updating member role:', error);
     }
   };
 
@@ -97,7 +98,7 @@ export default function TeamPage() {
         setTeamMembers(members => members.filter(m => m.id !== memberId));
       }
     } catch (error) {
-      console.error('Error removing team member:', error);
+      logger.error('Error removing team member:', error);
     }
   };
 
@@ -119,7 +120,7 @@ export default function TeamPage() {
         setShowInviteModal(false);
       }
     } catch (error) {
-      console.error('Error inviting team member:', error);
+      logger.error('Error inviting team member:', error);
     }
   };
 

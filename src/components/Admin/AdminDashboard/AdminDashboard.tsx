@@ -8,6 +8,7 @@ import { apiRequest } from '../../../utils/api';
 import StatsCards from './StatsCards';
 import UserSearchBar from './UserSearchBar';
 import UserTable from './UserTable';
+import { logger } from '../../../utils/logger';
 import Pagination from './Pagination';
 
 export default function AdminDashboard({ token, onSessionExpired }: AdminDashboardProps) {
@@ -31,7 +32,7 @@ export default function AdminDashboard({ token, onSessionExpired }: AdminDashboa
     fetchStats
   } = useAdminDashboard({ token, onSessionExpired });
 
-  console.log('🔍 AdminDashboard render - users from hook:', users, 'length:', users?.length);
+  logger.debug('AdminDashboard render - users from hook:', users, 'length:', users?.length);
 
   const handleCreateUser = () => {
     setEditingUser(null);

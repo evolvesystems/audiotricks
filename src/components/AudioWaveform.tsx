@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
+import { logger } from '../utils/logger'
 
 interface AudioWaveformProps {
   audioUrl?: string
@@ -65,7 +66,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
         setWaveformData(normalizedData)
         setIsLoading(false)
       } catch (error) {
-        console.error('Error loading audio waveform data:', error)
+        logger.error('Error loading audio waveform data:', error)
         setIsLoading(false)
         // Use empty waveform data instead of fake data
         setWaveformData([])

@@ -2,6 +2,7 @@
 import React from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { UserTableProps } from './types';
+import { logger } from '../../../utils/logger';
 
 export default function UserTable({ 
   users, 
@@ -10,8 +11,8 @@ export default function UserTable({
   onToggleStatus, 
   onUpdateRole 
 }: UserTableProps) {
-  console.log('🔍 UserTable render - users:', users, 'length:', users?.length);
-  console.log('🔍 UserTable - first user:', users?.[0]);
+  logger.debug('UserTable render - users:', users, 'length:', users?.length);
+  logger.debug('UserTable - first user:', users?.[0]);
   
   if (!users || users.length === 0) {
     return (
@@ -58,7 +59,7 @@ export default function UserTable({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {users.map((user, index) => {
-            console.log(`🔍 Rendering user ${index}:`, user);
+            logger.debug(`Rendering user ${index}:`, user);
             return (
               <tr key={user.id} className="border-b border-gray-200">
                 <td className="px-6 py-4 whitespace-nowrap border-r border-gray-300">

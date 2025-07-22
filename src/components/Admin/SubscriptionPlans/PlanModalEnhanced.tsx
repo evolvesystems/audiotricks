@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
 import { 
   XMarkIcon,
   CurrencyDollarIcon,
@@ -113,7 +114,7 @@ export default function PlanModalEnhanced({ isOpen, onClose, onSave, plan }: Pla
       await onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Error saving plan:', error);
+      logger.error('Error saving plan:', error);
       alert(`Failed to save plan: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);

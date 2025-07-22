@@ -8,6 +8,7 @@ import { ApiError } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import ProcessingOptions from './ProcessingOptions';
 import ErrorDisplay from './ErrorDisplay';
+import { logger } from '../../utils/logger';
 
 interface BackendAudioUploaderProps {
   onProcessingComplete: (result: any) => void;
@@ -67,7 +68,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
         setApiKeysValid(validation.valid);
         setRequiredKeys(validation.missing);
       } catch (error) {
-        console.warn('Failed to check API keys:', error);
+        logger.warn('Failed to check API keys:', error);
         setApiKeysValid(false);
       }
     };
@@ -242,7 +243,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       try {
         await UploadService.cancelUpload(uploadState.uploadId);
       } catch (error) {
-        console.warn('Failed to cancel upload:', error);
+        logger.warn('Failed to cancel upload:', error);
       }
     }
     
@@ -250,7 +251,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       try {
         await ProcessingService.cancelJob(uploadState.jobId);
       } catch (error) {
-        console.warn('Failed to cancel job:', error);
+        logger.warn('Failed to cancel job:', error);
       }
     }
     

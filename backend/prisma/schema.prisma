@@ -329,6 +329,7 @@ model SubscriptionPlan {
 
   // Relations
   subscriptions     WorkspaceSubscription[]
+  planPricing       PlanPricing[]
 
   @@map("subscription_plans")
 }
@@ -822,6 +823,115 @@ model AiTokenUsage {
   @@map("ai_token_usage")
 }
 
+// ==================== RBAC MODELS ====================
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  resource    String
+  action      String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String   @map("role_id")
+  permissionId String   @map("permission_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ==================== USAGE TRACKING MODELS ====================
+
+model UsageTracking {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  workspaceId    String   @map("workspace_id")
+  resourceType   String   @map("resource_type")
+  resourceId     String   @map("resource_id")
+  action         String
+  quantity       Int      @default(1)
+  metadata       Json?
+  timestamp      DateTime @default(now())
+
+  @@map("usage_tracking")
+}
+
+model UsageReport {
+  id             String   @id @default(uuid())
+  workspaceId    String   @map("workspace_id")
+  reportType     String   @map("report_type")
+  periodStart    DateTime @map("period_start")
+  periodEnd      DateTime @map("period_end")
+  totalUploads   Int      @default(0) @map("total_uploads")
+  totalMinutes   Int      @default(0) @map("total_minutes")
+  totalStorage   BigInt   @default(0) @map("total_storage")
+  reportData     Json     @map("report_data")
+  generatedAt    DateTime @default(now()) @map("generated_at")
+
+  @@unique([workspaceId, reportType, periodStart])
+  @@map("usage_reports")
+}
+
+// ==================== PAYMENT MODELS ====================
+
+model PaymentGatewayConfig {
+  id          String   @id @default(uuid())
+  provider    String
+  environment String
+  isActive    Boolean  @default(false) @map("is_active")
+  config      Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([provider, environment])
+  @@map("payment_gateway_configs")
+}
+
+model PlanPricing {
+  id           String          @id @default(uuid())
+  planId       String          @map("plan_id")
+  currency     String          @default("AUD")
+  price        Decimal         @db.Decimal(10, 2)
+  interval     String
+  isActive     Boolean         @default(true) @map("is_active")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  plan         SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, currency, interval])
+  @@map("plan_pricing")
+}
+
 // ==================== EWAY PAYMENT MODELS ====================
 
 model EwayTransaction {
@@ -831,6 +941,7 @@ model EwayTransaction {
   amount          Decimal  @db.Decimal(10, 2)
   currency        String   @default("AUD")
   status          String   // pending, approved, declined, failed
+  transactionStatus String @default("pending") @map("transaction_status")
   responseCode    String?  @map("response_code")
   responseMessage String?  @map("response_message")
   authCode        String?  @map("auth_code")
@@ -838,6 +949,9 @@ model EwayTransaction {
   metadata        Json     @default("{}")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  ewayCustomer    EwayCustomer? @relation(fields: [customerToken], references: [customerToken])
 
   @@map("eway_transactions")
 }
@@ -859,6 +973,10 @@ model EwayCustomer {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  // Relations
+  transactions    EwayTransaction[]
+  recurringSchedules EwayRecurringSchedule[]
+
   @@map("eway_customers")
 }
 
@@ -876,6 +994,9 @@ model EwayRecurringSchedule {
   metadata        Json     @default("{}")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  ewayCustomer    EwayCustomer @relation(fields: [customerToken], references: [customerToken])
 
   @@map("eway_recurring_schedules")
 }

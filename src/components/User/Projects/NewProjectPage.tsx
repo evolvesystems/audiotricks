@@ -3,6 +3,7 @@
  */
 
 import React, { useState } from 'react';
+import { logger } from '../../../utils/logger';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   FolderIcon,
@@ -48,7 +49,7 @@ export default function NewProjectPage() {
         navigate('/projects');
       }
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project:', error);
       // For now, just navigate back to projects list
       navigate('/projects');
     } finally {
