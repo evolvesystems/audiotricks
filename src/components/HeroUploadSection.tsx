@@ -108,13 +108,40 @@ const HeroUploadSection: React.FC<HeroUploadSectionProps> = ({
             <APIErrorBoundary apiProvider="backend">
               <BackendAudioUploader
                 onUploadComplete={(upload) => {
-                  // Convert backend upload to frontend processing complete format
+                  // For upload-only mode, convert to processing complete format
                   onProcessingComplete({
                     audioFile: null,
                     audioUrl: upload.cdnUrl || upload.storageUrl,
-                    transcript: { text: '' },
-                    summary: { total_duration: upload.duration || 0 },
-                    uploadId: upload.id
+                    transcript: { text: 'Upload completed successfully' },
+                    summary: { 
+                      total_duration: upload.duration || 0,
+                      text: 'File uploaded successfully. You can now process it for transcription and summary.'
+                    },
+                    uploadId: upload.id,
+                    fileName: upload.filename,
+                    fileSize: upload.fileSize
+                  })
+                }}
+                onProcessingComplete={(result) => {
+                  // Convert processing result to frontend format
+                  onProcessingComplete({
+                    audioFile: null,
+                    audioUrl: null,
+                    transcript: { 
+                      text: result?.transcription?.transcript || 'Processing completed'
+                    },
+                    summary: { 
+                      text: result?.summary?.summary || 'Summary will appear here',
+                      total_duration: result?.transcription?.duration || 0
+                    },
+                    processing: {
+                      confidence: result?.transcription?.confidence,
+                      language: result?.transcription?.language,
+                      segments: result?.transcription?.segments,
+                      keyPoints: result?.summary?.keyPoints,
+                      tokensUsed: result?.summary?.tokensUsed,
+                      cost: result?.summary?.cost
+                    }
                   })
                 }}
                 onError={onError}

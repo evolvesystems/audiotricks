@@ -66,26 +66,22 @@ export const UserDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       // Load dashboard statistics
-      const statsResponse = await fetch('/api/dashboard/stats');
+      const statsResponse = await fetch('/api/dashboard/stats', { headers });
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
         setStats(statsData);
       }
 
-      // Load recent projects
-      const projectsResponse = await fetch('/api/projects?limit=5&sort=updated');
-      if (projectsResponse.ok) {
-        const projectsData = await projectsResponse.json();
-        setRecentProjects(projectsData.projects || []);
-      }
-
-      // Load recent jobs
-      const jobsResponse = await fetch('/api/jobs?limit=10&sort=created');
-      if (jobsResponse.ok) {
-        const jobsData = await jobsResponse.json();
-        setRecentJobs(jobsData.jobs || []);
+      // Load recent activity (projects and jobs)
+      const recentResponse = await fetch('/api/dashboard/recent', { headers });
+      if (recentResponse.ok) {
+        const recentData = await recentResponse.json();
+        setRecentProjects(recentData.projects || []);
+        setRecentJobs(recentData.jobs || []);
       }
 
     } catch (error) {

@@ -10,7 +10,8 @@ import ProcessingOptions from './ProcessingOptions';
 import ErrorDisplay from './ErrorDisplay';
 
 interface BackendAudioUploaderProps {
-  onProcessingComplete: (result: any) => void;
+  onUploadComplete?: (upload: any) => void;
+  onProcessingComplete?: (result: any) => void;
   onError: (error: string) => void;
   workspaceId: string;
   defaultSettings?: {
@@ -36,6 +37,7 @@ interface UploadState {
  * Orchestrates file upload, API key validation, and processing workflow
  */
 export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
+  onUploadComplete,
   onProcessingComplete,
   onError,
   workspaceId,
@@ -135,8 +137,8 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
           onProgress: (progress: ChunkUploadProgress) => {
             setUploadState(prev => ({
               ...prev,
-              progress: progress.percentage,
-              stage: `Uploading... ${Math.round(progress.percentage)}%`
+              progress: progress.overallProgress,
+              stage: `Uploading... ${Math.round(progress.overallProgress)}%`
             }));
           }
         }
@@ -145,37 +147,59 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       setUploadState(prev => ({
         ...prev,
         uploadId: uploadResult.id,
-        stage: 'Upload complete, starting processing...',
-        status: 'processing',
-        progress: 0
+        stage: 'Upload complete!',
+        status: 'completed',
+        progress: 100
       }));
 
-      // Start processing
-      const operations = [];
-      if (processingOptions.transcribe) operations.push('transcribe');
-      if (processingOptions.summarize) operations.push('summarize');
-      if (processingOptions.analyze) operations.push('analyze');
+      // Call the upload complete callback if provided
+      if (onUploadComplete) {
+        onUploadComplete({
+          id: uploadResult.id,
+          filename: file.name,
+          fileSize: file.size,
+          storageUrl: uploadResult.storageUrl,
+          cdnUrl: uploadResult.cdnUrl,
+          duration: 0 // Will be calculated during processing
+        });
+      }
 
-      const processingResult = await ProcessingService.processAudio({
-        audioUploadId: uploadResult.id,
-        workspaceId,
-        operations,
-        config: {
-          language: processingOptions.language,
-          model: processingOptions.model,
-          temperature: processingOptions.temperature,
-          maxTokens: processingOptions.maxTokens
-        }
-      });
+      // If processing is also requested, start it
+      if (onProcessingComplete && (processingOptions.transcribe || processingOptions.summarize || processingOptions.analyze)) {
+        setUploadState(prev => ({
+          ...prev,
+          stage: 'Starting processing...',
+          status: 'processing',
+          progress: 0
+        }));
 
-      setUploadState(prev => ({
-        ...prev,
-        jobId: processingResult.jobId,
-        stage: 'Processing audio...'
-      }));
+        // Start processing
+        const operations = [];
+        if (processingOptions.transcribe) operations.push('transcribe');
+        if (processingOptions.summarize) operations.push('summarize');
+        if (processingOptions.analyze) operations.push('analyze');
 
-      // Poll for completion
-      await pollForCompletion(processingResult.jobId);
+        const processingResult = await ProcessingService.processAudio({
+          audioUploadId: uploadResult.id,
+          workspaceId,
+          operations,
+          config: {
+            language: processingOptions.language,
+            model: processingOptions.model,
+            temperature: processingOptions.temperature,
+            maxTokens: processingOptions.maxTokens
+          }
+        });
+
+        setUploadState(prev => ({
+          ...prev,
+          jobId: processingResult.job.jobId,
+          stage: 'Processing audio...'
+        }));
+
+        // Poll for completion
+        await pollForCompletion(processingResult.job.jobId);
+      }
 
     } catch (error) {
       handleError(error as Error);
@@ -203,7 +227,9 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
             progress: 100,
             stage: 'Processing complete!'
           }));
-          onProcessingComplete(result.results);
+          if (onProcessingComplete) {
+            onProcessingComplete(result.result);
+          }
           return;
         }
 

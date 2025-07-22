@@ -65,29 +65,80 @@ export class UploadService {
   }
 
   /**
-   * Upload a small file directly
+   * Upload a file (handles both small files and initialization of large files)
    */
   static async uploadFile(
-    uploadId: string,
     file: File,
-    onProgress?: (progress: number) => void
+    workspaceId: string,
+    options?: {
+      onProgress?: (progress: ChunkUploadProgress) => void
+    }
   ): Promise<Upload> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('uploadId', uploadId);
-
     try {
-      const response = await apiClient.uploadFile<{ success: boolean; upload: Upload }>(
-        '/upload',
-        formData,
-        onProgress
-      );
-
-      if (!response.success) {
-        throw new ApiError(500, 'Upload failed');
+      // First validate the file
+      const validation = this.validateFile(file);
+      if (!validation.valid) {
+        throw new ApiError(400, validation.error || 'File validation failed');
       }
 
-      return response.upload;
+      // Initialize upload
+      const initResponse = await this.initializeUpload({
+        filename: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        workspaceId
+      });
+
+      let upload: Upload;
+
+      if (initResponse.multipart) {
+        // Handle large file with chunking
+        upload = await this.uploadLargeFile(
+          initResponse.uploadId,
+          file,
+          initResponse.chunkSize || 10 * 1024 * 1024,
+          options?.onProgress
+        );
+      } else {
+        // Handle small file directly
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('uploadId', initResponse.uploadId);
+
+        const response = await apiClient.uploadFile<{ success: boolean; upload: any }>(
+          '/upload',
+          formData,
+          (progress) => {
+            if (options?.onProgress) {
+              options.onProgress({
+                chunkIndex: 0,
+                totalChunks: 1,
+                chunkProgress: progress,
+                overallProgress: progress
+              });
+            }
+          }
+        );
+
+        if (!response.success) {
+          throw new ApiError(500, 'Upload failed');
+        }
+
+        // Convert response to Upload type
+        upload = {
+          id: response.upload.id,
+          originalFileName: response.upload.filename,
+          fileSize: response.upload.fileSize.toString(),
+          uploadStatus: response.upload.status,
+          uploadProgress: 100,
+          storageUrl: response.upload.storageUrl,
+          cdnUrl: response.upload.cdnUrl,
+          createdAt: response.upload.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      return upload;
     } catch (error) {
       if (error instanceof ApiError && error.isQuotaError) {
         throw new ApiError(
@@ -166,14 +217,27 @@ export class UploadService {
         // Final chunk completes the upload
         if (i === totalChunks - 1) {
           // Get the final upload status
-          return await this.getUploadStatus(uploadId);
+          const uploadStatus = await this.getUploadStatus(uploadId);
+          
+          // Convert to Upload format
+          return {
+            id: uploadStatus.id,
+            originalFileName: uploadStatus.filename,
+            fileSize: uploadStatus.fileSize.toString(),
+            uploadStatus: uploadStatus.status,
+            uploadProgress: 100,
+            storageUrl: uploadStatus.storageUrl,
+            cdnUrl: uploadStatus.cdnUrl,
+            createdAt: uploadStatus.uploadedAt || uploadStatus.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
         }
       } catch (error) {
         // Cancel upload on error
         try {
           await this.cancelUpload(uploadId);
         } catch (cancelError) {
-          logger.warn('Failed to cancel upload:', cancelError);
+          console.warn('Failed to cancel upload:', cancelError);
         }
         throw error;
       }

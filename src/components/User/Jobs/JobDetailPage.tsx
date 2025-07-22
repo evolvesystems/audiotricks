@@ -9,6 +9,13 @@ import { JobHeader } from './Detail/JobHeader';
 import { JobStats } from './Detail/JobStats';
 import { JobContent } from './Detail/JobContent';
 
+interface KeyMoment {
+  timestamp: number;
+  title: string;
+  description: string;
+  confidence?: number;
+}
+
 interface JobDetail {
   id: string;
   fileName: string;
@@ -22,6 +29,7 @@ interface JobDetail {
   fileSize: number;
   transcriptionText?: string;
   summary?: string;
+  keyMoments?: KeyMoment[];
   confidence?: number;
   language: string;
   audioUrl?: string;
@@ -45,8 +53,14 @@ export default function JobDetailPage() {
       setLoading(true);
       setError(null);
 
+      const authToken = localStorage.getItem('authToken');
+      const headers = authToken ? {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      } : {};
+
       // Try to fetch from API
-      const response = await fetch(`/api/jobs/${id}`);
+      const response = await fetch(`/api/jobs/${id}`, { headers });
       
       if (response.ok) {
         const jobData = await response.json();
@@ -91,6 +105,32 @@ export default function JobDetailPage() {
 
 [Speaker 1]: Perfect. Let's discuss our Q2 planning and resource allocation...`,
           summary: 'Team meeting covering Q1 project progress and Q2 planning. Key highlights: UI redesign ahead of schedule with positive stakeholder feedback, successful cloud migration resulting in 40% performance improvement and 25% cost reduction. Minor legacy system integration issues expected to be resolved by end of week. Discussion included resource allocation for upcoming Q2 initiatives.',
+          keyMoments: [
+            {
+              timestamp: 45,
+              title: 'Q1 Deliverables Review',
+              description: 'Sarah provides update on UI redesign project - wireframes complete with positive stakeholder feedback.',
+              confidence: 0.92
+            },
+            {
+              timestamp: 125,
+              title: 'Performance Improvements',
+              description: 'Mike reports successful cloud migration with 40% performance improvement and 25% cost reduction.',
+              confidence: 0.88
+            },
+            {
+              timestamp: 185,
+              title: 'Technical Challenges',
+              description: 'Discussion of minor integration issues with legacy systems, resolution expected by end of week.',
+              confidence: 0.85
+            },
+            {
+              timestamp: 220,
+              title: 'Q2 Planning',
+              description: 'Resource allocation discussion for upcoming Q2 initiatives and project prioritization.',
+              confidence: 0.90
+            }
+          ],
           audioUrl: '/api/audio/sample-meeting.mp3'
         });
       }

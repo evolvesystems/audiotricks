@@ -1,15 +1,15 @@
 import { apiClient, ApiError, ProcessingJob, PaginatedResponse } from './api';
 
-export interface StartProcessingRequest {
-  uploadId: string;
-  jobType: 'transcription' | 'summary' | 'analysis';
-  options?: {
+export interface ProcessAudioRequest {
+  audioUploadId: string;
+  workspaceId: string;
+  operations: string[];
+  config?: {
     language?: string;
-    prompt?: string;
-    temperature?: number;
-    format?: 'json' | 'text' | 'srt' | 'verbose_json' | 'vtt';
     model?: string;
+    temperature?: number;
     maxTokens?: number;
+    format?: 'json' | 'text' | 'srt' | 'verbose_json' | 'vtt';
     systemPrompt?: string;
   };
 }
@@ -72,9 +72,28 @@ export interface JobListParams {
 
 export class ProcessingService {
   /**
+   * Process audio with multiple operations
+   */
+  static async processAudio(request: ProcessAudioRequest): Promise<StartProcessingResponse> {
+    // Determine the primary job type
+    let jobType = 'transcription';
+    if (request.operations.includes('summarize')) {
+      jobType = 'summary';
+    } else if (request.operations.includes('analyze')) {
+      jobType = 'analysis';
+    }
+
+    return this.startProcessing({
+      uploadId: request.audioUploadId,
+      jobType: jobType as any,
+      options: request.config
+    });
+  }
+
+  /**
    * Start audio processing
    */
-  static async startProcessing(request: StartProcessingRequest): Promise<StartProcessingResponse> {
+  static async startProcessing(request: { uploadId: string; jobType: string; options?: any }): Promise<StartProcessingResponse> {
     try {
       return await apiClient.post<StartProcessingResponse>('/processing/start', request);
     } catch (error) {

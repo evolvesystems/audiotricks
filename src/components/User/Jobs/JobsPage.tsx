@@ -59,7 +59,7 @@ export default function JobsPage() {
         'Content-Type': 'application/json'
       };
 
-      const response = await fetch('/api/user/jobs', { headers });
+      const response = await fetch('/api/jobs', { headers });
       
       if (response.ok) {
         const data = await response.json();

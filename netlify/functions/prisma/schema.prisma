@@ -82,6 +82,12 @@ model User {
   // Role-based access control
   userRoles        UserRole[]
   assignedRoles    UserRole[] @relation("UserRoleAssignedBy")
+  
+  // Simplified API relations
+  uploads          Upload[]
+  jobs             Job[]
+  simpleProjects   Project[]
+  userApiKeys      UserApiKey[]
 
   @@map("users")
 }
@@ -1284,6 +1290,111 @@ model DataRetentionPolicy {
 
   @@map("data_retention_policies")
 }
+
+// ========================================
+// SIMPLIFIED MODELS FOR CURRENT API COMPATIBILITY
+// ========================================
+
+// Simplified Upload model for current API
+model Upload {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  workspaceId String?  @map("workspace_id")
+  
+  filename    String
+  fileSize    BigInt   @map("file_size")
+  mimeType    String   @map("mime_type")
+  status      String   @default("pending") // pending, uploading, completed, failed
+  
+  storageUrl  String?  @map("storage_url")
+  cdnUrl      String?  @map("cdn_url")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  uploadedAt  DateTime? @map("uploaded_at")
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        Job[]
+  
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("uploads")
+}
+
+// Simplified Job model for current API
+model Job {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  uploadId     String   @map("upload_id")
+  projectId    String?  @map("project_id")
+  
+  type         String   // transcription, summary, analysis
+  fileName     String   @map("file_name")
+  fileSize     BigInt?  @map("file_size")
+  duration     Int?     // in seconds
+  
+  status       String   @default("queued") // queued, processing, completed, failed
+  progress     Int      @default(0)
+  
+  config       Json?    @default("{}")
+  results      Json?
+  error        String?
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upload       Upload   @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  @@index([userId, createdAt])
+  @@index([status])
+  @@index([uploadId])
+  @@map("jobs")
+}
+
+// Simplified Project model for current API
+model Project {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  name        String
+  description String?
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        Job[]
+  
+  @@index([userId, createdAt])
+  @@map("projects")
+}
+
+// User API Key storage for current API
+model UserApiKey {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  provider     String   // openai, elevenlabs
+  encryptedKey String   @map("encrypted_key")
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, provider])
+  @@index([provider])
+  @@map("user_api_keys")
+}
+
+// Add missing relations to User model
+// Upload[]     uploads
+// Job[]        jobs  
+// Project[]    projects
+// UserApiKey[] userApiKeys
 
 // ========================================
 // ADDITIONAL MODELS FOR LEGACY COMPATIBILITY

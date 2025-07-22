@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioTricks API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        .file-input { border: 2px dashed #ddd; padding: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>AudioTricks Upload & Processing API Test</h1>
+    
+    <div class="test-section info">
+        <h2>Authentication</h2>
+        <p>Using provided admin credentials:</p>
+        <p><strong>Email:</strong> admin@audiotricks.com</p>
+        <p><strong>Password:</strong> admin123</p>
+        <button onclick="testAuth()">Login & Get Token</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h2>File Upload Test</h2>
+        <div class="file-input">
+            <input type="file" id="audioFile" accept="audio/*" />
+            <p>Select an audio file to test upload</p>
+        </div>
+        <button onclick="testUpload()" disabled id="uploadBtn">Upload File</button>
+        <div id="upload-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h2>Processing Test</h2>
+        <button onclick="testProcessing()" disabled id="processBtn">Start Processing</button>
+        <div id="processing-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h2>Jobs List</h2>
+        <button onclick="testJobs()" disabled id="jobsBtn">Get Jobs</button>
+        <div id="jobs-result"></div>
+    </div>
+
+    <script>
+        let authToken = null;
+        let currentUploadId = null;
+        let currentJobId = null;
+        
+        const API_BASE = window.location.origin + '/api';
+        
+        // Enable file upload when file is selected
+        document.getElementById('audioFile').addEventListener('change', function(e) {
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = !e.target.files[0] || !authToken;
+        });
+        
+        async function testAuth() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.innerHTML = '<p>Authenticating...</p>';
+            
+            try {
+                const response = await fetch(API_BASE + '/admin/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@audiotricks.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.token) {
+                    authToken = result.token;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Authentication Successful</h3>
+                            <p><strong>Token:</strong> ${result.token.substring(0, 20)}...</p>
+                            <p><strong>User:</strong> ${result.user?.email || 'N/A'}</p>
+                        </div>
+                    `;
+                    
+                    // Enable other buttons
+                    enableButtons();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Authentication Failed</h3>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function enableButtons() {
+            const fileInput = document.getElementById('audioFile');
+            document.getElementById('uploadBtn').disabled = !fileInput.files[0];
+            document.getElementById('jobsBtn').disabled = false;
+        }
+        
+        async function testUpload() {
+            const fileInput = document.getElementById('audioFile');
+            const file = fileInput.files[0];
+            const resultDiv = document.getElementById('upload-result');
+            
+            if (!file) {
+                resultDiv.innerHTML = '<div class="error">Please select a file first</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>Uploading...</p>';
+            
+            try {
+                // Step 1: Initialize upload
+                const initResponse = await fetch(API_BASE + '/upload/initialize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        filename: file.name,
+                        fileSize: file.size,
+                        mimeType: file.type,
+                        workspaceId: 'default'
+                    })
+                });
+                
+                const initResult = await initResponse.json();
+                
+                if (!initResponse.ok) {
+                    throw new Error(JSON.stringify(initResult));
+                }
+                
+                currentUploadId = initResult.uploadId;
+                
+                // Step 2: Upload file
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('uploadId', initResult.uploadId);
+                
+                const uploadResponse = await fetch(API_BASE + '/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: formData
+                });
+                
+                const uploadResult = await uploadResponse.json();
+                
+                if (uploadResponse.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Upload Successful</h3>
+                            <p><strong>Upload ID:</strong> ${currentUploadId}</p>
+                            <p><strong>File:</strong> ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</p>
+                            <p><strong>Status:</strong> ${uploadResult.upload?.status || 'Unknown'}</p>
+                            <pre>${JSON.stringify(uploadResult, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    // Enable processing button
+                    document.getElementById('processBtn').disabled = false;
+                } else {
+                    throw new Error(JSON.stringify(uploadResult));
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Upload Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function testProcessing() {
+            if (!currentUploadId) {
+                document.getElementById('processing-result').innerHTML = 
+                    '<div class="error">Please upload a file first</div>';
+                return;
+            }
+            
+            const resultDiv = document.getElementById('processing-result');
+            resultDiv.innerHTML = '<p>Starting processing...</p>';
+            
+            try {
+                const response = await fetch(API_BASE + '/processing/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        uploadId: currentUploadId,
+                        jobType: 'transcription',
+                        options: {
+                            language: 'en',
+                            model: 'whisper-1'
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentJobId = result.job.jobId;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Processing Started</h3>
+                            <p><strong>Job ID:</strong> ${currentJobId}</p>
+                            <p><strong>Status:</strong> ${result.job.status}</p>
+                            <p><strong>Progress:</strong> ${result.job.progress}%</p>
+                        </div>
+                    `;
+                    
+                    // Start polling for status
+                    pollJobStatus();
+                } else {
+                    throw new Error(JSON.stringify(result));
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Processing Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function pollJobStatus() {
+            if (!currentJobId) return;
+            
+            try {
+                const response = await fetch(API_BASE + `/processing/job/${currentJobId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('processing-result');
+                
+                if (result.status === 'completed') {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>🎉 Processing Completed!</h3>
+                            <p><strong>Job ID:</strong> ${currentJobId}</p>
+                            <p><strong>Status:</strong> ${result.status}</p>
+                            <p><strong>Progress:</strong> ${result.progress}%</p>
+                            <h4>Results:</h4>
+                            <pre>${JSON.stringify(result.result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else if (result.status === 'failed') {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Processing Failed</h3>
+                            <p><strong>Error:</strong> ${result.error}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="info">
+                            <h3>⏳ Processing In Progress</h3>
+                            <p><strong>Status:</strong> ${result.status}</p>
+                            <p><strong>Progress:</strong> ${result.progress}%</p>
+                        </div>
+                    `;
+                    
+                    // Continue polling
+                    setTimeout(pollJobStatus, 3000);
+                }
+                
+            } catch (error) {
+                console.error('Polling error:', error);
+                // Continue polling on error
+                setTimeout(pollJobStatus, 5000);
+            }
+        }
+        
+        async function testJobs() {
+            const resultDiv = document.getElementById('jobs-result');
+            resultDiv.innerHTML = '<p>Loading jobs...</p>';
+            
+            try {
+                const response = await fetch(API_BASE + '/user/jobs', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Jobs Retrieved</h3>
+                            <p><strong>Total Jobs:</strong> ${result.jobs?.length || 0}</p>
+                            <pre>${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(JSON.stringify(result));
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Failed to Get Jobs</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -191,60 +191,155 @@ export default function RolesEditor() {
             <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
               <ShieldCheckIcon className="w-6 h-6 text-white" />
             </div>
-            Roles & Permissions Editor
+            Roles & Permissions
           </h1>
-          <p className="text-gray-600 mt-2">Manage role-based menu access and permissions</p>
+          <p className="text-gray-600 mt-2">Control access to different parts of the application</p>
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">System Roles</h2>
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <ShieldCheckIcon className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">{roles.length}</h3>
+              <p className="text-sm text-gray-500">Total Roles</p>
+            </div>
+          </div>
         </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <CheckIcon className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">{MENU_PERMISSIONS.length}</h3>
+              <p className="text-sm text-gray-500">Available Permissions</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <PlusIcon className="h-6 w-6 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-semibold text-gray-900">Customizable</h3>
+              <p className="text-sm text-gray-500">Role Management</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="p-6">
-          {roles.map(role => (
-            <div key={role.id} className="mb-8 last:mb-0">
-              <div className="flex items-center justify-between mb-4">
+      {/* Roles Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {roles.map(role => (
+          <div key={role.id} className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-medium">{role.displayName}</h3>
-                  <p className="text-sm text-gray-500">{role.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                      role.name === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                      role.name === 'user' ? 'bg-blue-100 text-blue-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {role.displayName}
+                    </span>
+                    {role.isSystemRole && (
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                        System Role
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">{role.description}</p>
                 </div>
                 <button
                   onClick={() => handleSaveRole(role.id)}
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  Save Changes
+                  {saving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <CheckIcon className="h-4 w-4" />
+                  )}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
+            </div>
 
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Menu Permissions</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {MENU_PERMISSIONS.map(menuItem => {
-                    const hasPermission = role.permissions.some(p => p.resource === menuItem.resource);
-                    return (
-                      <label
-                        key={menuItem.resource}
-                        className="flex items-center space-x-2 cursor-pointer"
-                      >
+            <div className="p-6">
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <ShieldCheckIcon className="h-4 w-4" />
+                  Access Permissions ({role.permissions.length}/{MENU_PERMISSIONS.length})
+                </h4>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(role.permissions.length / MENU_PERMISSIONS.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {MENU_PERMISSIONS.map(menuItem => {
+                  const hasPermission = role.permissions.some(p => p.resource === menuItem.resource);
+                  const isDisabled = role.isSystemRole && role.name === 'admin';
+                  
+                  return (
+                    <div
+                      key={menuItem.resource}
+                      className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all duration-200 ${
+                        hasPermission 
+                          ? 'border-green-200 bg-green-50' 
+                          : 'border-gray-200 bg-gray-50'
+                      } ${isDisabled ? 'opacity-75' : 'hover:border-blue-300'}`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`p-2 rounded-lg ${
+                          hasPermission ? 'bg-green-100' : 'bg-gray-100'
+                        }`}>
+                          <div className={`h-3 w-3 rounded-full ${
+                            hasPermission ? 'bg-green-600' : 'bg-gray-400'
+                          }`} />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">{menuItem.displayName}</span>
+                          <div className="text-xs text-gray-500">
+                            Routes: {menuItem.routes.join(', ')}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
                           checked={hasPermission}
                           onChange={() => handlePermissionToggle(role.id, menuItem.resource)}
-                          disabled={role.isSystemRole && role.name === 'admin'} // Prevent removing permissions from admin
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          disabled={isDisabled}
+                          className="sr-only peer"
                         />
-                        <span className="text-sm text-gray-700">{menuItem.displayName}</span>
+                        <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+                          hasPermission ? 'bg-green-600' : 'bg-gray-300'
+                        } ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} 
+                        peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
+                          <div className={`absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform duration-200 ${
+                            hasPermission ? 'translate-x-full border-white' : ''
+                          }`} />
+                        </div>
                       </label>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
