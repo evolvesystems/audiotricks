@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure mobile responsiveness */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Prevent horizontal scroll on mobile */
+* {
+  max-width: 100%;
+}
+
+/* Ensure container responsiveness */
+.container {
+  max-width: 100%;
+}
+
 /* Custom styles for formatted content */
 @layer components {
   .formatted-content h4 {
