@@ -355,17 +355,40 @@ class AudioTricksTestSuite {
 
   async testPageResponsiveness() {
     await this.runTest('Mobile Responsiveness', async () => {
-      // Test mobile viewport
-      await this.page.setViewport({ width: 375, height: 667 });
+      // Reset to original viewport first
+      await this.page.setViewport({ width: 1200, height: 800 });
+      await this.page.goto(this.baseUrl, { waitUntil: 'networkidle0' });
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Check if page adapts to mobile
-      const bodyWidth = await this.page.evaluate(() => document.body.scrollWidth);
+      // Test mobile viewport (iPhone SE size)
+      await this.page.setViewport({ width: 375, height: 667 });
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Allow more time for responsive changes
       
-      if (bodyWidth > 400) { // Allow some margin
-        throw new Error(`Page not responsive: body width ${bodyWidth}px on mobile`);
+      // Check if page adapts to mobile - get both scrollWidth and offsetWidth
+      const dimensions = await this.page.evaluate(() => {
+        return {
+          bodyScrollWidth: document.body.scrollWidth,
+          bodyOffsetWidth: document.body.offsetWidth,
+          documentElementScrollWidth: document.documentElement.scrollWidth,
+          viewportWidth: window.innerWidth,
+          hasHorizontalScroll: document.body.scrollWidth > window.innerWidth
+        };
+      });
+      
+      console.log(`  📱 Mobile dimensions:`, dimensions);
+      
+      // Check for horizontal scroll (the real issue)
+      if (dimensions.hasHorizontalScroll) {
+        throw new Error(`Page has horizontal scroll on mobile: body width ${dimensions.bodyScrollWidth}px exceeds viewport ${dimensions.viewportWidth}px`);
+      }
+      
+      // Also check document element
+      if (dimensions.documentElementScrollWidth > 400) { // Allow some margin
+        throw new Error(`Document width ${dimensions.documentElementScrollWidth}px too wide for mobile`);
       }
 
+      console.log('  ✅ Mobile responsiveness passed');
+      
       // Test tablet viewport
       await this.page.setViewport({ width: 768, height: 1024 });
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -445,17 +468,37 @@ class AudioTricksTestSuite {
       try {
         const response = await this.page.goto(`${this.baseUrl}/nonexistent-page-12345`, { waitUntil: 'networkidle2' });
         
-        // Check if we get a proper error page or redirect
+        // Check if we get a proper error page
         const status = response.status();
         const currentUrl = this.page.url();
         
-        if (status === 404 || currentUrl.includes('404') || currentUrl.includes('not-found')) {
-          console.log('  ✅ 404 handling working');
-        } else if (status === 200 && currentUrl === this.baseUrl) {
-          console.log('  ✅ 404 redirects to home (acceptable)');
+        // Since we're using React Router, the HTTP status will be 200 but we should see the NotFoundPage component
+        if (status === 200) {
+          // Wait a moment for React to render
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Check if the 404 page content is displayed
+          try {
+            await this.page.waitForSelector('text=Page Not Found', { timeout: 5000 });
+            console.log('  ✅ 404 page component displayed correctly');
+          } catch (e) {
+            // Check for 404 text alternative
+            const pageText = await this.page.evaluate(() => document.body.textContent);
+            if (pageText.includes('404') || pageText.includes('Page Not Found') || pageText.includes('not found')) {
+              console.log('  ✅ 404 content detected in page');
+            } else {
+              throw new Error('404 page does not display proper error content');
+            }
+          }
         } else {
-          throw new Error(`Unexpected 404 handling: ${status} - ${currentUrl}`);
+          throw new Error(`Unexpected status code for 404: ${status}`);
         }
+        
+        // Test that the page doesn't redirect to home
+        if (currentUrl === this.baseUrl) {
+          throw new Error('404 pages should not redirect to home page');
+        }
+        
       } catch (e) {
         throw new Error(`Error page testing failed: ${e.message}`);
       }
