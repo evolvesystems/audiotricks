@@ -1,5 +1,5 @@
 // Statistics cards component
-import React from 'react';
+
 import { UsersIcon, ChartBarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { StatsCardsProps } from './types';
 
@@ -41,7 +41,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
           <ShieldCheckIcon className="w-10 h-10 text-orange-500" />
           <div className="ml-4">
             <p className="text-sm text-gray-500">Admins</p>
-            <p className="text-2xl font-semibold">{stats.usersByRole.admin || 0}</p>
+            <p className="text-2xl font-semibold">{stats.usersByRole?.admin || 0}</p>
           </div>
         </div>
       </div>
