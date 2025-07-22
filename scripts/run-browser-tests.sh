@@ -107,8 +107,8 @@ print_status "Compiling and running browser tests..."
 mkdir -p test-screenshots
 mkdir -p tests/browser
 
-# Compile and run the browser tests
-npx ts-node --project tsconfig.browser-tests.json tests/browser/comprehensive-browser-test.ts
+# Run the browser tests
+node tests/browser/browser-test.js
 
 TEST_EXIT_CODE=$?
 
