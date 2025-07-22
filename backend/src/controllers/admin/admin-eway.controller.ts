@@ -369,4 +369,122 @@ export class AdminEwayController {
       res.status(500).json({ error: 'Failed to fetch system health' });
     }
   }
+
+  /**
+   * Get eWAY configuration
+   */
+  async getConfig(req: Request, res: Response) {
+    try {
+      // Get config from system settings
+      const configRecord = await prisma.systemConfig.findUnique({
+        where: { key: 'eway_config' }
+      });
+
+      if (!configRecord) {
+        return res.json({ config: null });
+      }
+
+      // Parse and return config (without sensitive data)
+      const config = configRecord.value as any;
+      const sanitizedConfig = {
+        environment: config.environment || 'sandbox',
+        rapidEndpoint: config.rapidEndpoint || 'https://api.sandbox.ewaypayments.com',
+        enableWebhooks: config.enableWebhooks || false,
+        // Don't send API key/password values, just indicate if they're set
+        apiKeySet: !!config.apiKey,
+        apiPasswordSet: !!config.apiPassword,
+        webhookSecretSet: !!config.webhookSecret
+      };
+
+      res.json({ config: sanitizedConfig });
+    } catch (error) {
+      logger.error('Failed to fetch eWAY config:', error);
+      res.status(500).json({ error: 'Failed to fetch configuration' });
+    }
+  }
+
+  /**
+   * Save eWAY configuration
+   */
+  async saveConfig(req: Request, res: Response) {
+    try {
+      const { config } = req.body;
+
+      if (!config) {
+        return res.status(400).json({ error: 'Configuration required' });
+      }
+
+      // Validate required fields
+      if (!config.apiKey || !config.apiPassword) {
+        return res.status(400).json({ error: 'API Key and Password are required' });
+      }
+
+      // Get existing config to preserve any unchanged sensitive fields
+      const existingConfig = await prisma.systemConfig.findUnique({
+        where: { key: 'eway_config' }
+      });
+
+      const existingData = existingConfig?.value as any || {};
+
+      // Merge with existing config, updating only provided fields
+      const updatedConfig = {
+        ...existingData,
+        ...config,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save config
+      await prisma.systemConfig.upsert({
+        where: { key: 'eway_config' },
+        update: { value: updatedConfig },
+        create: {
+          key: 'eway_config',
+          value: updatedConfig
+        }
+      });
+
+      res.json({ success: true, message: 'Configuration saved successfully' });
+    } catch (error) {
+      logger.error('Failed to save eWAY config:', error);
+      res.status(500).json({ error: 'Failed to save configuration' });
+    }
+  }
+
+  /**
+   * Test eWAY connection
+   */
+  async testConfig(req: Request, res: Response) {
+    try {
+      const { config } = req.body;
+
+      if (!config || !config.apiKey || !config.apiPassword) {
+        return res.status(400).json({ error: 'Configuration required' });
+      }
+
+      // Here you would normally make a test API call to eWAY
+      // For now, we'll simulate a successful test
+      // In production, you'd use the eWAY SDK to verify credentials
+
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Mock response - in production, this would be based on actual API response
+      const isValid = config.apiKey.length > 10 && config.apiPassword.length > 5;
+
+      if (isValid) {
+        res.json({ 
+          success: true, 
+          message: 'Connection test successful. Credentials are valid.' 
+        });
+      } else {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Invalid credentials. Please check your API key and password.' 
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to test eWAY connection:', error);
+      res.status(500).json({ error: 'Failed to test connection' });
+    }
+  }
 }

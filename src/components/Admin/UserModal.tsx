@@ -8,6 +8,10 @@ interface User {
   username: string;
   password?: string;
   role: string;
+  businessName?: string;
+  mobile?: string;
+  country?: string;
+  currency?: string;
   isActive?: boolean;
 }
 
@@ -25,6 +29,10 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
     username: '',
     password: '',
     role: 'user',
+    businessName: '',
+    mobile: '',
+    country: 'US',
+    currency: 'USD',
     isActive: true
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,6 +50,10 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
         username: '',
         password: '',
         role: 'user',
+        businessName: '',
+        mobile: '',
+        country: 'US',
+        currency: 'USD',
         isActive: true
       });
     }
@@ -191,6 +203,73 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Business Name
+            </label>
+            <input
+              type="text"
+              value={formData.businessName || ''}
+              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Optional"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mobile
+            </label>
+            <input
+              type="tel"
+              value={formData.mobile || ''}
+              onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="+1 234 567 8900"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Country
+              </label>
+              <select
+                value={formData.country || 'US'}
+                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="GB">United Kingdom</option>
+                <option value="AU">Australia</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="JP">Japan</option>
+                <option value="CN">China</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Currency
+              </label>
+              <select
+                value={formData.currency || 'USD'}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="AUD">AUD</option>
+                <option value="CAD">CAD</option>
+                <option value="JPY">JPY</option>
+                <option value="CNY">CNY</option>
+              </select>
+            </div>
           </div>
 
           {mode === 'edit' && (

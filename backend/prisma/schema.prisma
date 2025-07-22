@@ -19,6 +19,10 @@ model User {
   lastName          String?   @map("last_name")
   avatar            String?
   phoneNumber       String?   @map("phone_number")
+  businessName      String?   @map("business_name")
+  mobile            String?
+  country           String    @default("US")
+  currency          String    @default("USD")
   timezone          String    @default("UTC")
   lastLoginAt       DateTime? @map("last_login_at")
   emailVerified     Boolean   @default(false) @map("email_verified")

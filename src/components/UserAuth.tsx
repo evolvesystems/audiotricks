@@ -106,10 +106,10 @@ export default function UserAuth({ onUserChange }: UserAuthProps) {
   return (
     <a
       href="/admin/login"
-      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
     >
       <UserCircleIcon className="h-5 w-5" />
-      <span>Login</span>
+      <span>Sign In</span>
     </a>
   );
 }

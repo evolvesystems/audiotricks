@@ -17,6 +17,8 @@ import processingRoutes from './routes/processing.routes';
 import apiKeyRoutes from './routes/api-key.routes';
 import usageRoutes from './routes/usage.routes';
 import testimonialsRoutes from './routes/testimonials.js';
+// import projectRoutes from './routes/project.routes';
+import userRoutes from './routes/user.routes';
 import { createHealthRoutes } from './routes/health.routes';
 import { createPaymentRoutes } from './routes/payment.routes';
 
@@ -53,6 +55,8 @@ app.use('/api/processing', processingRoutes);
 app.use('/api/api-keys', apiKeyRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/testimonials', testimonialsRoutes);
+// app.use('/api/projects', projectRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/payment', createPaymentRoutes(prisma));
 
 // Health check routes

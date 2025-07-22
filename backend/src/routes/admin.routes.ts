@@ -88,6 +88,9 @@ router.get('/eway/recurring', adminEwayController.getRecurringSchedules.bind(adm
 router.get('/eway/webhooks', adminEwayController.getWebhookEvents.bind(adminEwayController));
 router.post('/eway/webhooks/:eventId/retry', adminEwayController.retryWebhookEvent.bind(adminEwayController));
 router.get('/eway/health', adminEwayController.getSystemHealth.bind(adminEwayController));
+router.get('/eway/config', adminEwayController.getConfig.bind(adminEwayController));
+router.post('/eway/config', adminEwayController.saveConfig.bind(adminEwayController));
+router.post('/eway/test', adminEwayController.testConfig.bind(adminEwayController));
 
 // ===== ROLES & PERMISSIONS MANAGEMENT =====
 router.get('/roles', adminRolesController.getRoles.bind(adminRolesController));

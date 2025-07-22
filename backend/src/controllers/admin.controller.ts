@@ -29,6 +29,10 @@ export async function getUsers(req: Request, res: Response): Promise<void> {
           email: true,
           username: true,
           role: true,
+          businessName: true,
+          mobile: true,
+          country: true,
+          currency: true,
           createdAt: true,
           lastLoginAt: true,
           isActive: true,
@@ -178,7 +182,7 @@ export async function toggleUserStatus(req: Request, res: Response): Promise<voi
  */
 export async function createUser(req: Request, res: Response): Promise<void> {
   try {
-    const { email, username, password, role = 'user' } = req.body;
+    const { email, username, password, role = 'user', businessName, mobile, country = 'US', currency = 'USD' } = req.body;
 
     // Check if user exists
     const existingUser = await prisma.user.findFirst({
@@ -204,6 +208,10 @@ export async function createUser(req: Request, res: Response): Promise<void> {
         username,
         passwordHash,
         role,
+        businessName,
+        mobile,
+        country,
+        currency,
         settings: {
           create: {}
         }
@@ -231,7 +239,7 @@ export async function createUser(req: Request, res: Response): Promise<void> {
 export async function updateUser(req: Request, res: Response): Promise<void> {
   try {
     const { id } = req.params;
-    const { email, username, password, role, isActive } = req.body;
+    const { email, username, password, role, isActive, businessName, mobile, country, currency } = req.body;
 
     // Check if email/username is taken by another user
     if (email || username) {
@@ -265,6 +273,10 @@ export async function updateUser(req: Request, res: Response): Promise<void> {
     if (role) updateData.role = role;
     if (typeof isActive === 'boolean') updateData.isActive = isActive;
     if (password) updateData.passwordHash = await bcrypt.hash(password, 12);
+    if (businessName !== undefined) updateData.businessName = businessName;
+    if (mobile !== undefined) updateData.mobile = mobile;
+    if (country !== undefined) updateData.country = country;
+    if (currency !== undefined) updateData.currency = currency;
 
     const user = await prisma.user.update({
       where: { id },

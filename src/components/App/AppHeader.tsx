@@ -76,23 +76,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             </div>
             
             <div className="flex items-center space-x-2">
-              <SecureApiKeyInput
-                apiKey={apiKey}
-                onApiKeyChange={onApiKeyChange}
-                isGuest={isGuest}
-                token={token}
-                keyType="openai"
-              />
-              
-              <SecureApiKeyInput
-                apiKey={elevenLabsKey}
-                onApiKeyChange={onElevenLabsKeyChange}
-                isGuest={isGuest}
-                token={token}
-                keyType="elevenlabs"
-              />
-              
-              <ApiKeySafetyDropdown />
               
               <div className="relative">
                 <button

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Settings, { UserSettings as SettingsType } from '../Settings';
 import { useSettings } from '../../hooks/useSettings';
-import ApiKeyManager from '../ApiKeyManager';
+import { ApiKeyManager } from '../ApiKeyManager';
 import { useApiKeys } from '../../hooks/useApiKeys';
 
 export default function UserSettingsPage() {
@@ -60,13 +60,13 @@ export default function UserSettingsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">API Keys</h2>
           
           <ApiKeyManager
-            openAIKey={openAIKey}
-            elevenLabsKey={elevenLabsKey}
-            onOpenAIKeyChange={handleOpenAIKeyChange}
-            onElevenLabsKeyChange={handleElevenLabsKeyChange}
-            isGuest={!token}
-            token={token}
-            hasSecureKeys={hasKeys}
+            onKeysUpdated={() => {
+              // Reload API keys from local storage or server
+              const newOpenAIKey = localStorage.getItem('openai_api_key') || '';
+              const newElevenLabsKey = localStorage.getItem('elevenlabs_api_key') || '';
+              setOpenAIKey(newOpenAIKey);
+              setElevenLabsKey(newElevenLabsKey);
+            }}
           />
         </div>
 
@@ -118,6 +118,26 @@ export default function UserSettingsPage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Timezone Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Timezone</h2>
+          
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            defaultValue="America/New_York"
+          >
+            <option value="America/New_York">Eastern Time (US & Canada)</option>
+            <option value="America/Chicago">Central Time (US & Canada)</option>
+            <option value="America/Denver">Mountain Time (US & Canada)</option>
+            <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+            <option value="Europe/London">London</option>
+            <option value="Europe/Paris">Paris</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+            <option value="Asia/Shanghai">Beijing, Shanghai</option>
+            <option value="Australia/Sydney">Sydney</option>
+          </select>
         </div>
 
         {/* Account Settings Section */}

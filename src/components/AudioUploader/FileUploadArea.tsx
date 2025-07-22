@@ -1,5 +1,7 @@
 import React from 'react'
 import { CloudArrowUpIcon, DocumentIcon } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface FileUploadAreaProps {
   uploadedFile: File | null
@@ -20,6 +22,19 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
   getRootProps,
   getInputProps
 }) => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+
+  const handleStartProcessing = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    // If user is not authenticated, redirect to pricing page
+    if (!isAuthenticated) {
+      navigate('/pricing')
+    } else {
+      onStartProcessing()
+    }
+  }
   return (
     <div
       {...(isProcessing ? {} : getRootProps())}
@@ -44,10 +59,7 @@ const FileUploadArea: React.FC<FileUploadAreaProps> = ({
           </div>
           {hasApiKey && !isProcessing && (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                onStartProcessing()
-              }}
+              onClick={handleStartProcessing}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
             >
               Start Processing

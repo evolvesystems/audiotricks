@@ -11,8 +11,10 @@ import {
   ClockIcon, 
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  CurrencyDollarIcon
+  CurrencyDollarIcon,
+  CogIcon
 } from '@heroicons/react/24/outline';
+import EwayConfiguration from './EwayConfiguration';
 
 interface TransactionOverview {
   transactionStats: {
@@ -62,10 +64,13 @@ export default function EwayDashboard({ token }: EwayDashboardProps) {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('30days');
+  const [activeTab, setActiveTab] = useState<'overview' | 'configuration'>('overview');
 
   useEffect(() => {
-    fetchData();
-  }, [timeframe]);
+    if (activeTab === 'overview') {
+      fetchData();
+    }
+  }, [timeframe, activeTab]);
 
   const fetchData = async () => {
     try {
@@ -108,7 +113,7 @@ export default function EwayDashboard({ token }: EwayDashboardProps) {
     }).format(amount / 100); // Assuming amounts are in cents
   };
 
-  if (loading) {
+  if (loading && activeTab === 'overview') {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -127,37 +132,69 @@ export default function EwayDashboard({ token }: EwayDashboardProps) {
             </h1>
             <p className="text-gray-600 mt-2">Monitor transactions, customers, and system health</p>
           </div>
-          <div className="flex items-center gap-4">
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2"
-            >
-              <option value="7days">Last 7 days</option>
-              <option value="30days">Last 30 days</option>
-              <option value="90days">Last 90 days</option>
-            </select>
-          </div>
+          {activeTab === 'overview' && (
+            <div className="flex items-center gap-4">
+              <select
+                value={timeframe}
+                onChange={(e) => setTimeframe(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-2"
+              >
+                <option value="7days">Last 7 days</option>
+                <option value="30days">Last 30 days</option>
+                <option value="90days">Last 90 days</option>
+              </select>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* System Health Alert */}
-      {health && health.webhookBacklog > 0 && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <div className="flex">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Webhook Processing Backlog
-              </h3>
-              <p className="mt-1 text-sm text-yellow-700">
-                {health.webhookBacklog} webhook events are pending processing. 
-                Check the webhook management section for details.
-              </p>
+      {/* Tab Navigation */}
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'overview'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('configuration')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+              activeTab === 'configuration'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <CogIcon className="w-4 h-4" />
+            Configuration
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'overview' ? (
+        <>
+          {/* System Health Alert */}
+          {health && health.webhookBacklog > 0 && (
+            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <div className="flex">
+                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Webhook Processing Backlog
+                  </h3>
+                  <p className="mt-1 text-sm text-yellow-700">
+                    {health.webhookBacklog} webhook events are pending processing. 
+                    Check the webhook management section for details.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -316,6 +353,10 @@ export default function EwayDashboard({ token }: EwayDashboardProps) {
           </div>
         )}
       </div>
+        </>
+      ) : (
+        <EwayConfiguration token={token} onConfigSaved={fetchData} />
+      )}
     </div>
   );
 }

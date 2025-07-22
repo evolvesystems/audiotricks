@@ -18,6 +18,7 @@ import AdminTest from './components/Admin/AdminTest.tsx'
 import DashboardTest from './components/Admin/DashboardTest.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import NotFoundPage from './components/NotFoundPage.tsx'
+import PricingPage from './components/PricingPage.tsx'
 import { AdminAuthProvider } from './contexts/AdminAuthContext.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import './index.css'
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Routes>
           {/* Main App */}
           <Route path="/" element={<App />} />
+          <Route path="/pricing" element={<PricingPage />} />
           
           {/* User Dashboard Routes */}
           <Route path="/dashboard" element={<UserApp />} />

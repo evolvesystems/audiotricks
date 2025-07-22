@@ -46,7 +46,7 @@ const navigation: NavigationItem[] = [
   { name: 'Admin Dashboard', href: '/admin/users', icon: HomeIcon, section: 'admin' },
   { name: 'User Management', href: '/admin/users', icon: UsersIcon, section: 'admin' },
   { name: 'Subscriptions', href: '/admin/subscriptions', icon: CreditCardIcon, section: 'admin' },
-  { name: 'Payments', href: '/admin/payments', icon: CurrencyDollarIcon, section: 'admin' },
+  { name: 'Payment Gateway', href: '/admin/payments', icon: CreditCardIcon, section: 'admin' },
   { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon, section: 'admin' },
   { name: 'Roles & Permissions', href: '/admin/roles', icon: KeyIcon, section: 'admin' },
   { name: 'Admin Settings', href: '/admin/settings', icon: Cog6ToothIcon, section: 'admin' },
@@ -130,7 +130,7 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
                               to={item.href}
                               className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold ${
                                 location.pathname === item.href
-                                  ? 'bg-gray-50 text-blue-600'
+                                  ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                                   : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                               }`}
                               onClick={() => setSidebarOpen(false)}
@@ -160,7 +160,7 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
                               to={item.href}
                               className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold ${
                                 location.pathname === item.href
-                                  ? 'bg-gray-50 text-blue-600'
+                                  ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                                   : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                               }`}
                               onClick={() => setSidebarOpen(false)}
@@ -213,7 +213,7 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
                           to={item.href}
                           className={`group flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold transition-all duration-200 ${
                             location.pathname === item.href
-                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                              ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                               : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                           }`}
                         >
@@ -242,7 +242,7 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
                           to={item.href}
                           className={`group flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold transition-all duration-200 ${
                             location.pathname === item.href
-                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                              ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
                               : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                           }`}
                         >

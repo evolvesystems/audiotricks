@@ -28,10 +28,56 @@ export class AdminSubscriptionController {
       });
 
       res.json({
-        plans: plans.map(plan => ({
-          ...plan,
-          activeSubscriptions: plan._count.subscriptions
-        }))
+        plans: plans.map(plan => {
+          const features = (plan.features as any) || {};
+          const quotas = (plan.quotas as any) || {};
+          
+          return {
+            id: plan.id,
+            name: plan.name,
+            displayName: plan.displayName,
+            tier: plan.tier,
+            description: plan.description,
+            price: Number(plan.price),
+            priceAUD: Number(plan.price), // For backward compatibility
+            priceUSD: Number(plan.price), // For backward compatibility
+            priceEUR: Number(plan.price), // For backward compatibility
+            currency: plan.currency,
+            billingInterval: plan.billingPeriod,
+            // Basic Limits from features
+            maxApiCalls: features.maxApiCalls || 1000,
+            maxStorageMb: features.maxStorageMb || 1024,
+            maxProcessingMin: features.maxProcessingMin || 60,
+            maxFileSize: features.maxFileSize || 157286400,
+            maxWorkspaces: features.maxWorkspaces || 1,
+            maxUsers: features.maxUsers || 1,
+            priorityLevel: features.priorityLevel || 5,
+            features: features.basicFeatures || [],
+            collaborationFeatures: features.collaborationFeatures || [],
+            planCategory: features.planCategory || 'personal',
+            // Quotas
+            maxTranscriptionsMonthly: quotas.maxTranscriptionsMonthly || 50,
+            maxFilesDaily: quotas.maxFilesDaily || 10,
+            maxFilesMonthly: quotas.maxFilesMonthly || 100,
+            maxAudioDurationMinutes: quotas.maxAudioDurationMinutes || 120,
+            maxConcurrentJobs: quotas.maxConcurrentJobs || 1,
+            maxVoiceSynthesisMonthly: quotas.maxVoiceSynthesisMonthly || 10,
+            maxExportOperationsMonthly: quotas.maxExportOperationsMonthly || 50,
+            // Legacy fields for compatibility
+            audioProcessingLimit: quotas.maxTranscriptionsMonthly || 50,
+            storageLimit: (features.maxStorageMb || 1024) / 1024, // Convert to GB
+            apiCallsLimit: features.maxApiCalls || 1000,
+            advancedFeatures: (features.basicFeatures || []).length > 0,
+            customBranding: (features.collaborationFeatures || []).includes('customBranding'),
+            prioritySupport: (features.collaborationFeatures || []).includes('prioritySupport'),
+            // Status
+            isActive: plan.isActive,
+            isPublic: plan.isPublic,
+            activeSubscriptions: plan._count.subscriptions,
+            createdAt: plan.createdAt,
+            updatedAt: plan.updatedAt
+          };
+        })
       });
     } catch (error) {
       logger.error('Failed to fetch subscription plans for admin:', error);
@@ -44,14 +90,72 @@ export class AdminSubscriptionController {
    */
   async createSubscriptionPlan(req: Request, res: Response) {
     try {
-      const planData = req.body;
+      const {
+        name,
+        displayName,
+        tier,
+        description,
+        price,
+        currency,
+        billingInterval,
+        maxApiCalls,
+        maxStorageMb,
+        maxProcessingMin,
+        maxFileSize,
+        maxTranscriptionsMonthly,
+        maxFilesDaily,
+        maxFilesMonthly,
+        maxAudioDurationMinutes,
+        maxConcurrentJobs,
+        maxVoiceSynthesisMonthly,
+        maxExportOperationsMonthly,
+        maxWorkspaces,
+        maxUsers,
+        priorityLevel,
+        features,
+        collaborationFeatures,
+        isActive,
+        isPublic,
+        planCategory
+      } = req.body;
+      
+      // Transform frontend data to match database schema
+      const planData = {
+        name: name || '',
+        displayName: displayName || name || '',
+        description: description || '',
+        tier: tier || 'personal',
+        price: price || 0,
+        currency: currency || 'AUD',
+        billingPeriod: billingInterval === 'monthly' ? 'monthly' : 'yearly',
+        features: {
+          maxApiCalls,
+          maxStorageMb,
+          maxProcessingMin,
+          maxFileSize,
+          maxWorkspaces,
+          maxUsers,
+          priorityLevel,
+          basicFeatures: features || [],
+          collaborationFeatures: collaborationFeatures || [],
+          planCategory
+        },
+        quotas: {
+          maxTranscriptionsMonthly,
+          maxFilesDaily,
+          maxFilesMonthly,
+          maxAudioDurationMinutes,
+          maxConcurrentJobs,
+          maxVoiceSynthesisMonthly,
+          maxExportOperationsMonthly
+        },
+        isActive: isActive !== undefined ? isActive : true,
+        isPublic: isPublic !== undefined ? isPublic : true,
+        sortOrder: priorityLevel || 0
+      };
       
       const plan = await prisma.subscriptionPlan.create({
-        data: {
-          ...planData,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
+        data: planData
       });
 
       logger.info('Admin created new subscription plan:', { planId: plan.id, name: plan.name });
@@ -68,14 +172,87 @@ export class AdminSubscriptionController {
   async updateSubscriptionPlan(req: Request, res: Response) {
     try {
       const { planId } = req.params;
-      const updateData = req.body;
+      const {
+        name,
+        displayName,
+        tier,
+        description,
+        price,
+        currency,
+        billingInterval,
+        maxApiCalls,
+        maxStorageMb,
+        maxProcessingMin,
+        maxFileSize,
+        maxTranscriptionsMonthly,
+        maxFilesDaily,
+        maxFilesMonthly,
+        maxAudioDurationMinutes,
+        maxConcurrentJobs,
+        maxVoiceSynthesisMonthly,
+        maxExportOperationsMonthly,
+        maxWorkspaces,
+        maxUsers,
+        priorityLevel,
+        features,
+        collaborationFeatures,
+        isActive,
+        isPublic,
+        planCategory
+      } = req.body;
+
+      // Transform frontend data to match database schema
+      const updateData: any = {};
+      
+      if (name !== undefined) updateData.name = name;
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (tier !== undefined) updateData.tier = tier;
+      if (description !== undefined) updateData.description = description;
+      if (price !== undefined) updateData.price = price;
+      if (currency !== undefined) updateData.currency = currency;
+      if (billingInterval !== undefined) updateData.billingPeriod = billingInterval === 'monthly' ? 'monthly' : 'yearly';
+      if (isActive !== undefined) updateData.isActive = isActive;
+      if (isPublic !== undefined) updateData.isPublic = isPublic;
+      if (priorityLevel !== undefined) updateData.sortOrder = priorityLevel;
+      
+      // Update features object
+      if (maxApiCalls !== undefined || maxStorageMb !== undefined || maxProcessingMin !== undefined || 
+          maxFileSize !== undefined || maxWorkspaces !== undefined || maxUsers !== undefined || 
+          priorityLevel !== undefined || features !== undefined || collaborationFeatures !== undefined || 
+          planCategory !== undefined) {
+        updateData.features = {
+          maxApiCalls,
+          maxStorageMb,
+          maxProcessingMin,
+          maxFileSize,
+          maxWorkspaces,
+          maxUsers,
+          priorityLevel,
+          basicFeatures: features || [],
+          collaborationFeatures: collaborationFeatures || [],
+          planCategory
+        };
+      }
+      
+      // Update quotas object
+      if (maxTranscriptionsMonthly !== undefined || maxFilesDaily !== undefined || 
+          maxFilesMonthly !== undefined || maxAudioDurationMinutes !== undefined || 
+          maxConcurrentJobs !== undefined || maxVoiceSynthesisMonthly !== undefined || 
+          maxExportOperationsMonthly !== undefined) {
+        updateData.quotas = {
+          maxTranscriptionsMonthly,
+          maxFilesDaily,
+          maxFilesMonthly,
+          maxAudioDurationMinutes,
+          maxConcurrentJobs,
+          maxVoiceSynthesisMonthly,
+          maxExportOperationsMonthly
+        };
+      }
 
       const plan = await prisma.subscriptionPlan.update({
         where: { id: planId },
-        data: {
-          ...updateData,
-          updatedAt: new Date()
-        }
+        data: updateData
       });
 
       logger.info('Admin updated subscription plan:', { planId, name: plan.name });

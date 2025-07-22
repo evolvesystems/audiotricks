@@ -1,5 +1,7 @@
 import React from 'react'
 import { LinkIcon } from '@heroicons/react/24/outline'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface UrlUploadAreaProps {
   audioUrl: string
@@ -16,9 +18,18 @@ const UrlUploadArea: React.FC<UrlUploadAreaProps> = ({
   isProcessing,
   hasApiKey
 }) => {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit()
+    
+    // If user is not authenticated, redirect to pricing page
+    if (!isAuthenticated) {
+      navigate('/pricing')
+    } else {
+      onSubmit()
+    }
   }
 
   return (
