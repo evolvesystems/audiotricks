@@ -1,415 +1,578 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EwayApiService } from '../../../src/services/payment/eway-api.service';
+import fetch from 'node-fetch';
 
 /**
- * Test suite for EwayApiService - eWAY API integration
- * Follows CLAUDE.md requirements: expected use, edge case, failure case
+ * Comprehensive tests for EwayApiService - eWAY API integration
+ * Following CLAUDE.md requirements: Expected use case, Edge case, Failure case
  */
+
+// Mock node-fetch
+vi.mock('node-fetch');
+const mockFetch = vi.mocked(fetch);
 
 describe('EwayApiService', () => {
   let ewayApiService: EwayApiService;
 
   beforeEach(() => {
     // Mock environment variables
-    process.env.EWAY_API_KEY = 'test_api_key';
-    process.env.EWAY_PASSWORD = 'test_password';
-    process.env.EWAY_CUSTOMER_API = 'Sandbox';
+    process.env.EWAY_API_KEY = 'test_api_key_12345';
+    process.env.EWAY_PASSWORD = 'test_password_67890';
+    process.env.NODE_ENV = 'test';
     
-    ewayApiService = new EwayApiService();
+    vi.clearAllMocks();
   });
 
-  describe('createTokenCustomer', () => {
-    test('expected use case - creates token customer successfully', async () => {
-      // Mock successful eWAY API response
-      const mockResponse = {
-        Customer: {
-          TokenCustomerID: 'test_token_123',
-          Reference: 'user_456',
-          Title: 'Mr',
-          FirstName: 'John',
-          LastName: 'Doe',
-          Email: 'john@example.com',
-          Phone: '1234567890'
-        },
-        Errors: []
-      };
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
 
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse)
-      });
+  describe('constructor', () => {
+    it('should initialize with test credentials (expected use case)', () => {
+      // Act
+      ewayApiService = new EwayApiService();
 
-      const customerData = {
-        reference: 'user_456',
+      // Assert
+      expect(ewayApiService).toBeDefined();
+      expect((ewayApiService as any).apiKey).toBe('test_api_key_12345');
+      expect((ewayApiService as any).password).toBe('test_password_67890');
+      expect((ewayApiService as any).endpoint).toBe('https://api.sandbox.ewaypayments.com');
+    });
+
+    it('should use production endpoint in production (edge case)', () => {
+      // Arrange
+      process.env.NODE_ENV = 'production';
+
+      // Act
+      ewayApiService = new EwayApiService();
+
+      // Assert
+      expect((ewayApiService as any).endpoint).toBe('https://api.ewaypayments.com');
+      
+      // Cleanup
+      process.env.NODE_ENV = 'test';
+    });
+
+    it('should throw error when credentials are missing (failure case)', () => {
+      // Arrange
+      delete process.env.EWAY_API_KEY;
+      delete process.env.EWAY_PASSWORD;
+
+      // Act & Assert
+      expect(() => new EwayApiService()).toThrow('eWAY API credentials not configured');
+    });
+  });
+
+  describe('createAccessCode', () => {
+    beforeEach(() => {
+      ewayApiService = new EwayApiService();
+    });
+
+    const validPaymentData = {
+      customerDetails: {
+        reference: 'user-123',
         title: 'Mr',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
         phone: '1234567890',
-        cardDetails: {
-          name: 'John Doe',
-          number: '4444333322221111',
-          expiryMonth: '12',
-          expiryYear: '25',
-          cvn: '123'
-        }
+        street1: '123 Test St',
+        city: 'Sydney',
+        state: 'NSW',
+        postalCode: '2000',
+        country: 'AU'
+      },
+      payment: {
+        totalAmount: 29.99,
+        currencyCode: 'AUD',
+        invoiceNumber: 'INV-001',
+        invoiceDescription: 'Subscription payment'
+      },
+      redirectUrl: 'https://example.com/return',
+      method: 'ProcessPayment' as const,
+      transactionType: 'Purchase' as const
+    };
+
+    it('should create access code successfully (expected use case)', async () => {
+      // Arrange
+      const mockResponse = {
+        AccessCode: 'ABC123DEF456',
+        FormActionURL: 'https://secure.ewaypayments.com/Process',
+        CompleteCheckoutURL: 'https://secure.ewaypayments.com/Process/ABC123DEF456',
+        Errors: []
       };
 
-      const result = await ewayApiService.createTokenCustomer(customerData);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
 
-      expect(result.success).toBe(true);
-      expect(result.tokenCustomerId).toBe('test_token_123');
-      expect(result.customer.email).toBe('john@example.com');
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/Customer'),
+      // Act
+      const result = await ewayApiService.createAccessCode(validPaymentData);
+
+      // Assert
+      expect(result.AccessCode).toBe('ABC123DEF456');
+      expect(result.FormActionURL).toBe('https://secure.ewaypayments.com/Process');
+      expect(result.Errors).toHaveLength(0);
+      
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.sandbox.ewaypayments.com/CreateAccessCode',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': expect.stringContaining('Basic'),
-            'Content-Type': 'application/json'
+            'Authorization': expect.stringMatching(/^Basic /),
+            'Content-Type': 'application/json',
+            'User-Agent': 'AudioTricks/1.0'
+          }),
+          body: expect.any(String)
+        })
+      );
+
+      // Verify request body contains correct amount in cents
+      const callArgs = mockFetch.mock.calls[0];
+      const requestBody = JSON.parse(callArgs[1]?.body as string);
+      expect(requestBody.Payment.TotalAmount).toBe(2999); // 29.99 * 100
+    });
+
+    it('should handle customer details with special characters (edge case)', async () => {
+      // Arrange
+      const paymentDataWithSpecialChars = {
+        ...validPaymentData,
+        customerDetails: {
+          ...validPaymentData.customerDetails,
+          firstName: 'José',
+          lastName: 'O\'Connor',
+          street1: '123 Test St & Co'
+        }
+      };
+
+      const mockResponse = {
+        AccessCode: 'XYZ789ABC123',
+        Errors: []
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.createAccessCode(paymentDataWithSpecialChars);
+
+      // Assert
+      expect(result.AccessCode).toBe('XYZ789ABC123');
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    it('should handle eWAY validation errors (failure case)', async () => {
+      // Arrange
+      const mockErrorResponse = {
+        AccessCode: null,
+        Errors: ['V6040', 'V6041'] // Invalid customer details
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockErrorResponse)
+      } as any);
+
+      // Act & Assert
+      await expect(ewayApiService.createAccessCode(validPaymentData))
+        .rejects
+        .toThrow('eWAY API error: V6040, V6041');
+    });
+
+    it('should handle network failures (failure case)', async () => {
+      // Arrange
+      mockFetch.mockRejectedValue(new Error('Network timeout'));
+
+      // Act & Assert
+      await expect(ewayApiService.createAccessCode(validPaymentData))
+        .rejects
+        .toThrow('Failed to create access code: API request failed: Network timeout');
+    });
+  });
+
+  describe('getTransactionResult', () => {
+    beforeEach(() => {
+      ewayApiService = new EwayApiService();
+    });
+
+    const accessCode = 'ABC123DEF456';
+
+    it('should get transaction result successfully (expected use case)', async () => {
+      // Arrange
+      const mockResponse = {
+        AccessCode: accessCode,
+        TransactionID: 12345678,
+        TransactionStatus: true,
+        TransactionType: 'Purchase',
+        BeagleScore: 0,
+        Verification: {
+          CVN: 'M',
+          Address: 'Y',
+          Email: 'Y',
+          Mobile: 'Y',
+          Phone: 'Y'
+        },
+        Customer: {
+          TokenCustomerID: 'cust_123',
+          Reference: 'user-123',
+          Title: 'Mr',
+          FirstName: 'John',
+          LastName: 'Doe',
+          CompanyName: '',
+          JobDescription: '',
+          Street1: '123 Test St',
+          Street2: '',
+          City: 'Sydney',
+          State: 'NSW',
+          PostalCode: '2000',
+          Country: 'au',
+          Email: 'john@example.com',
+          Phone: '1234567890'
+        },
+        Payment: {
+          TotalAmount: 2999,
+          InvoiceNumber: 'INV-001',
+          InvoiceDescription: 'Subscription payment',
+          InvoiceReference: '',
+          CurrencyCode: 'AUD'
+        },
+        ResponseCode: '00',
+        ResponseMessage: 'A2000',
+        AuthorisationCode: 'AUTH123456',
+        Errors: []
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.getTransactionResult(accessCode);
+
+      // Assert
+      expect(result.TransactionID).toBe(12345678);
+      expect(result.TransactionStatus).toBe(true);
+      expect(result.ResponseCode).toBe('00');
+      expect(result.AuthorisationCode).toBe('AUTH123456');
+      
+      expect(mockFetch).toHaveBeenCalledWith(
+        `https://api.sandbox.ewaypayments.com/GetAccessCodeResult/${accessCode}`,
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Authorization': expect.stringMatching(/^Basic /)
           })
         })
       );
     });
 
-    test('edge case - handles eWAY validation errors gracefully', async () => {
-      const mockErrorResponse = {
-        Customer: null,
-        Errors: ['V6040', 'V6041'] // Invalid card number, invalid expiry
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockErrorResponse)
-      });
-
-      const invalidCustomerData = {
-        reference: 'user_456',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'invalid-email',
-        cardDetails: {
-          name: 'John Doe',
-          number: '1234',
-          expiryMonth: '13',
-          expiryYear: '20',
-          cvn: '12'
-        }
-      };
-
-      const result = await ewayApiService.createTokenCustomer(invalidCustomerData);
-
-      expect(result.success).toBe(false);
-      expect(result.errors).toContain('V6040');
-      expect(result.errors).toContain('V6041');
-      expect(result.tokenCustomerId).toBeNull();
-    });
-
-    test('failure case - throws error for network/API failures', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-
-      const customerData = {
-        reference: 'user_456',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        cardDetails: {
-          name: 'John Doe',
-          number: '4444333322221111',
-          expiryMonth: '12',
-          expiryYear: '25',
-          cvn: '123'
-        }
-      };
-
-      await expect(ewayApiService.createTokenCustomer(customerData))
-        .rejects
-        .toThrow('Network error');
-    });
-  });
-
-  describe('processPayment', () => {
-    test('expected use case - processes payment successfully', async () => {
-      const mockPaymentResponse = {
-        TransactionID: 'txn_789',
-        TransactionStatus: true,
-        TransactionType: 'Purchase',
-        TotalAmount: 2000,
-        ResponseCode: '00',
-        ResponseMessage: 'A2000',
-        AuthorisationCode: 'AUTH123',
-        Errors: []
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockPaymentResponse)
-      });
-
-      const paymentData = {
-        tokenCustomerId: 'test_token_123',
-        amount: 2000, // $20.00 in cents
-        currency: 'AUD',
-        invoiceReference: 'INV_001',
-        invoiceDescription: 'Subscription payment'
-      };
-
-      const result = await ewayApiService.processPayment(paymentData);
-
-      expect(result.success).toBe(true);
-      expect(result.transactionId).toBe('txn_789');
-      expect(result.amount).toBe(2000);
-      expect(result.responseCode).toBe('00');
-      expect(result.authorisationCode).toBe('AUTH123');
-    });
-
-    test('edge case - handles declined payment', async () => {
-      const mockDeclineResponse = {
-        TransactionID: 'txn_failed_456',
+    it('should handle failed transaction (edge case)', async () => {
+      // Arrange
+      const mockFailedResponse = {
+        AccessCode: accessCode,
+        TransactionID: 12345679,
         TransactionStatus: false,
-        TransactionType: 'Purchase',
-        TotalAmount: 2000,
         ResponseCode: '05',
         ResponseMessage: 'Do Not Honour',
-        AuthorisationCode: null,
+        AuthorisationCode: '',
         Errors: []
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockDeclineResponse)
-      });
+        json: () => Promise.resolve(mockFailedResponse)
+      } as any);
 
-      const paymentData = {
-        tokenCustomerId: 'test_token_123',
-        amount: 2000,
-        currency: 'AUD',
-        invoiceReference: 'INV_002'
-      };
+      // Act
+      const result = await ewayApiService.getTransactionResult(accessCode);
 
-      const result = await ewayApiService.processPayment(paymentData);
-
-      expect(result.success).toBe(false);
-      expect(result.transactionId).toBe('txn_failed_456');
-      expect(result.responseCode).toBe('05');
-      expect(result.responseMessage).toBe('Do Not Honour');
-      expect(result.authorisationCode).toBeNull();
+      // Assert
+      expect(result.TransactionStatus).toBe(false);
+      expect(result.ResponseCode).toBe('05');
+      expect(result.ResponseMessage).toBe('Do Not Honour');
+      expect(result.AuthorisationCode).toBe('');
     });
 
-    test('failure case - throws error for invalid payment amount', async () => {
-      const invalidPaymentData = {
-        tokenCustomerId: 'test_token_123',
-        amount: -100, // Invalid negative amount
-        currency: 'AUD',
-        invoiceReference: 'INV_003'
-      };
-
-      await expect(ewayApiService.processPayment(invalidPaymentData))
-        .rejects
-        .toThrow('Payment amount must be positive');
-    });
-  });
-
-  describe('refundPayment', () => {
-    test('expected use case - processes refund successfully', async () => {
-      const mockRefundResponse = {
-        TransactionID: 'refund_123',
-        TransactionStatus: true,
-        TransactionType: 'Refund',
-        TotalAmount: 1000,
-        ResponseCode: '00',
-        ResponseMessage: 'A2000',
-        Errors: []
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockRefundResponse)
-      });
-
-      const refundData = {
-        originalTransactionId: 'txn_789',
-        amount: 1000, // Partial refund
-        reason: 'Customer request'
-      };
-
-      const result = await ewayApiService.refundPayment(refundData);
-
-      expect(result.success).toBe(true);
-      expect(result.refundId).toBe('refund_123');
-      expect(result.amount).toBe(1000);
-      expect(result.responseCode).toBe('00');
-    });
-
-    test('edge case - handles refund amount exceeding original payment', async () => {
+    it('should handle API errors (failure case)', async () => {
+      // Arrange
       const mockErrorResponse = {
-        TransactionID: null,
-        TransactionStatus: false,
-        Errors: ['V6011'] // Invalid amount - exceeds original
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockErrorResponse)
-      });
-
-      const invalidRefundData = {
-        originalTransactionId: 'txn_789',
-        amount: 5000, // More than original $20.00
-        reason: 'Test refund'
-      };
-
-      const result = await ewayApiService.refundPayment(invalidRefundData);
-
-      expect(result.success).toBe(false);
-      expect(result.errors).toContain('V6011');
-      expect(result.refundId).toBeNull();
-    });
-
-    test('failure case - throws error for missing original transaction', async () => {
-      const refundData = {
-        originalTransactionId: '', // Empty transaction ID
-        amount: 1000,
-        reason: 'Test'
-      };
-
-      await expect(ewayApiService.refundPayment(refundData))
-        .rejects
-        .toThrow('Original transaction ID is required');
-    });
-  });
-
-  describe('queryCustomer', () => {
-    test('expected use case - retrieves customer information', async () => {
-      const mockCustomerResponse = {
-        Customer: {
-          TokenCustomerID: 'test_token_123',
-          Reference: 'user_456',
-          Title: 'Mr',
-          FirstName: 'John',
-          LastName: 'Doe',
-          Email: 'john@example.com',
-          Phone: '1234567890',
-          CardDetails: {
-            Number: '411111XXXXXX1111',
-            Name: 'John Doe',
-            ExpiryMonth: '12',
-            ExpiryYear: '25'
-          }
-        },
-        Errors: []
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCustomerResponse)
-      });
-
-      const result = await ewayApiService.queryCustomer('test_token_123');
-
-      expect(result.success).toBe(true);
-      expect(result.customer.tokenCustomerId).toBe('test_token_123');
-      expect(result.customer.email).toBe('john@example.com');
-      expect(result.customer.cardDetails.number).toBe('411111XXXXXX1111');
-    });
-
-    test('edge case - handles non-existent customer', async () => {
-      const mockNotFoundResponse = {
-        Customer: null,
         Errors: ['V6010'] // Customer not found
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockNotFoundResponse)
-      });
+        json: () => Promise.resolve(mockErrorResponse)
+      } as any);
 
-      const result = await ewayApiService.queryCustomer('non_existent_token');
-
-      expect(result.success).toBe(false);
-      expect(result.errors).toContain('V6010');
-      expect(result.customer).toBeNull();
-    });
-
-    test('failure case - throws error for invalid token format', async () => {
-      await expect(ewayApiService.queryCustomer(''))
+      // Act & Assert
+      await expect(ewayApiService.getTransactionResult(accessCode))
         .rejects
-        .toThrow('Token customer ID is required');
-
-      await expect(ewayApiService.queryCustomer('   '))
-        .rejects
-        .toThrow('Token customer ID is required');
+        .toThrow('eWAY API error: V6010');
     });
   });
 
-  describe('updateTokenCustomer', () => {
-    test('expected use case - updates customer successfully', async () => {
-      const mockUpdateResponse = {
-        Customer: {
-          TokenCustomerID: 'test_token_123',
-          Reference: 'user_456',
-          Title: 'Ms',
-          FirstName: 'Jane',
-          LastName: 'Smith',
-          Email: 'jane@example.com',
-          Phone: '0987654321'
+  describe('createRecurringSchedule', () => {
+    beforeEach(() => {
+      ewayApiService = new EwayApiService();
+    });
+
+    const validScheduleParams = {
+      tokenCustomerId: 'cust_123',
+      amount: 29.99,
+      currency: 'AUD',
+      frequency: 'Monthly' as const,
+      startDate: new Date('2024-02-01'),
+      invoiceDescription: 'Monthly subscription'
+    };
+
+    it('should create recurring schedule successfully (expected use case)', async () => {
+      // Arrange
+      const mockResponse = {
+        ScheduleID: 'sched_789',
+        TokenCustomer: {
+          TokenCustomerID: 'cust_123'
+        },
+        Payment: {
+          TotalAmount: 2999,
+          CurrencyCode: 'AUD'
+        },
+        Schedule: {
+          StartDate: '2024-02-01',
+          Frequency: 'Monthly',
+          NextPaymentDate: '2024-02-01'
         },
         Errors: []
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockUpdateResponse)
-      });
+        json: () => Promise.resolve(mockResponse)
+      } as any);
 
-      const updateData = {
-        tokenCustomerId: 'test_token_123',
-        title: 'Ms',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane@example.com',
-        phone: '0987654321'
-      };
+      // Act
+      const result = await ewayApiService.createRecurringSchedule(validScheduleParams);
 
-      const result = await ewayApiService.updateTokenCustomer(updateData);
+      // Assert
+      expect(result.ScheduleID).toBe('sched_789');
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.sandbox.ewaypayments.com/Recurring/Create',
+        expect.objectContaining({
+          method: 'POST'
+        })
+      );
 
-      expect(result.success).toBe(true);
-      expect(result.customer.firstName).toBe('Jane');
-      expect(result.customer.email).toBe('jane@example.com');
+      // Verify amount conversion to cents
+      const callArgs = mockFetch.mock.calls[0];
+      const requestBody = JSON.parse(callArgs[1]?.body as string);
+      expect(requestBody.Payment.TotalAmount).toBe(2999);
     });
 
-    test('edge case - handles partial update with validation errors', async () => {
-      const mockValidationResponse = {
-        Customer: null,
-        Errors: ['V6043'] // Invalid email format
+    it('should handle schedule with end date (edge case)', async () => {
+      // Arrange
+      const paramsWithEndDate = {
+        ...validScheduleParams,
+        endDate: new Date('2024-12-31')
       };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      const mockResponse = {
+        ScheduleID: 'sched_456',
+        Schedule: {
+          StartDate: '2024-02-01',
+          EndDate: '2024-12-31',
+          Frequency: 'Monthly'
+        },
+        Errors: []
+      };
+
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve(mockValidationResponse)
-      });
+        json: () => Promise.resolve(mockResponse)
+      } as any);
 
-      const invalidUpdateData = {
-        tokenCustomerId: 'test_token_123',
-        email: 'invalid-email-format'
-      };
+      // Act
+      const result = await ewayApiService.createRecurringSchedule(paramsWithEndDate);
 
-      const result = await ewayApiService.updateTokenCustomer(invalidUpdateData);
-
-      expect(result.success).toBe(false);
-      expect(result.errors).toContain('V6043');
+      // Assert
+      expect(result.ScheduleID).toBe('sched_456');
+      
+      const callArgs = mockFetch.mock.calls[0];
+      const requestBody = JSON.parse(callArgs[1]?.body as string);
+      expect(requestBody.Schedule.EndDate).toBe('2024-12-31');
     });
 
-    test('failure case - throws error for missing token customer ID', async () => {
-      const updateData = {
-        firstName: 'John',
-        lastName: 'Doe'
-        // Missing tokenCustomerId
+    it('should handle invalid token customer (failure case)', async () => {
+      // Arrange
+      const mockErrorResponse = {
+        Errors: ['V6010'] // Customer not found
       };
 
-      await expect(ewayApiService.updateTokenCustomer(updateData as any))
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockErrorResponse)
+      } as any);
+
+      // Act & Assert
+      await expect(ewayApiService.createRecurringSchedule(validScheduleParams))
         .rejects
-        .toThrow('Token customer ID is required');
+        .toThrow('eWAY API error: V6010');
+    });
+  });
+
+  describe('cancelRecurringSchedule', () => {
+    beforeEach(() => {
+      ewayApiService = new EwayApiService();
+    });
+
+    const scheduleId = 'sched_789';
+
+    it('should cancel recurring schedule successfully (expected use case)', async () => {
+      // Arrange
+      const mockResponse = {
+        ScheduleID: scheduleId,
+        Status: 'Cancelled',
+        Errors: []
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.cancelRecurringSchedule(scheduleId);
+
+      // Assert
+      expect(result.ScheduleID).toBe(scheduleId);
+      expect(result.Status).toBe('Cancelled');
+      
+      expect(mockFetch).toHaveBeenCalledWith(
+        `https://api.sandbox.ewaypayments.com/Recurring/Cancel/${scheduleId}`,
+        expect.objectContaining({
+          method: 'POST'
+        })
+      );
+    });
+
+    it('should handle already cancelled schedule (edge case)', async () => {
+      // Arrange
+      const mockResponse = {
+        ScheduleID: scheduleId,
+        Status: 'Already Cancelled',
+        Errors: []
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.cancelRecurringSchedule(scheduleId);
+
+      // Assert
+      expect(result.Status).toBe('Already Cancelled');
+    });
+
+    it('should handle non-existent schedule (failure case)', async () => {
+      // Arrange
+      const mockErrorResponse = {
+        Errors: ['V6020'] // Schedule not found
+      };
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockErrorResponse)
+      } as any);
+
+      // Act & Assert
+      await expect(ewayApiService.cancelRecurringSchedule(scheduleId))
+        .rejects
+        .toThrow('eWAY API error: V6020');
+    });
+  });
+
+  describe('makeApiRequest', () => {
+    beforeEach(() => {
+      ewayApiService = new EwayApiService();
+    });
+
+    it('should make GET request successfully (expected use case)', async () => {
+      // Arrange
+      const mockResponse = { data: 'test' };
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.makeApiRequest('/test-endpoint', 'GET');
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.sandbox.ewaypayments.com/test-endpoint',
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Authorization': expect.stringMatching(/^Basic /),
+            'Content-Type': 'application/json',
+            'User-Agent': 'AudioTricks/1.0'
+          })
+        })
+      );
+    });
+
+    it('should make POST request with data (edge case)', async () => {
+      // Arrange
+      const mockResponse = { success: true };
+      const postData = { name: 'test', value: 123 };
+      
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      } as any);
+
+      // Act
+      const result = await ewayApiService.makeApiRequest('/post-endpoint', 'POST', postData);
+
+      // Assert
+      expect(result).toEqual(mockResponse);
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.sandbox.ewaypayments.com/post-endpoint',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(postData)
+        })
+      );
+    });
+
+    it('should handle HTTP error responses (failure case)', async () => {
+      // Arrange
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        json: () => Promise.resolve({ error: 'Invalid credentials' })
+      } as any);
+
+      // Act & Assert
+      await expect(ewayApiService.makeApiRequest('/secure-endpoint', 'GET'))
+        .rejects
+        .toThrow('API request failed: HTTP 401: Unauthorized');
+    });
+
+    it('should handle network failures (failure case)', async () => {
+      // Arrange
+      mockFetch.mockRejectedValue(new Error('ECONNRESET'));
+
+      // Act & Assert
+      await expect(ewayApiService.makeApiRequest('/test-endpoint', 'GET'))
+        .rejects
+        .toThrow('API request failed: ECONNRESET');
     });
   });
 });

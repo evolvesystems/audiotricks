@@ -11,8 +11,8 @@ export default defineConfig({
     // Test environment setup
     environment: 'node',
     
-    // Global setup and teardown
-    globalSetup: './tests/setup.ts',
+    // Setup files for tests
+    setupFiles: ['./tests/setup.ts'],
     
     // Test file patterns
     include: [
@@ -55,8 +55,6 @@ export default defineConfig({
     // Test timeout
     testTimeout: 30000,
     
-    // Setup files
-    setupFiles: ['./tests/setup.ts'],
     
     // Mock configuration
     server: {

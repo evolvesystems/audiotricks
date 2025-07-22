@@ -355,7 +355,7 @@ Response: { current, limit, percentUsed, exceeded }
 DATABASE_URL="postgresql://..."
 
 # Server
-PORT=3001
+PORT=3000
 NODE_ENV=production
 
 # Auth

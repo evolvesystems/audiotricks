@@ -17,7 +17,7 @@ const envSchema = z.object({
   
   ENCRYPTION_KEY: z.string().min(32),
   
-  FRONTEND_URL: z.string().url().default('http://localhost:3001'),
+  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
   
   RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default('900000'),
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default('100'),

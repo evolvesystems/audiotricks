@@ -18,7 +18,7 @@ RUN npm ci --only=production && npm cache clean --force
 FROM base AS development
 RUN npm ci
 COPY . .
-EXPOSE 3001
+EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 # Build stage
@@ -54,10 +54,10 @@ USER audiotricks
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+  CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
 
 # Expose port
-EXPOSE 3001
+EXPOSE 3000
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
