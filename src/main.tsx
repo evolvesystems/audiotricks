@@ -17,6 +17,7 @@ import UserApp from './components/User/UserApp.tsx'
 import AdminTest from './components/Admin/AdminTest.tsx'
 import DashboardTest from './components/Admin/DashboardTest.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
+import NotFoundPage from './components/NotFoundPage.tsx'
 import { AdminAuthProvider } from './contexts/AdminAuthContext.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import './index.css'
@@ -56,8 +57,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/admin/" element={<AdminApp />} />
           <Route path="/admin" element={<Navigate to="/admin/users" replace />} />
           
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 404 Page */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
           </AdminAuthProvider>
         </AuthProvider>
