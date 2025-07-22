@@ -1,0 +1,102 @@
+{
+  "title": "AudioTricks Comprehensive Browser Test Report",
+  "timestamp": "2025-07-22T08:13:40.688Z",
+  "baseUrl": "https://audiotricks.evolvepreneuriq.com",
+  "totalTests": 9,
+  "passed": 6,
+  "failed": 3,
+  "results": [
+    {
+      "test": "Home Page Loads",
+      "category": "Navigation",
+      "status": "PASS",
+      "message": "",
+      "duration": 3518,
+      "screenshot": "000-home-page-loads.png",
+      "timestamp": "2025-07-22T08:12:52.595Z"
+    },
+    {
+      "test": "API Health Endpoints",
+      "category": "API",
+      "status": "PASS",
+      "message": "",
+      "duration": 4815,
+      "screenshot": "001-api-health-endpoints.png",
+      "timestamp": "2025-07-22T08:12:57.412Z"
+    },
+    {
+      "test": "Admin Login Process",
+      "category": "Authentication",
+      "status": "PASS",
+      "message": "",
+      "duration": 12175,
+      "screenshot": "002-admin-login-process.png",
+      "timestamp": "2025-07-22T08:13:09.588Z"
+    },
+    {
+      "test": "Navigation Menu Functionality",
+      "category": "Navigation",
+      "status": "FAIL",
+      "message": "No navigation menu items found",
+      "duration": 3543,
+      "screenshot": "003-failed-navigation-menu-functionality.png",
+      "timestamp": "2025-07-22T08:13:13.131Z"
+    },
+    {
+      "test": "Button Interactions",
+      "category": "Interactions",
+      "status": "PASS",
+      "message": "",
+      "duration": 11286,
+      "screenshot": "004-button-interactions.png",
+      "timestamp": "2025-07-22T08:13:24.417Z"
+    },
+    {
+      "test": "Form Element Testing",
+      "category": "Forms",
+      "status": "PASS",
+      "message": "",
+      "duration": 10667,
+      "screenshot": "005-form-element-testing.png",
+      "timestamp": "2025-07-22T08:13:35.084Z"
+    },
+    {
+      "test": "Mobile Responsiveness",
+      "category": "Responsive Design",
+      "status": "FAIL",
+      "message": "Page not responsive: body width 1198px on mobile",
+      "duration": 2175,
+      "screenshot": "006-failed-mobile-responsiveness.png",
+      "timestamp": "2025-07-22T08:13:37.260Z"
+    },
+    {
+      "test": "Page Load Performance",
+      "category": "Performance",
+      "status": "PASS",
+      "message": "",
+      "duration": 1696,
+      "screenshot": "007-page-load-performance.png",
+      "timestamp": "2025-07-22T08:13:38.956Z"
+    },
+    {
+      "test": "Error Page Handling",
+      "category": "Error Handling",
+      "status": "FAIL",
+      "message": "Error page testing failed: Unexpected 404 handling: 200 - https://audiotricks.evolvepreneuriq.com/",
+      "duration": 1731,
+      "screenshot": "008-failed-error-page-handling.png",
+      "timestamp": "2025-07-22T08:13:40.687Z"
+    }
+  ],
+  "screenshots": [
+    "000-home-page-loads.png",
+    "001-api-health-endpoints.png",
+    "002-admin-login-process.png",
+    "003-failed-navigation-menu-functionality.png",
+    "004-button-interactions.png",
+    "005-form-element-testing.png",
+    "006-failed-mobile-responsiveness.png",
+    "007-page-load-performance.png",
+    "008-failed-error-page-handling.png"
+  ]
+}

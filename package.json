@@ -15,7 +15,9 @@
     "preview": "echo '🚫 ERROR: Frontend served from backend. Run: npm run dev' && exit 1",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "test:browser": "cd tests && node comprehensive-browser-test.js",
+    "test:browser:headless": "cd tests && HEADLESS=true node comprehensive-browser-test.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
