@@ -108,6 +108,137 @@ git push
 - ✅ **After routing updates** - Test navigation works
 - ✅ **Before deployment** - Comprehensive pre-deployment check
 
+### 🔄 Netlify Deployment Status Testing (CRITICAL)
+
+**MANDATORY**: After every deployment, you MUST verify that Netlify build succeeded and the application is functioning in production.
+
+#### 📡 Live Build Status Checks
+
+**PRIMARY HEALTH CHECK**: 
+```bash
+# Test production deployment status
+curl -s https://audiotricks.evolvepreneuriq.com/api/health
+```
+
+**Expected Success Response**:
+```json
+{"status":"ok","timestamp":"2024-01-20T10:00:00Z","database":"connected"}
+```
+
+**Build Failure Indicators**:
+- ❌ Connection refused / timeout = Netlify build failed
+- ❌ 500 Internal Server Error = Backend deployment issue  
+- ❌ `"database":"failed"` = Database connection problem
+- ❌ Missing environment variables = Configuration issue
+
+#### 🔍 Comprehensive Production Verification
+
+**FULL DEPLOYMENT TEST SEQUENCE**:
+```bash
+# 1. Test health endpoint
+curl -s https://audiotricks.evolvepreneuriq.com/api/health
+
+# 2. Test authentication endpoint
+curl -s https://audiotricks.evolvepreneuriq.com/api/auth/health
+
+# 3. Test frontend loads
+curl -s https://audiotricks.evolvepreneuriq.com/ | grep -q "AudioTricks"
+
+# 4. Test admin functionality (if admin user exists)
+curl -s https://audiotricks.evolvepreneuriq.com/api/admin/stats
+```
+
+#### 🚨 Build Failure Recovery Protocol
+
+**If Netlify build fails**:
+
+1. **Immediate Diagnosis**:
+   ```bash
+   # Check if site responds at all
+   curl -I https://audiotricks.evolvepreneuriq.com/
+   ```
+
+2. **Common Build Failure Patterns**:
+   - **"Module not found"** = Missing dependency in package.json
+   - **"Prisma not found"** = Missing prisma in netlify functions
+   - **"Environment variable not found"** = Missing Netlify env vars
+   - **"Build timeout"** = Build process taking too long
+
+3. **Fix and Redeploy**:
+   ```bash
+   # Fix the issue, then test locally first
+   npm run build:test
+   
+   # Only push if local build passes
+   git add .
+   git commit -m "fix: resolve deployment issue"
+   git push
+   ```
+
+#### 📊 Deployment Health Dashboard
+
+**Quick Status Check** - Run this to get full deployment status:
+```bash
+#!/bin/bash
+echo "🔄 Checking AudioTricks Deployment Status..."
+echo "=============================================="
+
+# Test main site
+if curl -s https://audiotricks.evolvepreneuriq.com/api/health | grep -q "ok"; then
+    echo "✅ Main site: HEALTHY"
+else
+    echo "❌ Main site: FAILED"
+fi
+
+# Test authentication
+if curl -s https://audiotricks.evolvepreneuriq.com/api/auth/health | grep -q "ok"; then
+    echo "✅ Authentication: HEALTHY"  
+else
+    echo "❌ Authentication: FAILED"
+fi
+
+# Test database
+if curl -s https://audiotricks.evolvepreneuriq.com/api/health | grep -q "connected"; then
+    echo "✅ Database: CONNECTED"
+else
+    echo "❌ Database: DISCONNECTED"
+fi
+
+echo "=============================================="
+```
+
+#### ⚡ Quick Deploy Status Check
+
+**RECOMMENDED**: Use the built-in deployment checker:
+```bash
+npm run check:deploy
+```
+
+**ONE-LINER** to check if your latest deployment worked:
+```bash
+curl -s https://audiotricks.evolvepreneuriq.com/api/health | grep -q "ok" && echo "✅ DEPLOYED SUCCESSFULLY" || echo "❌ DEPLOYMENT FAILED"
+```
+
+**Post-Deployment Workflow**: 
+```bash
+# 1. Push your changes
+git push
+
+# 2. Wait for Netlify build (2-3 minutes)
+# 3. Check deployment status
+npm run check:deploy
+
+# Expected output on success:
+# 🎉 DEPLOYMENT SUCCESSFUL!
+# ✅ All systems operational
+```
+
+**Integration with Build Testing**: 
+- Run `npm run check:deploy` after every `git push`
+- Wait 2-3 minutes for Netlify build to complete
+- Verify all endpoints are responding correctly
+- Check database connectivity in production environment
+
 ### 🚫 Build Testing Violations - STRICTLY FORBIDDEN
 
 **VIOLATION = IMMEDIATE BUILD FAILURE**:
@@ -439,6 +570,8 @@ npm run start            # Starts server on port 3000
 
 # Testing
 npm run test             # Runs all tests
+npm run build:test       # MANDATORY pre-commit build testing
+npm run check:deploy     # Check Netlify deployment status
 
 # Database
 npm run migrate          # Run database migrations

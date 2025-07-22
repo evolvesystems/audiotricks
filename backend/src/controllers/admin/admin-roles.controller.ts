@@ -19,11 +19,6 @@ export class AdminRolesController {
             include: {
               permission: true
             }
-          },
-          permissions: {
-            include: {
-              permission: true
-            }
           }
         },
         orderBy: { name: 'asc' }
@@ -51,7 +46,7 @@ export class AdminRolesController {
    */
   async createRole(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { name, displayName, description, permissions } = req.body;
+      const { name, description, permissions } = req.body;
 
       // Create role
       const role = await prisma.role.create({

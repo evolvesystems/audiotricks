@@ -8,6 +8,7 @@
     "build:frontend": "./scripts/build-frontend.sh",
     "build:test": "./scripts/build-test.sh",
     "build:production": "npm run build && cd netlify/functions && npm install",
+    "check:deploy": "./scripts/check-deployment.sh",
     "dev": "./dev.sh",
     "dev:win": "dev.bat",
     "start": "echo '🚫 ERROR: Frontend served from backend. Run: npm run dev' && exit 1",

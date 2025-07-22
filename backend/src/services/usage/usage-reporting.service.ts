@@ -58,10 +58,10 @@ export class UsageReportingService {
       return await prisma.usageReport.findMany({
         where: {
           workspaceId,
-          period
+          reportType: period
         },
         orderBy: {
-          startDate: 'desc'
+          periodStart: 'desc'
         },
         take: limit
       });
@@ -105,18 +105,18 @@ export class UsageReportingService {
       await prisma.usageReport.create({
         data: {
           workspaceId,
-          period: 'monthly',
-          startDate: report.startDate,
-          endDate: report.endDate,
-          storageBytes: report.usage.storageBytes,
-          processingMinutes: report.usage.processingMinutes,
-          apiCalls: report.usage.apiCalls,
-          transcriptionMinutes: report.usage.transcriptionMinutes,
-          aiTokens: report.usage.aiTokens,
-          totalCost: report.costs.total,
-          metadata: {
+          reportType: 'monthly',
+          periodStart: report.startDate,
+          periodEnd: report.endDate,
+          totalUploads: 0, // TODO: Calculate actual uploads
+          totalMinutes: report.usage.processingMinutes,
+          totalStorage: report.usage.storageBytes,
+          reportData: {
             costs: report.costs,
-            percentUsed: report.usage.percentUsed
+            percentUsed: report.usage.percentUsed,
+            apiCalls: report.usage.apiCalls,
+            transcriptionMinutes: report.usage.transcriptionMinutes,
+            aiTokens: report.usage.aiTokens
           }
         }
       });

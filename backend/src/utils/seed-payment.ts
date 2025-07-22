@@ -200,10 +200,10 @@ async function seedPaymentData() {
 
           await prisma.planPricing.upsert({
             where: {
-              planId_currency_billingPeriod: {
+              planId_currency_interval: {
                 planId: plan.id,
                 currency,
-                billingPeriod: planData.billingPeriod
+                interval: planData.billingPeriod
               }
             },
             update: {
@@ -213,7 +213,7 @@ async function seedPaymentData() {
               planId: plan.id,
               currency,
               price: conversion.convertedAmount,
-              billingPeriod: planData.billingPeriod,
+              interval: planData.billingPeriod,
               isActive: true
             }
           });
@@ -225,36 +225,53 @@ async function seedPaymentData() {
 
     // Create payment gateway configurations
     await prisma.paymentGatewayConfig.upsert({
-      where: { gateway: 'stripe' },
+      where: { 
+        provider_environment: {
+          provider: 'stripe',
+          environment: 'production'
+        }
+      },
       update: {
-        supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'],
-        supportedCountries: ['US', 'CA', 'GB', 'AU', 'NZ', 'JP', 'CH', 'SE', 'NO', 'DK', 'DE', 'FR', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'FI', 'IE']
+        config: {
+          supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'],
+          supportedCountries: ['US', 'CA', 'GB', 'AU', 'NZ', 'JP', 'CH', 'SE', 'NO', 'DK', 'DE', 'FR', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'FI', 'IE'],
+          webhookEndpoint: '/api/payment/webhooks/stripe'
+        }
       },
       create: {
-        gateway: 'stripe',
+        provider: 'stripe',
+        environment: 'production',
         isActive: true,
-        isDefault: true,
-        supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'],
-        supportedCountries: ['US', 'CA', 'GB', 'AU', 'NZ', 'JP', 'CH', 'SE', 'NO', 'DK', 'DE', 'FR', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'FI', 'IE'],
-        config: {},
-        webhookEndpoint: '/api/payment/webhooks/stripe'
+        config: {
+          supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK'],
+          supportedCountries: ['US', 'CA', 'GB', 'AU', 'NZ', 'JP', 'CH', 'SE', 'NO', 'DK', 'DE', 'FR', 'IT', 'ES', 'PT', 'NL', 'BE', 'AT', 'FI', 'IE'],
+          webhookEndpoint: '/api/payment/webhooks/stripe'
+        }
       }
     });
 
     await prisma.paymentGatewayConfig.upsert({
-      where: { gateway: 'eway' },
+      where: { 
+        provider_environment: {
+          provider: 'eway',
+          environment: 'production'
+        }
+      },
       update: {
-        supportedCurrencies: ['AUD', 'USD', 'NZD'],
-        supportedCountries: ['AU', 'NZ']
+        config: {
+          supportedCurrencies: ['AUD', 'USD', 'NZD'],
+          supportedCountries: ['AU', 'NZ']
+        }
       },
       create: {
-        gateway: 'eway',
+        provider: 'eway',
+        environment: 'production',
         isActive: false,
-        isDefault: false,
-        supportedCurrencies: ['AUD', 'USD', 'NZD'],
-        supportedCountries: ['AU', 'NZ'],
-        config: {},
-        webhookEndpoint: '/api/payment/webhooks/eway'
+        config: {
+          supportedCurrencies: ['AUD', 'USD', 'NZD'],
+          supportedCountries: ['AU', 'NZ'],
+          webhookEndpoint: '/api/payment/webhooks/eway'
+        }
       }
     });
 

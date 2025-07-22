@@ -68,10 +68,10 @@ export class UsageCalculationService {
     ]);
 
     return {
-      storageBytes: BigInt(storageUsage._sum?.fileSize || 0),
+      storageBytes: BigInt(Number(storageUsage._sum?.fileSize || 0)),
       processingMinutes: (processingUsage._count || 0) * 5, // Estimate 5 min per job
       apiCalls: apiUsage,
-      transcriptionMinutes: Math.round((transcriptionData._sum.durationSeconds || 0) / 60),
+      transcriptionMinutes: Math.round(((transcriptionData._sum?.durationSeconds || 0)) / 60),
       aiTokens: 0 // Simplified - token usage model doesn't exist yet
     };
   }
@@ -83,7 +83,7 @@ export class UsageCalculationService {
     return await prisma.audioUpload.aggregate({
       where: {
         workspaceId,
-        status: 'completed'
+        uploadStatus: 'completed'
       },
       _sum: {
         fileSize: true
@@ -103,7 +103,7 @@ export class UsageCalculationService {
       where: {
         upload: { workspaceId },
         status: 'completed',
-        queuedAt: {
+        createdAt: {
           gte: startDate,
           lte: endDate
         }
@@ -123,7 +123,7 @@ export class UsageCalculationService {
     return await prisma.audioHistory.aggregate({
       where: {
         workspaceId,
-        queuedAt: {
+        createdAt: {
           gte: startDate,
           lte: endDate
         }
@@ -184,9 +184,12 @@ export class UsageCalculationService {
     try {
       await prisma.usageTracking.create({
         data: {
+          userId: 'system', // TODO: Pass actual userId
           workspaceId,
           resourceType,
-          amount: BigInt(amount),
+          resourceId: 'auto-generated',
+          action: 'track',
+          quantity: amount,
           metadata: metadata || {}
         }
       });
@@ -214,18 +217,18 @@ export class UsageCalculationService {
         by: ['resourceType'],
         where: {
           workspaceId,
-          createdAt: {
+          timestamp: {
             gte: startDate
           }
         },
         _sum: {
-          amount: true
+          quantity: true
         }
       });
 
       return dailyUsage.map(item => ({
         resourceType: item.resourceType,
-        totalAmount: Number(item._sum.amount || 0)
+        totalAmount: Number(item._sum?.quantity || 0)
       }));
     } catch (error) {
       logger.error('Failed to get usage statistics', { workspaceId, error });

@@ -44,14 +44,14 @@ export class QuotaManagementService {
 
       const subscription = workspace.subscriptions[0];
       const plan = subscription.plan;
-      const features = plan.features as any;
+      const quotas = plan.quotas as any;
 
       return {
-        storageBytes: BigInt(features.storageGB * 1024 * 1024 * 1024),
-        processingMinutes: features.processingHours * 60,
-        apiCalls: features.apiCallsPerMonth || 10000,
-        transcriptionMinutes: features.transcriptionHours * 60,
-        aiTokens: features.aiTokensPerMonth || 1000000
+        storageBytes: BigInt((quotas.storage_gb || 1) * 1024 * 1024 * 1024),
+        processingMinutes: (quotas.processing_minutes || 60),
+        apiCalls: quotas.api_calls_per_month || 10000,
+        transcriptionMinutes: (quotas.transcription_minutes || 30),
+        aiTokens: quotas.ai_tokens_per_month || 1000000
       };
     } catch (error) {
       logger.error('Failed to get workspace quota', { workspaceId, error });
@@ -171,7 +171,6 @@ export class QuotaManagementService {
    */
   async checkQuotaWarnings(workspaceId: string, currentUsage: any): Promise<void> {
     try {
-      const quota = await this.getWorkspaceQuota(workspaceId);
       const quotaTypes: ResourceType[] = ['storage', 'processing', 'apiCalls', 'transcription', 'aiTokens'];
       
       for (const type of quotaTypes) {

@@ -161,11 +161,11 @@ export const getUsageHistory = async (req: Request, res: Response) => {
     const usageRecords = await prisma.usageTracking.findMany({
       where: {
         workspaceId,
-        createdAt: {
+        timestamp: {
           gte: startDate
         }
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { timestamp: 'desc' },
       take: 100
     });
 
@@ -173,11 +173,11 @@ export const getUsageHistory = async (req: Request, res: Response) => {
     const reports = await prisma.usageReport.findMany({
       where: {
         workspaceId,
-        startDate: {
+        periodStart: {
           gte: startDate
         }
       },
-      orderBy: { endDate: 'desc' }
+      orderBy: { periodEnd: 'desc' }
     });
 
     res.json({
@@ -186,21 +186,19 @@ export const getUsageHistory = async (req: Request, res: Response) => {
       records: usageRecords.map(record => ({
         id: record.id,
         resourceType: record.resourceType,
-        amount: record.amount.toString(),
+        amount: record.quantity.toString(),
         metadata: record.metadata,
-        createdAt: record.createdAt
+        timestamp: record.timestamp
       })),
       reports: reports.map(report => ({
         id: report.id,
-        period: report.period,
-        startDate: report.startDate,
-        endDate: report.endDate,
-        storage: report.storageBytes.toString(),
-        processing: report.processingMinutes,
-        apiCalls: report.apiCalls,
-        transcription: report.transcriptionMinutes,
-        aiTokens: report.aiTokens,
-        totalCost: Number(report.totalCost)
+        period: report.reportType,
+        startDate: report.periodStart,
+        endDate: report.periodEnd,
+        storage: report.totalStorage.toString(),
+        processing: report.totalMinutes,
+        uploads: report.totalUploads,
+        reportData: report.reportData
       }))
     });
     return;

@@ -109,10 +109,10 @@ export class AdminSubscriptionController {
       });
 
       logger.info('Admin deleted subscription plan:', { planId });
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       logger.error('Failed to delete subscription plan:', error);
-      res.status(500).json({ error: 'Failed to delete subscription plan' });
+      return res.status(500).json({ error: 'Failed to delete subscription plan' });
     }
   }
 
@@ -136,7 +136,7 @@ export class AdminSubscriptionController {
           orderBy: { createdAt: 'desc' },
           include: {
             workspace: {
-              select: { id: true, name: true, ownerId: true }
+              select: { id: true, name: true }
             },
             plan: {
               select: { id: true, name: true, tier: true }
@@ -167,7 +167,7 @@ export class AdminSubscriptionController {
   /**
    * Get billing analytics for admin dashboard
    */
-  async getBillingAnalytics(req: Request, res: Response) {
+  async getBillingAnalytics(_req: Request, res: Response) {
     try {
       const [
         totalRevenue,
@@ -206,8 +206,12 @@ export class AdminSubscriptionController {
           take: 10,
           orderBy: { createdAt: 'desc' },
           include: {
-            workspace: {
-              select: { name: true }
+            subscription: {
+              select: {
+                workspace: {
+                  select: { name: true }
+                }
+              }
             }
           }
         })
@@ -231,7 +235,7 @@ export class AdminSubscriptionController {
   /**
    * Get usage analytics across all workspaces
    */
-  async getUsageAnalytics(req: Request, res: Response) {
+  async getUsageAnalytics(_req: Request, res: Response) {
     try {
       const [
         totalUsage,
@@ -241,22 +245,18 @@ export class AdminSubscriptionController {
       ] = await Promise.all([
         // Total usage across all metrics
         prisma.usageRecord.groupBy({
-          by: ['metricType'],
-          _sum: { value: true },
+          by: ['recordType'],
+          _sum: { quantity: true },
           _count: { id: true }
         }),
         // Usage by subscription plan
         prisma.usageRecord.findMany({
           include: {
-            workspace: {
+            subscription: {
               include: {
-                subscriptions: {
-                  where: { status: 'active' },
-                  include: {
-                    subscriptionPlan: {
-                      select: { name: true, tier: true }
-                    }
-                  }
+                workspace: true,
+                plan: {
+                  select: { name: true, tier: true }
                 }
               }
             }
@@ -264,9 +264,9 @@ export class AdminSubscriptionController {
           take: 1000 // Limit for aggregation
         }),
         // Top workspaces by usage
-        prisma.usageCounter.findMany({
+        prisma.workspaceSubscription.findMany({
           take: 10,
-          orderBy: { audioProcessingCount: 'desc' },
+          orderBy: { createdAt: 'desc' },
           include: {
             workspace: {
               select: { id: true, name: true }
@@ -276,11 +276,11 @@ export class AdminSubscriptionController {
         // Usage trends (last 7 days)
         prisma.usageRecord.findMany({
           where: {
-            timestamp: {
+            createdAt: {
               gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             }
           },
-          orderBy: { timestamp: 'asc' }
+          orderBy: { createdAt: 'asc' }
         })
       ]);
 
