@@ -393,6 +393,33 @@ async function processAudioFile(audioFile: File, apiKey: string): Promise<AudioP
 - **Prisma/TypeORM**: Database ORM with migrations
 - **Jest**: Testing framework for backend
 
+### 🔄 Git Best Practices
+
+**MANDATORY .gitignore Configuration**:
+```gitignore
+# Dependencies - NEVER track these
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs - NEVER track these
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables - NEVER track these
+.env
+.env.production
+.env.local
+```
+
+**Git Workflow Rules**:
+- **ALWAYS** configure .gitignore BEFORE first commit
+- **NEVER** track node_modules (installs via npm/yarn)
+- **NEVER** commit build artifacts (dist, build folders)
+- **ALWAYS** commit package.json AND package-lock.json together
+- **VERIFY** git status shows only source files before committing
+
 ### 🔧 Development Commands
 
 ```bash
@@ -428,6 +455,13 @@ npm run db:seed          # Seed database
 - Configuring proxy in vite.config.ts
 - Suggesting port 5173, 3001, or ANY port other than 3000
 - Having separate dev commands for frontend and backend
+
+**VERSION CONTROL VIOLATIONS**:
+- Tracking node_modules in git (12,760 files, 402MB)
+- Committing dist or build directories
+- Including any generated files in version control
+- Not properly configuring .gitignore before initial commit
+- Tracking package-lock.json without the corresponding package.json
 
 **Code Quality Violations**:
 - Files longer than 250 lines
