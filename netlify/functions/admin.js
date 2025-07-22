@@ -124,7 +124,9 @@ exports.handler = async (event, context) => {
         totalUsers,
         activeUsers,
         totalWorkspaces,
-        recentUsers
+        recentUsers,
+        totalJobs,
+        usersByRole
       ] = await Promise.all([
         prisma.user.count(),
         prisma.user.count({ where: { isActive: true } }),
@@ -135,8 +137,21 @@ exports.handler = async (event, context) => {
               gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
             }
           }
+        }),
+        prisma.job.count(),
+        prisma.user.groupBy({
+          by: ['role'],
+          _count: {
+            role: true
+          }
         })
       ]);
+
+      // Convert usersByRole to the expected format
+      const usersByRoleMap = {};
+      usersByRole.forEach(item => {
+        usersByRoleMap[item.role] = item._count.role;
+      });
 
       return {
         statusCode: 200,
@@ -147,7 +162,9 @@ exports.handler = async (event, context) => {
             activeUsers,
             inactiveUsers: totalUsers - activeUsers,
             totalWorkspaces,
-            recentUsers
+            recentUsers,
+            totalAudioProcessed: totalJobs,
+            usersByRole: usersByRoleMap
           }
         })
       };

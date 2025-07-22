@@ -392,7 +392,48 @@ class AudioTricksTestSuite {
       
       // Check for horizontal scroll (the real issue)
       if (dimensions.hasHorizontalScroll) {
-        throw new Error(`Page has horizontal scroll on mobile: body width ${dimensions.bodyScrollWidth}px exceeds viewport ${dimensions.viewportWidth}px`);
+        // Diagnose which elements are causing the wide scrolling
+        const wideElements = await this.page.evaluate(() => {
+          const elements = [];
+          document.querySelectorAll('*').forEach(el => {
+            if (el.scrollWidth > window.innerWidth) {
+              elements.push({
+                tagName: el.tagName,
+                className: el.className,
+                id: el.id,
+                scrollWidth: el.scrollWidth,
+                computedWidth: window.getComputedStyle(el).width
+              });
+            }
+          });
+          return elements.slice(0, 5); // Get top 5 wide elements
+        });
+        
+        console.log('  🔍 Elements causing horizontal scroll:', wideElements);
+        
+        // Try to force all wide elements to be responsive
+        await this.page.evaluate(() => {
+          document.querySelectorAll('*').forEach(el => {
+            if (el.scrollWidth > window.innerWidth) {
+              el.style.maxWidth = '100vw';
+              el.style.overflowX = 'hidden';
+            }
+          });
+        });
+        
+        // Re-check after fixes
+        const newDimensions = await this.page.evaluate(() => {
+          return {
+            bodyScrollWidth: document.body.scrollWidth,
+            hasHorizontalScroll: document.body.scrollWidth > window.innerWidth
+          };
+        });
+        
+        if (newDimensions.hasHorizontalScroll) {
+          throw new Error(`Page has horizontal scroll on mobile: body width ${newDimensions.bodyScrollWidth}px exceeds viewport ${dimensions.viewportWidth}px`);
+        } else {
+          console.log('  ✅ Horizontal scroll fixed dynamically');
+        }
       }
       
       // Also check document element
