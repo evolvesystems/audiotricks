@@ -32,6 +32,88 @@ exports.handler = async (event, context) => {
     const endpoint = getEndpoint(event);
     const method = event.httpMethod;
 
+    // Registration endpoint (for testing)
+    if (endpoint === '/register' && method === 'POST') {
+      let email, password, username;
+      try {
+        const body = JSON.parse(event.body);
+        email = body.email;
+        password = body.password;
+        username = body.username;
+      } catch (parseError) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid request body' })
+        };
+      }
+
+      if (!email || !password || !username) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Email, password, and username are required' })
+        };
+      }
+
+      try {
+        // Check if user exists
+        const existingUser = await prisma.user.findFirst({
+          where: {
+            OR: [{ email }, { username }]
+          }
+        });
+
+        if (existingUser) {
+          return {
+            statusCode: 409,
+            headers: corsHeaders,
+            body: JSON.stringify({ 
+              error: existingUser.email === email ? 'Email already registered' : 'Username already taken' 
+            })
+          };
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, 12);
+
+        // Create user
+        const user = await prisma.user.create({
+          data: {
+            email,
+            username,
+            passwordHash,
+            role: 'user',
+            isActive: true
+          }
+        });
+
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            message: 'Registration successful',
+            user: {
+              id: user.id,
+              email: user.email,
+              username: user.username,
+              role: user.role
+            }
+          })
+        };
+      } catch (error) {
+        console.error('Registration error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Registration failed',
+            details: error.message
+          })
+        };
+      }
+    }
+
     // Login endpoint
     if (endpoint === '/login' && method === 'POST') {
       let email, password;
@@ -59,6 +141,7 @@ exports.handler = async (event, context) => {
       // Find user
       let user;
       try {
+        console.log('Looking up user with email/username:', email);
         user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -67,14 +150,21 @@ exports.handler = async (event, context) => {
             ]
           }
         });
+        console.log('User lookup result:', user ? 'Found user' : 'No user found');
       } catch (dbError) {
-        console.error('Database error during user lookup:', dbError);
+        console.error('Database error during user lookup:', {
+          error: dbError.message,
+          code: dbError.code,
+          meta: dbError.meta,
+          email: email
+        });
         return {
           statusCode: 500,
           headers: corsHeaders,
           body: JSON.stringify({ 
             error: 'Database error during authentication',
-            details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+            details: dbError.message,
+            code: dbError.code
           })
         };
       }
