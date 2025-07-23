@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import { authSettings } from './config';
-import { logger } from '../../utils/logger';
+import * as jwt from 'jsonwebtoken';
+import { authSettings } from './config.js';
+import { logger } from '../../utils/logger.js';
 
 export interface JWTPayload {
   sub: string; // user id

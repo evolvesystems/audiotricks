@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-23T09:37:21.976Z",
+  "buildDate": "2025-07-23T10:08:11.914Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "925ff8fd",
+    "commitHash": "fb95aa56",
     "branch": "main",
-    "commitDate": "2025-07-23 16:43:42 +1000",
-    "commitMessage": "fix: add null checks to prevent forEach errors on undefined data"
+    "commitDate": "2025-07-23 19:37:39 +1000",
+    "commitMessage": "feat: add comprehensive debugging tools for intermittent loading issues"
   },
   "environment": "development"
 }

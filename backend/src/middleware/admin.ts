@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from './auth.js';
+import { AuthRequest } from '../core/auth/index.js';
 import { prisma } from '../config/database.js';
 
 /**

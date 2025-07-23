@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../../config/database';
-import { authSettings } from './config';
-import { APIKeyManager } from './api-keys';
-import { JWTManager } from './jwt';
-import { logger } from '../../utils/logger';
+import { prisma } from '../../config/database.js';
+import { authSettings } from './config.js';
+import { APIKeyManager } from './api-keys.js';
+import { JWTManager } from './jwt.js';
+import { logger } from '../../utils/logger.js';
 
 export interface AuthRequest extends Request {
   apiKey?: string;

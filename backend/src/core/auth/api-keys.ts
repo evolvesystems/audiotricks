@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { logger } from '../../utils/logger';
+import * as crypto from 'crypto';
+import { logger } from '../../utils/logger.js';
 
 export class APIKeyManager {
   /**

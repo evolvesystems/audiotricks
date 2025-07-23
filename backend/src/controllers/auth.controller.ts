@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { prisma } from '../config/database.js';
 import { env } from '../config/environment.js';
 import { hashToken } from '../utils/encryption.js';
-import { AuthRequest } from '../middleware/auth.js';
+import { AuthRequest } from '../core/auth/index.js';
 import { logger } from '../utils/logger.js';
 
 /**

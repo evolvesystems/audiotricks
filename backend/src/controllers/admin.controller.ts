@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { prisma } from '../config/database.js';
 import { logger } from '../utils/logger.js';
-import { AuthRequest } from '../middleware/auth.js';
+import { AuthRequest } from '../core/auth/index.js';
 
 /**
  * Get all users with pagination
