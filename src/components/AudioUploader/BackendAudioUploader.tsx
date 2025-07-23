@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import UploadService, { ChunkUploadProgress } from '../../services/upload.service';
-import ProcessingService from '../../services/processing.service';
+import { uploadService, UploadProgress } from '../../services/upload';
+import { processingService } from '../../services/processing';
 import { ApiError } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { UploadDropzone } from './UploadDropzone';
@@ -130,17 +130,15 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       });
 
       // Upload file
-      const uploadResult = await UploadService.uploadFile(
+      const uploadResult = await uploadService.uploadFile(
         file,
         workspaceId,
-        {
-          onProgress: (progress: ChunkUploadProgress) => {
-            setUploadState(prev => ({
-              ...prev,
-              progress: progress.overallProgress,
-              stage: `Uploading... ${Math.round(progress.overallProgress)}%`
-            }));
-          }
+        (progress: number) => {
+          setUploadState(prev => ({
+            ...prev,
+            progress: progress,
+            stage: `Uploading... ${Math.round(progress)}%`
+          }));
         }
       );
 
@@ -179,7 +177,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
         if (processingOptions.summarize) operations.push('summarize');
         if (processingOptions.analyze) operations.push('analyze');
 
-        const processingResult = await ProcessingService.processAudio({
+        const processingResult = await processingService.audio.startProcessing({
           audioUploadId: uploadResult.id,
           workspaceId,
           operations,
@@ -212,7 +210,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
 
     const poll = async (): Promise<void> => {
       try {
-        const result = await ProcessingService.getJobStatus(jobId);
+        const result = await processingService.jobs.getJob(jobId);
         
         setUploadState(prev => ({
           ...prev,

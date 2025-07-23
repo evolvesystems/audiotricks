@@ -6,7 +6,7 @@ import AdminDashboard from './AdminDashboard';
 import WorkspaceDashboard from './WorkspaceDashboard';
 import SubscriptionPlansDashboard from './SubscriptionPlans/SubscriptionPlansDashboard';
 import EwayDashboard from './PaymentGateway/EwayDashboard';
-import BillingAnalyticsDashboard from './Analytics/BillingAnalyticsDashboard';
+import BillingAnalyticsDashboard from './Analytics/BillingAnalytics';
 import SuperAdminSettings from './SuperAdmin/SuperAdminSettings';
 import AdminSettings from './Settings/AdminSettings';
 import RolesEditor from './RolesEditor/RolesEditor';
