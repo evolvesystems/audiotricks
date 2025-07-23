@@ -14,8 +14,16 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default('30d'),
+  JWT_ALGORITHM: z.string().default('HS256'),
+  JWT_EXPIRE_MINUTES: z.string().default('10080'), // 7 days in minutes
   
   ENCRYPTION_KEY: z.string().min(32),
+  
+  // API Key Authentication
+  API_KEYS: z.string().optional(), // JSON array of valid API keys
+  API_KEY_HEADER_NAME: z.string().default('X-API-Key'),
+  REQUIRE_API_KEY: z.string().default('true'),
+  REQUIRE_USER_AUTH: z.string().default('false'),
   
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
   

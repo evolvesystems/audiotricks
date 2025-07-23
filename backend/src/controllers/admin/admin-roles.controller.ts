@@ -52,6 +52,7 @@ export class AdminRolesController {
       const role = await prisma.role.create({
         data: {
           name,
+          displayName: name, // Use name as displayName
           description
         }
       });
@@ -71,6 +72,7 @@ export class AdminRolesController {
             permission = await prisma.permission.create({
               data: {
                 name: `${permissionResource}_read`,
+                displayName: `${permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Read`,
                 description: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 resource: permissionResource,
                 action: 'read'
@@ -133,6 +135,7 @@ export class AdminRolesController {
             permission = await prisma.permission.create({
               data: {
                 name: `${permissionResource}_read`,
+                displayName: `${permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} Read`,
                 description: permissionResource.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 resource: permissionResource,
                 action: 'read'

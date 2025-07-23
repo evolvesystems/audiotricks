@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import * as authController from '../controllers/auth.controller.js';
-import { authenticate } from '../middleware/auth.js';
+import { auth } from '../core/auth/index.js';
 
 const router = Router();
 
@@ -75,9 +75,9 @@ const changePasswordValidation = [
 router.post('/register', registerValidation, validate, authController.register);
 router.post('/login', loginValidation, validate, authController.login);
 
-// Protected routes
-router.post('/logout', authenticate, authController.logout);
-router.get('/me', authenticate, authController.getCurrentUser);
-router.put('/change-password', authenticate, changePasswordValidation, validate, authController.changePassword);
+// Protected routes (require user authentication)
+router.post('/logout', auth.getCurrentUserRequired, authController.logout);
+router.get('/me', auth.getCurrentUserRequired, authController.getCurrentUser);
+router.put('/change-password', auth.getCurrentUserRequired, changePasswordValidation, validate, authController.changePassword);
 
 export default router;

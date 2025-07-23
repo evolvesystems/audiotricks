@@ -1,34 +1,33 @@
 {
-  "timestamp": "2025-07-23T07:31:58.988Z",
+  "timestamp": "2025-07-23T07:32:20.855Z",
+  "testType": "Admin & Dashboard Testing",
   "totalTests": 4,
-  "passed": 3,
-  "failed": 1,
-  "skipped": 0,
+  "passed": 4,
+  "failed": 0,
   "results": [
     {
-      "test": "Homepage Load",
-      "status": "FAIL",
-      "message": "No main content found on homepage",
-      "duration": 1217,
-      "screenshot": "1753255916870-fail-Homepage-Load.png"
+      "test": "Admin Access & Login",
+      "status": "PASS",
+      "duration": 6231,
+      "screenshot": "1753255931708-pass-Admin-Access---Login.png"
     },
     {
-      "test": "Homepage Interactive Elements",
+      "test": "Admin Menu Navigation",
       "status": "PASS",
-      "duration": 1545,
-      "screenshot": "1753255918576-pass-Homepage-Interactive-Elements.png"
+      "duration": 2631,
+      "screenshot": "1753255934510-pass-Admin-Menu-Navigation.png"
     },
     {
-      "test": "Navigation Testing",
+      "test": "Admin CRUD Operations",
       "status": "PASS",
-      "duration": 5,
-      "screenshot": "1753255918729-pass-Navigation-Testing.png"
+      "duration": 2442,
+      "screenshot": "1753255937194-pass-Admin-CRUD-Operations.png"
     },
     {
-      "test": "Form Testing",
+      "test": "Dashboard Widgets",
       "status": "PASS",
-      "duration": 5,
-      "screenshot": "1753255918862-pass-Form-Testing.png"
+      "duration": 3353,
+      "screenshot": "1753255940706-pass-Dashboard-Widgets.png"
     }
   ],
   "screenshots": [
@@ -63,6 +62,13 @@
     "1753255916870-fail-Homepage-Load.png",
     "1753255918576-pass-Homepage-Interactive-Elements.png",
     "1753255918729-pass-Navigation-Testing.png",
-    "1753255918862-pass-Form-Testing.png"
+    "1753255918862-pass-Form-Testing.png",
+    "1753255931708-pass-Admin-Access---Login.png",
+    "1753255934185-admin-menu-Dashboard.png",
+    "1753255934510-pass-Admin-Menu-Navigation.png",
+    "1753255937025-admin-form-filled-0.png",
+    "1753255937194-pass-Admin-CRUD-Operations.png",
+    "1753255940522-admin-dashboard-overview.png",
+    "1753255940706-pass-Dashboard-Widgets.png"
   ]
 }

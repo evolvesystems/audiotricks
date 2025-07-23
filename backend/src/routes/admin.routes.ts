@@ -5,8 +5,7 @@ import * as adminController from '../controllers/admin.controller.js';
 import { AdminSubscriptionController } from '../controllers/admin/admin-subscription.controller';
 import { AdminEwayController } from '../controllers/admin/admin-eway.controller';
 import { AdminRolesController } from '../controllers/admin/admin-roles.controller';
-import { authenticate } from '../middleware/auth.js';
-import { requireAdmin } from '../middleware/admin.js';
+import { auth } from '../core/auth/index.js';
 
 const router = Router();
 
@@ -26,8 +25,7 @@ const validate = (req: Request, res: Response, next: NextFunction): void => {
 };
 
 // All admin routes require authentication and admin role
-router.use(authenticate);
-router.use(requireAdmin);
+router.use(auth.requireAdmin);
 
 // User management
 router.get('/users', adminController.getUsers);

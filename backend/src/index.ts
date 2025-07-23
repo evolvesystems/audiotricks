@@ -9,22 +9,8 @@ import { testDatabaseConnection, closeDatabaseConnection, prisma } from './confi
 import { redis, testRedisConnection, closeRedisConnection } from './config/redis';
 import { logger } from './utils/logger.js';
 import { errorHandler, notFoundHandler as _notFoundHandler } from './middleware/errorHandler.js';
-import authRoutes from './routes/auth.routes.js';
-import adminRoutes from './routes/admin.routes.js';
-import workspaceRoutes from './routes/workspace.routes.js';
-import uploadRoutes from './routes/upload.routes';
-import processingRoutes from './routes/processing.routes';
-import apiKeyRoutes from './routes/api-key.routes';
-import usageRoutes from './routes/usage.routes';
-import testimonialsRoutes from './routes/testimonials.js';
-import projectRoutes from './routes/project.routes';
-import jobRoutes from './routes/job.routes';
-import dashboardRoutes from './routes/dashboard.routes';
-import teamRoutes from './routes/team.routes';
-import workspaceUserRoutes from './routes/workspace-user.routes';
-import userRoutes from './routes/user.routes';
+import apiRouter from './routes/api/index.js';
 import { createHealthRoutes } from './routes/health.routes';
-import { createPaymentRoutes } from './routes/payment.routes';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,25 +36,11 @@ app.use('/api/', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/workspaces', workspaceRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/processing', processingRoutes);
-app.use('/api/api-keys', apiKeyRoutes);
-app.use('/api/usage', usageRoutes);
-app.use('/api/testimonials', testimonialsRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/team', teamRoutes);
-app.use('/api/user-workspaces', workspaceUserRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/payment', createPaymentRoutes(prisma));
-
-// Health check routes
+// Health check routes (no auth required)
 app.use('/health', createHealthRoutes(prisma, redis));
+
+// API routes (all require API key authentication)
+app.use('/api', apiRouter);
 
 // CRITICAL: Serve frontend build from backend (ONE PORT ONLY)
 const frontendPath = path.join(__dirname, '../../dist');

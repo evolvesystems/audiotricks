@@ -1,98 +1,98 @@
 {
   "title": "AudioTricks Comprehensive Browser Test Report",
-  "timestamp": "2025-07-22T10:10:10.610Z",
+  "timestamp": "2025-07-23T09:30:55.287Z",
   "baseUrl": "https://audiotricks.evolvepreneuriq.com",
   "totalTests": 9,
-  "passed": 8,
-  "failed": 1,
+  "passed": 5,
+  "failed": 4,
   "results": [
     {
       "test": "Home Page Loads",
       "category": "Navigation",
-      "status": "PASS",
-      "message": "",
-      "duration": 9195,
-      "screenshot": "000-home-page-loads.png",
-      "timestamp": "2025-07-22T10:07:37.970Z"
+      "status": "FAIL",
+      "message": "AudioTricks branding not found on homepage",
+      "duration": 5540,
+      "screenshot": "000-failed-home-page-loads.png",
+      "timestamp": "2025-07-23T09:30:13.438Z"
     },
     {
       "test": "API Health Endpoints",
       "category": "API",
       "status": "PASS",
       "message": "",
-      "duration": 7916,
+      "duration": 6110,
       "screenshot": "001-api-health-endpoints.png",
-      "timestamp": "2025-07-22T10:07:45.886Z"
+      "timestamp": "2025-07-23T09:30:19.549Z"
     },
     {
       "test": "Admin Login Process",
       "category": "Authentication",
-      "status": "PASS",
-      "message": "",
-      "duration": 15247,
-      "screenshot": "002-admin-login-process.png",
-      "timestamp": "2025-07-22T10:08:01.133Z"
+      "status": "FAIL",
+      "message": "No login form or button found on homepage",
+      "duration": 15412,
+      "screenshot": "002-failed-admin-login-process.png",
+      "timestamp": "2025-07-23T09:30:34.961Z"
     },
     {
       "test": "Navigation Menu Functionality",
       "category": "Navigation",
-      "status": "PASS",
-      "message": "",
-      "duration": 54915,
-      "screenshot": "003-navigation-menu-functionality.png",
-      "timestamp": "2025-07-22T10:08:56.048Z"
+      "status": "FAIL",
+      "message": "No navigation elements found",
+      "duration": 2315,
+      "screenshot": "003-failed-navigation-menu-functionality.png",
+      "timestamp": "2025-07-23T09:30:37.276Z"
     },
     {
       "test": "Button Interactions",
       "category": "Interactions",
       "status": "PASS",
       "message": "",
-      "duration": 37293,
+      "duration": 3450,
       "screenshot": "004-button-interactions.png",
-      "timestamp": "2025-07-22T10:09:33.341Z"
+      "timestamp": "2025-07-23T09:30:40.726Z"
     },
     {
       "test": "Form Element Testing",
       "category": "Forms",
       "status": "FAIL",
-      "message": "No form elements were functional",
-      "duration": 13082,
+      "message": "No form elements found on page",
+      "duration": 1385,
       "screenshot": "005-failed-form-element-testing.png",
-      "timestamp": "2025-07-22T10:09:46.423Z"
+      "timestamp": "2025-07-23T09:30:42.111Z"
     },
     {
       "test": "Mobile Responsiveness",
       "category": "Responsive Design",
       "status": "PASS",
       "message": "",
-      "duration": 11573,
+      "duration": 7129,
       "screenshot": "006-mobile-responsiveness.png",
-      "timestamp": "2025-07-22T10:09:57.996Z"
+      "timestamp": "2025-07-23T09:30:49.240Z"
     },
     {
       "test": "Page Load Performance",
       "category": "Performance",
       "status": "PASS",
       "message": "",
-      "duration": 2678,
+      "duration": 931,
       "screenshot": "007-page-load-performance.png",
-      "timestamp": "2025-07-22T10:10:00.675Z"
+      "timestamp": "2025-07-23T09:30:50.171Z"
     },
     {
       "test": "Error Page Handling",
       "category": "Error Handling",
       "status": "PASS",
       "message": "",
-      "duration": 9935,
+      "duration": 5115,
       "screenshot": "008-error-page-handling.png",
-      "timestamp": "2025-07-22T10:10:10.610Z"
+      "timestamp": "2025-07-23T09:30:55.286Z"
     }
   ],
   "screenshots": [
-    "000-home-page-loads.png",
+    "000-failed-home-page-loads.png",
     "001-api-health-endpoints.png",
-    "002-admin-login-process.png",
-    "003-navigation-menu-functionality.png",
+    "002-failed-admin-login-process.png",
+    "003-failed-navigation-menu-functionality.png",
     "004-button-interactions.png",
     "005-failed-form-element-testing.png",
     "006-mobile-responsiveness.png",

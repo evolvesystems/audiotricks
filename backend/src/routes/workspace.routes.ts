@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth.js';
+import { auth } from '../core/auth/index.js';
 import { requireWorkspaceAccess } from '../middleware/workspace.middleware.js';
 import * as workspaceController from '../controllers/workspace.controller.js';
 
 const router = Router();
 
-// All routes require authentication
-router.use(authenticate);
+// All workspace routes require user authentication
+router.use(auth.getCurrentUserRequired);
 
 // Workspace CRUD operations
 router.post('/', workspaceController.createWorkspace);
