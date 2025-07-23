@@ -1,75 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   UserCircleIcon, 
   ArrowRightOnRectangleIcon,
   ShieldCheckIcon,
   HomeIcon
 } from '@heroicons/react/24/outline';
-import { logger } from '../utils/logger';
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-}
+import { useAuth } from '../contexts/AuthContext';
 
 interface UserAuthProps {
-  onUserChange?: (user: User | null) => void;
+  onUserChange?: (user: any | null) => void;
 }
 
 export default function UserAuth({ onUserChange }: UserAuthProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, isAuthenticated, logout, loading } = useAuth();
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) return;
-
-    try {
-      const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        onUserChange?.(data.user);
-      } else {
-        localStorage.removeItem('authToken');
-      }
-    } catch (error) {
-      logger.error('Auth check failed:', error);
-    }
-  };
-
+  // Notify parent component when user changes
+  React.useEffect(() => {
+    onUserChange?.(user);
+  }, [user, onUserChange]);
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-      } catch (error) {
-        logger.error('Logout error:', error);
-      }
+    try {
+      await logout();
+    } catch (error) {
+      // Error is handled by the AuthContext
     }
-    
-    localStorage.removeItem('authToken');
-    setUser(null);
-    onUserChange?.(null);
   };
 
-  if (user) {
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user) {
     return (
       <div className="flex items-center gap-2">
         <a

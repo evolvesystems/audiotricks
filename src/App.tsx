@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useAuth } from './contexts/AuthContext'
 import { useAppState } from './components/App/useAppState'
 import { useExport } from './components/App/useExport'
 import { useSettings } from './hooks/useSettings'
@@ -14,9 +15,8 @@ import ErrorBoundary from './components/ErrorBoundary'
 import ApiKeyMigration from './components/ApiKeyMigration'
 
 function App() {
-  // Check for authentication (this will be unified later)
-  const [token, setToken] = useState<string | null>(localStorage.getItem('authToken'))
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  // Use unified authentication context
+  const { user, token, isAuthenticated, loading } = useAuth()
   
   // Use secure API key management
   const { hasKeys, saveApiKeys } = useApiKeys(token)
@@ -52,22 +52,17 @@ function App() {
     apiProxy.setToken(token)
   }, [token])
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (token) {
-        try {
-          const response = await fetch('/api/auth/check', {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-          setIsAuthenticated(response.ok)
-        } catch {
-          setIsAuthenticated(false)
-        }
-      }
-    }
-    checkAuth()
-  }, [token])
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Load API keys from localStorage for backward compatibility
   useEffect(() => {
