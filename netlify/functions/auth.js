@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const prisma = new PrismaClient();
 
@@ -33,7 +34,19 @@ exports.handler = async (event, context) => {
 
     // Login endpoint
     if (endpoint === '/login' && method === 'POST') {
-      const { email, password } = JSON.parse(event.body);
+      let email, password;
+      try {
+        const body = JSON.parse(event.body);
+        email = body.email;
+        password = body.password;
+      } catch (parseError) {
+        console.error('Failed to parse login body:', parseError);
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid request body' })
+        };
+      }
 
       if (!email || !password) {
         return {
@@ -44,20 +57,42 @@ exports.handler = async (event, context) => {
       }
 
       // Find user
-      const user = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: email },
-            { username: email }
-          ]
-        }
-      });
+      let user;
+      try {
+        user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: email },
+              { username: email }
+            ]
+          }
+        });
+      } catch (dbError) {
+        console.error('Database error during user lookup:', dbError);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Database error during authentication',
+            details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+          })
+        };
+      }
 
       if (!user) {
         return {
           statusCode: 401,
           headers: corsHeaders,
           body: JSON.stringify({ error: 'Invalid credentials' })
+        };
+      }
+
+      // Check if user is active
+      if (!user.isActive) {
+        return {
+          statusCode: 403,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Account is deactivated' })
         };
       }
 
@@ -73,20 +108,23 @@ exports.handler = async (event, context) => {
 
       // Generate JWT
       const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key';
+      const sessionId = crypto.randomUUID();
       const token = jwt.sign(
         { 
           userId: user.id, 
           email: user.email, 
-          role: user.role 
+          role: user.role,
+          sessionId 
         },
         jwtSecret,
-        { expiresIn: '24h' }
+        { expiresIn: '7d' }
       );
 
       return {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({
+          message: 'Login successful',
           user: {
             id: user.id,
             email: user.email,
