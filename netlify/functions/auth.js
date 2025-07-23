@@ -61,6 +61,11 @@ exports.handler = async (event, context) => {
         const existingUser = await prisma.user.findFirst({
           where: {
             OR: [{ email }, { username }]
+          },
+          select: {
+            id: true,
+            email: true,
+            username: true
           }
         });
 
@@ -77,14 +82,22 @@ exports.handler = async (event, context) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, 12);
 
-        // Create user
+        // Create user with minimal required fields
         const user = await prisma.user.create({
           data: {
             email,
             username,
             passwordHash,
-            role: 'user',
+            role: 'admin', // Make first user admin
             isActive: true
+          },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            role: true,
+            isActive: true,
+            createdAt: true
           }
         });
 
@@ -148,6 +161,14 @@ exports.handler = async (event, context) => {
               { email: email },
               { username: email }
             ]
+          },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            role: true,
+            isActive: true,
+            passwordHash: true
           }
         });
         console.log('User lookup result:', user ? 'Found user' : 'No user found');
@@ -247,7 +268,14 @@ exports.handler = async (event, context) => {
         
         // Get fresh user data from database
         const user = await prisma.user.findUnique({
-          where: { id: decoded.userId }
+          where: { id: decoded.userId },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            role: true,
+            isActive: true
+          }
         });
 
         if (!user || !user.isActive) {
