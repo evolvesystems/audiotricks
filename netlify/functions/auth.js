@@ -108,7 +108,8 @@ exports.handler = async (event, context) => {
 
       // Generate JWT
       const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key';
-      const sessionId = crypto.randomUUID();
+      // Use crypto.randomBytes for compatibility with older Node versions
+      const sessionId = crypto.randomBytes(16).toString('hex');
       const token = jwt.sign(
         { 
           userId: user.id, 
