@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-23T05:36:34.872Z",
+  "buildDate": "2025-07-23T06:11:04.157Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "e805d25c",
+    "commitHash": "a151961e",
     "branch": "main",
-    "commitDate": "2025-07-23 15:29:43 +1000",
-    "commitMessage": "fix: resolve build errors from refactored service imports"
+    "commitDate": "2025-07-23 15:52:40 +1000",
+    "commitMessage": "fix: use crypto.randomBytes instead of randomUUID for Node.js compatibility"
   },
   "environment": "development"
 }

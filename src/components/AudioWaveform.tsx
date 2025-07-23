@@ -77,7 +77,7 @@ const AudioWaveform: React.FC<AudioWaveformProps> = ({
   }, [audioUrl, audioFile])
 
   useEffect(() => {
-    if (!canvasRef.current || waveformData.length === 0) return
+    if (!canvasRef.current || !waveformData || !Array.isArray(waveformData) || waveformData.length === 0) return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')

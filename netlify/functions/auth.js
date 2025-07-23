@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
       }
 
       try {
-        // Check if user exists
+        // Check if user exists (only select columns that exist in DB)
         const existingUser = await prisma.user.findFirst({
           where: {
             OR: [{ email }, { username }]

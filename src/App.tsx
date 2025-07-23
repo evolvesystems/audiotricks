@@ -78,9 +78,13 @@ function App() {
   }, [hasKeys])
 
   const handleRecoverHistory = (items: any[]) => {
-    items.forEach(item => {
-      addToHistory(item.results)
-    })
+    if (items && Array.isArray(items)) {
+      items.forEach(item => {
+        if (item && item.results) {
+          addToHistory(item.results)
+        }
+      })
+    }
   }
 
   const handleReprocess = (newResults: any) => {

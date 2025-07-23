@@ -10,6 +10,15 @@ const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ transcript, durat
   const [showTimestamps, setShowTimestamps] = useState(true)
   const [displayMode, setDisplayMode] = useState<'paragraphs' | 'sentences' | 'raw'>('paragraphs')
 
+  // Handle null/undefined transcript
+  if (!transcript) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        No transcript available
+      </div>
+    )
+  }
+
   // Parse transcript for timestamps (format: [00:00:00] or similar)
   const parseTranscript = (text: string) => {
     const timestampRegex = /\[(\d{1,2}:\d{2}(?::\d{2})?)\]/g

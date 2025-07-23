@@ -9,9 +9,23 @@ interface PodcastsTabProps {
 const PodcastsTab2: React.FC<PodcastsTabProps> = ({ results }) => {
   const [showTimestamps, setShowTimestamps] = useState(true)
   
+  // Handle missing results or summary
+  if (!results || !results.summary) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        No summary data available
+      </div>
+    )
+  }
+  
   // Function to generate HTML content
   const generateHtmlContent = (includeTimestamps: boolean) => {
     let html = ''
+    
+    // Handle missing summary text
+    if (!results.summary.summary) {
+      return '<p class="text-gray-500">No summary available</p>'
+    }
     
     // Extract summary and takeaways
     const summaryParts = results.summary.summary.split('Takeaways:')
@@ -45,7 +59,9 @@ const PodcastsTab2: React.FC<PodcastsTabProps> = ({ results }) => {
     // Add Key Moments Section
     html += '\n<h2 class="text-xl font-bold text-gray-900 mt-6 mb-4">Key Moments</h2>\n'
     
-    results.summary.key_moments.forEach((moment, index) => {
+    // Check if key_moments exists and is an array
+    if (results.summary.key_moments && Array.isArray(results.summary.key_moments)) {
+      results.summary.key_moments.forEach((moment, index) => {
       const title = moment.title.replace(/\*\*/g, '') // Remove any markdown formatting
       const description = moment.description.replace(/\*\*/g, '')
       
@@ -57,10 +73,13 @@ const PodcastsTab2: React.FC<PodcastsTabProps> = ({ results }) => {
       
       html += `<p class="text-gray-700 mb-4">${description}</p>\n`
       
-      if (index < results.summary.key_moments.length - 1) {
-        html += '\n'
-      }
-    })
+        if (index < results.summary.key_moments.length - 1) {
+          html += '\n'
+        }
+      })
+    } else {
+      html += '<p class="text-gray-500">No key moments available</p>\n'
+    }
     
     return html
   }

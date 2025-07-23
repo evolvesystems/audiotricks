@@ -1,0 +1,102 @@
+{
+  "title": "AudioTricks Comprehensive Browser Test Report",
+  "timestamp": "2025-07-23T06:10:44.772Z",
+  "baseUrl": "https://audiotricks.evolvepreneuriq.com",
+  "totalTests": 9,
+  "passed": 5,
+  "failed": 4,
+  "results": [
+    {
+      "test": "Home Page Loads",
+      "category": "Navigation",
+      "status": "FAIL",
+      "message": "AudioTricks branding not found on homepage",
+      "duration": 9893,
+      "screenshot": "000-failed-home-page-loads.png",
+      "timestamp": "2025-07-23T06:09:26.928Z"
+    },
+    {
+      "test": "API Health Endpoints",
+      "category": "API",
+      "status": "PASS",
+      "message": "",
+      "duration": 6486,
+      "screenshot": "001-api-health-endpoints.png",
+      "timestamp": "2025-07-23T06:09:33.415Z"
+    },
+    {
+      "test": "Admin Login Process",
+      "category": "Authentication",
+      "status": "FAIL",
+      "message": "No login form or button found on homepage",
+      "duration": 17742,
+      "screenshot": "002-failed-admin-login-process.png",
+      "timestamp": "2025-07-23T06:09:51.157Z"
+    },
+    {
+      "test": "Navigation Menu Functionality",
+      "category": "Navigation",
+      "status": "FAIL",
+      "message": "No navigation elements found",
+      "duration": 11123,
+      "screenshot": "003-failed-navigation-menu-functionality.png",
+      "timestamp": "2025-07-23T06:10:02.280Z"
+    },
+    {
+      "test": "Button Interactions",
+      "category": "Interactions",
+      "status": "PASS",
+      "message": "",
+      "duration": 12648,
+      "screenshot": "004-button-interactions.png",
+      "timestamp": "2025-07-23T06:10:14.928Z"
+    },
+    {
+      "test": "Form Element Testing",
+      "category": "Forms",
+      "status": "FAIL",
+      "message": "No form elements found on page",
+      "duration": 6595,
+      "screenshot": "005-failed-form-element-testing.png",
+      "timestamp": "2025-07-23T06:10:21.523Z"
+    },
+    {
+      "test": "Mobile Responsiveness",
+      "category": "Responsive Design",
+      "status": "PASS",
+      "message": "",
+      "duration": 11228,
+      "screenshot": "006-mobile-responsiveness.png",
+      "timestamp": "2025-07-23T06:10:32.751Z"
+    },
+    {
+      "test": "Page Load Performance",
+      "category": "Performance",
+      "status": "PASS",
+      "message": "",
+      "duration": 2164,
+      "screenshot": "007-page-load-performance.png",
+      "timestamp": "2025-07-23T06:10:34.915Z"
+    },
+    {
+      "test": "Error Page Handling",
+      "category": "Error Handling",
+      "status": "PASS",
+      "message": "",
+      "duration": 9857,
+      "screenshot": "008-error-page-handling.png",
+      "timestamp": "2025-07-23T06:10:44.772Z"
+    }
+  ],
+  "screenshots": [
+    "000-failed-home-page-loads.png",
+    "001-api-health-endpoints.png",
+    "002-failed-admin-login-process.png",
+    "003-failed-navigation-menu-functionality.png",
+    "004-button-interactions.png",
+    "005-failed-form-element-testing.png",
+    "006-mobile-responsiveness.png",
+    "007-page-load-performance.png",
+    "008-error-page-handling.png"
+  ]
+}
