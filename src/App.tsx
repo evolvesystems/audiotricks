@@ -13,6 +13,7 @@ import Settings from './components/Settings'
 import HelpCenter from './components/HelpCenter'
 import ErrorBoundary from './components/ErrorBoundary'
 import ApiKeyMigration from './components/ApiKeyMigration'
+import Footer from './components/Footer'
 
 function App() {
   // Use unified authentication context
@@ -130,7 +131,7 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* API Key Migration Helper */}
         <ApiKeyMigration
           token={token}
@@ -189,6 +190,8 @@ function App() {
         {showHelp && (
           <HelpCenter onClose={() => setShowHelp(false)} />
         )}
+        
+        <Footer />
       </div>
     </ErrorBoundary>
   )

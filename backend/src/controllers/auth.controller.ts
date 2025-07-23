@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '../config/database.js';
 import { env } from '../config/environment.js';
 import { hashToken } from '../utils/encryption.js';

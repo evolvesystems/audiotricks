@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import Footer from '../Footer';
 
 interface AdminLoginProps {
   onLogin: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -26,8 +27,9 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
             <ShieldCheckIcon className="h-8 w-8 text-blue-600" />
@@ -92,6 +94,8 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
           </div>
         </form>
       </div>
+    </div>
+    <Footer />
     </div>
   );
 }

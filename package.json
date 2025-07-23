@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/generate-build-info.js",
     "build": "vite build",
     "build:frontend": "./scripts/build-frontend.sh",
     "build:test": "./scripts/build-test.sh",

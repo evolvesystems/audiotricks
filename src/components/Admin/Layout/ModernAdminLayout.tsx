@@ -28,6 +28,7 @@ import {
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { useAdminAuthContext } from '../../../contexts/AdminAuthContext';
+import Footer from '../../Footer';
 
 interface ModernAdminLayoutProps {
   children: React.ReactNode;
@@ -278,7 +279,7 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <div className="lg:pl-72 min-h-screen flex flex-col">
         {/* Top navigation */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
@@ -347,11 +348,14 @@ export default function ModernAdminLayout({ children }: ModernAdminLayoutProps) 
         </div>
 
         {/* Page content */}
-        <main className="py-10">
+        <main className="flex-1 py-10">
           <div className="px-4 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>
+        
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   );
