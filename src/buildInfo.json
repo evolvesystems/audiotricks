@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-24T12:43:06.381Z",
+  "buildDate": "2025-07-24T12:53:56.469Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "2ea69c46",
+    "commitHash": "ac9b7dde",
     "branch": "main",
-    "commitDate": "2025-07-24 22:34:02 +1000",
-    "commitMessage": "feat: add connection pooling configuration to Prisma client setup"
+    "commitDate": "2025-07-24 22:43:35 +1000",
+    "commitMessage": "chore: update build info with latest commit and build timestamps"
   },
   "environment": "development"
 }
