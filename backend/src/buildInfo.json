@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-24T11:05:48.806Z",
+  "buildDate": "2025-07-24T12:43:06.381Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "f248c76b",
+    "commitHash": "2ea69c46",
     "branch": "main",
-    "commitDate": "2025-07-24 20:45:13 +1000",
-    "commitMessage": "feat: add fallback state handling to useAuth hook for safer initialization"
+    "commitDate": "2025-07-24 22:34:02 +1000",
+    "commitMessage": "feat: add connection pooling configuration to Prisma client setup"
   },
   "environment": "development"
 }
