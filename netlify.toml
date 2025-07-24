@@ -5,6 +5,13 @@
 [functions]
   directory = "netlify/functions"
 
+# Static assets must be served first (before API redirects)
+[[redirects]]
+  from = "/assets/*"
+  to = "/assets/:splat"
+  status = 200
+  force = false
+
 # API routes redirect to serverless functions
 [[redirects]]
   from = "/api/auth/*"
