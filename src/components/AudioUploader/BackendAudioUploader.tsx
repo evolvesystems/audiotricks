@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { uploadService, UploadProgress } from '../../services/upload';
+import { uploadService, UploadProgress as UploadProgressType } from '../../services/upload';
 import { processingService } from '../../services/processing';
 import { ApiError } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -144,7 +144,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
 
       setUploadState(prev => ({
         ...prev,
-        uploadId: uploadResult.id,
+        uploadId: uploadResult, // uploadResult is a string (upload ID)
         stage: 'Upload complete!',
         status: 'completed',
         progress: 100
@@ -153,11 +153,11 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       // Call the upload complete callback if provided
       if (onUploadComplete) {
         onUploadComplete({
-          id: uploadResult.id,
+          id: uploadResult, // uploadResult is a string (upload ID)
           filename: file.name,
           fileSize: file.size,
-          storageUrl: uploadResult.storageUrl,
-          cdnUrl: uploadResult.cdnUrl,
+          storageUrl: '', // Will be set after processing
+          cdnUrl: '', // Will be set after processing
           duration: 0 // Will be calculated during processing
         });
       }
@@ -178,7 +178,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
         if (processingOptions.analyze) operations.push('analyze');
 
         const processingResult = await processingService.audio.startProcessing({
-          audioUploadId: uploadResult.id,
+          audioUploadId: uploadResult, // uploadResult is a string (upload ID)
           workspaceId,
           operations,
           config: {
@@ -200,7 +200,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       }
 
     } catch (error) {
-      handleError(error as Error);
+      handleError(error instanceof Error ? error.message : String(error));
     }
   }, [isAuthenticated, apiKeysValid, processingOptions, workspaceId, handleError]);
 
@@ -235,14 +235,14 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
           throw new Error(result.error || 'Processing failed');
         }
 
-        if (attempts < maxAttempts && (result.status === 'pending' || result.status === 'processing')) {
+        if (attempts < maxAttempts && (result.status === 'queued' || result.status === 'processing')) {
           attempts++;
           setTimeout(poll, 5000); // Poll every 5 seconds
         } else if (attempts >= maxAttempts) {
           throw new Error('Processing timeout - please try again');
         }
       } catch (error) {
-        handleError(error as Error);
+        handleError(error instanceof Error ? error.message : String(error));
       }
     };
 
@@ -281,8 +281,16 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
 
       {/* Processing Options */}
       <ProcessingOptions
-        options={processingOptions}
-        onChange={setProcessingOptions}
+        summaryStyle="formal" // Default summary style
+        onSummaryStyleChange={() => {}} // TODO: Implement summary style handling
+        outputLanguage={processingOptions.language}
+        onLanguageChange={(language) => setProcessingOptions(prev => ({ ...prev, language }))}
+        temperature={processingOptions.temperature}
+        onTemperatureChange={(temperature) => setProcessingOptions(prev => ({ ...prev, temperature }))}
+        maxTokens={processingOptions.maxTokens}
+        onMaxTokensChange={(maxTokens) => setProcessingOptions(prev => ({ ...prev, maxTokens }))}
+        showAdvanced={false} // Default to not showing advanced options
+        onToggleAdvanced={() => {}} // TODO: Implement advanced toggle
         disabled={uploadState.status !== 'idle'}
       />
 
@@ -305,7 +313,7 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
       {uploadState.error && uploadState.status === 'error' && (
         <ErrorDisplay
           error={uploadState.error}
-          onRetry={resetState}
+          onDismiss={resetState}
         />
       )}
     </div>

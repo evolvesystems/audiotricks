@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-24T10:44:02.359Z",
+  "buildDate": "2025-07-24T11:05:48.806Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "ae005f26",
+    "commitHash": "f248c76b",
     "branch": "main",
-    "commitDate": "2025-07-24 20:36:05 +1000",
-    "commitMessage": "feat: configure Netlify serverless functions and API routing infrastructure"
+    "commitDate": "2025-07-24 20:45:13 +1000",
+    "commitMessage": "feat: add fallback state handling to useAuth hook for safer initialization"
   },
-  "environment": "production"
+  "environment": "development"
 }

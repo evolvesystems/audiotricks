@@ -1,5 +1,5 @@
 // Unified authentication context
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { logger } from '../utils/logger';
 import AuthService, { AuthResponse } from '../services/auth.service';
 import { tokenManager, ApiError, User } from '../services/api';
@@ -57,6 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const isAuthenticated = !!user && !!token;
 
@@ -174,9 +175,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => window.removeEventListener('auth:logout', handleAuthLogout);
   }, []);
 
-  // Check auth on mount
+  // Check auth on mount and mark as initialized when complete
   useEffect(() => {
-    checkAuth();
+    const initializeAuth = async () => {
+      try {
+        await checkAuth();
+      } catch (error) {
+        logger.error('Failed to initialize auth:', error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+    
+    initializeAuth();
   }, []);
 
   const value: AuthContextType = {
@@ -195,6 +206,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error,
     clearError
   };
+
+  // Don't render children until AuthProvider is initialized
+  if (!isInitialized) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        fontSize: '18px',
+        color: '#666'
+      }}>
+        Initializing...
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>
