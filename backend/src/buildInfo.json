@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-24T12:54:38.620Z",
+  "buildDate": "2025-07-24T13:07:15.581Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "616d8657",
+    "commitHash": "ca97a76f",
     "branch": "main",
-    "commitDate": "2025-07-24 22:54:05 +1000",
-    "commitMessage": "chore: update build timestamps and commit hashes in buildInfo files"
+    "commitDate": "2025-07-24 22:57:52 +1000",
+    "commitMessage": "chore: update build timestamps and switch environment to production"
   },
   "environment": "production"
 }
