@@ -26,7 +26,24 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Defensive fallback to prevent app crash during initialization
+    console.warn('useAuth called before AuthProvider is ready, using fallback values');
+    return {
+      user: null,
+      token: null,
+      loading: true,
+      isAuthenticated: false,
+      login: async () => { throw new Error('AuthProvider not ready'); },
+      register: async () => { throw new Error('AuthProvider not ready'); },
+      logout: async () => { throw new Error('AuthProvider not ready'); },
+      checkAuth: async () => { throw new Error('AuthProvider not ready'); },
+      updateProfile: async () => { throw new Error('AuthProvider not ready'); },
+      changePassword: async () => { throw new Error('AuthProvider not ready'); },
+      setUser: () => { console.warn('AuthProvider not ready'); },
+      setToken: () => { console.warn('AuthProvider not ready'); },
+      error: 'AuthProvider not initialized',
+      clearError: () => { console.warn('AuthProvider not ready'); }
+    };
   }
   return context;
 }
