@@ -30,6 +30,18 @@ functions = "/Users/johnnorth/CascadeProjects/AudioTricks/netlify/functions"
 [functions."*"]
 
 [[redirects]]
+from = "/assets/*"
+to = "/assets/:splat"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
 from = "/api/auth/*"
 to = "/.netlify/functions/auth"
 status = 200.0
