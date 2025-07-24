@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-23T10:08:11.914Z",
+  "buildDate": "2025-07-24T10:32:16.258Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "fb95aa56",
+    "commitHash": "9af3c60c",
     "branch": "main",
-    "commitDate": "2025-07-23 19:37:39 +1000",
-    "commitMessage": "feat: add comprehensive debugging tools for intermittent loading issues"
+    "commitDate": "2025-07-23 20:16:59 +1000",
+    "commitMessage": "feat: implement comprehensive API key + JWT authentication system"
   },
-  "environment": "development"
+  "environment": "production"
 }
