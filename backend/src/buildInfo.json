@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T07:05:14.417Z",
+  "buildDate": "2025-07-25T07:15:36.042Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "43ab63b4",
+    "commitHash": "7439a285",
     "branch": "main",
-    "commitDate": "2025-07-25 17:02:54 +1000",
-    "commitMessage": "fix: resolve authentication and API key hook errors"
+    "commitDate": "2025-07-25 17:06:50 +1000",
+    "commitMessage": "fix: resolve AuthProvider context errors and React StrictMode issues"
   },
   "environment": "development"
 }

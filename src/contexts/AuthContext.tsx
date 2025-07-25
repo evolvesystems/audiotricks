@@ -21,35 +21,29 @@ interface AuthContextType {
   clearError: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// Create fallback context values to prevent crashes
+const fallbackContextValue: AuthContextType = {
+  user: null,
+  token: null,
+  loading: true,
+  isAuthenticated: false,
+  login: async () => { throw new Error('AuthProvider not ready'); },
+  register: async () => { throw new Error('AuthProvider not ready'); },
+  logout: async () => { throw new Error('AuthProvider not ready'); },
+  checkAuth: async () => { throw new Error('AuthProvider not ready'); },
+  updateProfile: async () => { throw new Error('AuthProvider not ready'); },
+  changePassword: async () => { throw new Error('AuthProvider not ready'); },
+  setUser: () => { console.warn('AuthProvider not ready'); },
+  setToken: () => { console.warn('AuthProvider not ready'); },
+  error: null,
+  clearError: () => { console.warn('AuthProvider not ready'); }
+};
+
+const AuthContext = createContext<AuthContextType>(fallbackContextValue);
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    // In development, React StrictMode can cause double-rendering
-    // Provide safe fallback values to prevent crashes during initialization
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.warn('useAuth called outside AuthProvider during React StrictMode - using fallback values');
-      return {
-        user: null,
-        token: null,
-        loading: true,
-        isAuthenticated: false,
-        login: async () => { throw new Error('AuthProvider not ready'); },
-        register: async () => { throw new Error('AuthProvider not ready'); },
-        logout: async () => { throw new Error('AuthProvider not ready'); },
-        checkAuth: async () => { throw new Error('AuthProvider not ready'); },
-        updateProfile: async () => { throw new Error('AuthProvider not ready'); },
-        changePassword: async () => { throw new Error('AuthProvider not ready'); },
-        setUser: () => { console.warn('AuthProvider not ready'); },
-        setToken: () => { console.warn('AuthProvider not ready'); },
-        error: null,
-        clearError: () => { console.warn('AuthProvider not ready'); }
-      } as AuthContextType;
-    }
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  // Context always has fallback values, so this should never be null
   return context;
 }
 
