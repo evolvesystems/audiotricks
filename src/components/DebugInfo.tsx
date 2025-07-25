@@ -10,7 +10,22 @@ interface DebugInfoProps {
 }
 
 const DebugInfo: React.FC<DebugInfoProps> = ({ isVisible, onClose }) => {
-  const { user, token, loading, isAuthenticated, error } = useAuth();
+  // Safely get auth context - may not be available during error states
+  let authContext = null;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    // Auth provider not available - use fallback values
+    authContext = {
+      user: null,
+      token: null,
+      loading: false,
+      isAuthenticated: false,
+      error: 'AuthProvider not available'
+    };
+  }
+  
+  const { user, token, loading, isAuthenticated, error } = authContext;
   const [isOnline, setIsOnline] = useState(true);
   const [healthStatus, setHealthStatus] = useState<any>(null);
 

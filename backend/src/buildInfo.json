@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T07:02:25.881Z",
+  "buildDate": "2025-07-25T07:05:14.417Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "9ee159ea",
+    "commitHash": "43ab63b4",
     "branch": "main",
-    "commitDate": "2025-07-25 16:58:07 +1000",
-    "commitMessage": "feat: complete comprehensive refactoring and modernization"
+    "commitDate": "2025-07-25 17:02:54 +1000",
+    "commitMessage": "fix: resolve authentication and API key hook errors"
   },
   "environment": "development"
 }
