@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 
+// Cache bust: 1738330639
 // Configure Prisma for Netlify Functions with PgBouncer
 const prisma = new PrismaClient({
   datasources: {
@@ -8,9 +9,11 @@ const prisma = new PrismaClient({
       url: process.env.DATABASE_URL
     }
   },
-  // Optimize for serverless/PgBouncer with longer timeouts
+  // Optimize for serverless/PgBouncer with extended timeouts
   transactionOptions: {
-    timeout: 20000, // 20 second timeout for serverless
+    timeout: 30000, // 30 second timeout for serverless cold starts
+    maxWait: 30000, // Maximum time to wait for a transaction
+    isolationLevel: 'ReadCommitted'
   },
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
 });

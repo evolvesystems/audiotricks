@@ -1,21 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { executeWithRetry, disconnectPrisma } = require('./db-utils');
 
-// Configure Prisma for Netlify Functions with PgBouncer
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  },
-  // Optimize for serverless/PgBouncer with longer timeouts
-  transactionOptions: {
-    timeout: 20000, // 20 second timeout for serverless
-  },
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
-});
+// Cache bust: 1738330640
 
 // Helper to handle CORS
 const corsHeaders = {
@@ -69,17 +57,22 @@ exports.handler = async (event, context) => {
       }
 
       try {
-        // Check if user exists (only select columns that exist in DB)
-        const existingUser = await prisma.user.findFirst({
-          where: {
-            OR: [{ email }, { username }]
+        // Check if user exists with retry logic
+        const existingUser = await executeWithRetry(
+          async (prisma) => {
+            return await prisma.user.findFirst({
+              where: {
+                OR: [{ email }, { username }]
+              },
+              select: {
+                id: true,
+                email: true,
+                username: true
+              }
+            });
           },
-          select: {
-            id: true,
-            email: true,
-            username: true
-          }
-        });
+          'Check existing user'
+        );
 
         if (existingUser) {
           return {
@@ -94,24 +87,29 @@ exports.handler = async (event, context) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, 12);
 
-        // Create user with minimal required fields
-        const user = await prisma.user.create({
-          data: {
-            email,
-            username,
-            passwordHash,
-            role: 'admin', // Make first user admin
-            isActive: true
+        // Create user with retry logic
+        const user = await executeWithRetry(
+          async (prisma) => {
+            return await prisma.user.create({
+              data: {
+                email,
+                username,
+                passwordHash,
+                role: 'admin', // Make first user admin
+                isActive: true
+              },
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                isActive: true,
+                createdAt: true
+              }
+            });
           },
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            role: true,
-            isActive: true,
-            createdAt: true
-          }
-        });
+          'Create user'
+        );
 
         return {
           statusCode: 201,
@@ -163,26 +161,33 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Find user
+      // Find user with retry logic
       let user;
       try {
         console.log('Looking up user with email/username:', email);
-        user = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { email: email },
-              { username: email }
-            ]
+        
+        user = await executeWithRetry(
+          async (prisma) => {
+            return await prisma.user.findFirst({
+              where: {
+                OR: [
+                  { email: email },
+                  { username: email }
+                ]
+              },
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                isActive: true,
+                passwordHash: true
+              }
+            });
           },
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            role: true,
-            isActive: true,
-            passwordHash: true
-          }
-        });
+          'User lookup'
+        );
+        
         console.log('User lookup result:', user ? 'Found user' : 'No user found');
       } catch (dbError) {
         console.error('Database error during user lookup:', {
@@ -278,17 +283,22 @@ exports.handler = async (event, context) => {
       try {
         const decoded = jwt.verify(token, jwtSecret);
         
-        // Get fresh user data from database
-        const user = await prisma.user.findUnique({
-          where: { id: decoded.userId },
-          select: {
-            id: true,
-            email: true,
-            username: true,
-            role: true,
-            isActive: true
-          }
-        });
+        // Get fresh user data from database with retry
+        const user = await executeWithRetry(
+          async (prisma) => {
+            return await prisma.user.findUnique({
+              where: { id: decoded.userId },
+              select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                isActive: true
+              }
+            });
+          },
+          'Get user data'
+        );
 
         if (!user || !user.isActive) {
           return {
@@ -342,8 +352,13 @@ exports.handler = async (event, context) => {
       };
 
       try {
-        // Test database connection
-        await prisma.$queryRaw`SELECT 1`;
+        // Test database connection with retry
+        await executeWithRetry(
+          async (prisma) => {
+            await prisma.$queryRaw`SELECT 1`;
+          },
+          'Health check'
+        );
         healthCheck.database = 'connected';
       } catch (dbError) {
         healthCheck.database = 'failed';
@@ -385,6 +400,6 @@ exports.handler = async (event, context) => {
       })
     };
   } finally {
-    await prisma.$disconnect();
+    await disconnectPrisma();
   }
 };
