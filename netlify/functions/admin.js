@@ -1,7 +1,19 @@
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 
-const prisma = new PrismaClient();
+// Configure Prisma for Netlify Functions with PgBouncer
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  },
+  // Optimize for serverless/PgBouncer
+  transactionOptions: {
+    timeout: 5000, // 5 second timeout for serverless
+  },
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
+});
 
 // Helper to handle CORS
 const corsHeaders = {
