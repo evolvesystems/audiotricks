@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { logger } from '../../utils/logger';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import ModernAdminLayout from '../Admin/Layout/ModernAdminLayout';
 import UserDashboard from './UserDashboard';
 import ProjectsPage from './Projects/ProjectsPage';
@@ -19,19 +20,18 @@ import TeamPage from './Team/TeamPage';
 import MyAccountPage from './Account/MyAccountPage';
 import WorkspacesPage from './WorkspacesPage';
 
-// Mock user for now - in a real app this would come from authentication context
-const mockUser = {
-  id: '1',
-  username: 'john_user',
-  email: 'john@example.com',
-  role: 'user'
-};
-
 export default function UserApp() {
   const location = useLocation();
-  const handleLogout = () => {
-    // In a real app, this would clear authentication state
-    logger.log('User logged out');
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      logger.error('Logout error:', error);
+    }
   };
 
   // Route to appropriate component based on current path
@@ -59,6 +59,11 @@ export default function UserApp() {
       default: return <UserDashboard />;
     }
   };
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
   return (
     <ModernAdminLayout>

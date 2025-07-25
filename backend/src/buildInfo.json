@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T07:15:36.042Z",
+  "buildDate": "2025-07-25T09:34:36.984Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "7439a285",
+    "commitHash": "f35f2dc1",
     "branch": "main",
-    "commitDate": "2025-07-25 17:06:50 +1000",
-    "commitMessage": "fix: resolve AuthProvider context errors and React StrictMode issues"
+    "commitDate": "2025-07-25 17:18:28 +1000",
+    "commitMessage": "fix: definitive solution for useAuth outside AuthProvider errors"
   },
   "environment": "development"
 }

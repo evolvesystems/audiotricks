@@ -19,6 +19,9 @@ import DashboardTest from './components/Admin/DashboardTest.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import NotFoundPage from './components/NotFoundPage.tsx'
 import PricingPage from './components/PricingPage.tsx'
+import LoginPage from './components/Auth/LoginPage.tsx'
+import RegisterPage from './components/Auth/RegisterPage.tsx'
+import ProtectedRoute from './components/Auth/ProtectedRoute.tsx'
 import { AdminAuthProvider } from './contexts/AdminAuthContext.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import './index.css'
@@ -34,15 +37,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<App />} />
           <Route path="/pricing" element={<PricingPage />} />
           
-          {/* User Dashboard Routes */}
-          <Route path="/dashboard" element={<UserApp />} />
-          <Route path="/projects/*" element={<UserApp />} />
-          <Route path="/jobs/*" element={<UserApp />} />
-          <Route path="/upload" element={<UserApp />} />
-          <Route path="/team" element={<UserApp />} />
-          <Route path="/account" element={<UserApp />} />
-          <Route path="/workspaces" element={<UserApp />} />
-          <Route path="/settings" element={<UserApp />} />
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
+          {/* User Dashboard Routes - Protected */}
+          <Route path="/dashboard" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/projects/*" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/jobs/*" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/upload" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/team" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/account" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/workspaces" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><UserApp /></ProtectedRoute>} />
           
           {/* Admin Routes */}
           <Route path="/admin/test" element={<AdminTest />} />
