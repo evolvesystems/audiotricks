@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T09:45:15.646Z",
+  "buildDate": "2025-07-25T09:58:23.416Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "b9f5c604",
+    "commitHash": "89471672",
     "branch": "main",
-    "commitDate": "2025-07-25 19:35:13 +1000",
-    "commitMessage": "fix: implement proper user authentication flow with login/register pages"
+    "commitDate": "2025-07-25 19:45:41 +1000",
+    "commitMessage": "fix: implement API key saving functionality for admin settings"
   },
   "environment": "development"
 }
