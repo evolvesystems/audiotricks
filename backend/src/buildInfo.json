@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T09:58:23.416Z",
+  "buildDate": "2025-07-25T10:03:46.433Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "89471672",
+    "commitHash": "dfc4456a",
     "branch": "main",
-    "commitDate": "2025-07-25 19:45:41 +1000",
-    "commitMessage": "fix: implement API key saving functionality for admin settings"
+    "commitDate": "2025-07-25 20:00:46 +1000",
+    "commitMessage": "fix: adapt admin settings to use existing API key endpoints"
   },
   "environment": "development"
 }

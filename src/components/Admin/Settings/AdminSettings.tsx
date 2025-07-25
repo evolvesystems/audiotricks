@@ -204,7 +204,7 @@ export default function AdminSettings() {
       
       await AdminSettingsService.updateApiKeys(token, keysToSave);
       logger.log('API keys saved successfully');
-      alert('API keys saved successfully!\n\nNote: OpenAI and ElevenLabs keys are stored securely in the database. Other keys are temporarily stored locally until the admin settings API is implemented.');
+      alert('API keys saved successfully to the database!');
       setSaving(false);
     } catch (error) {
       logger.error('Error saving API keys:', error);

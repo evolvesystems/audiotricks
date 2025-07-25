@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/admin.controller.js';
+import * as adminSettingsController from '../controllers/admin-settings.controller';
 import { AdminSubscriptionController } from '../controllers/admin/admin-subscription.controller';
 import { AdminEwayController } from '../controllers/admin/admin-eway.controller';
 import { AdminRolesController } from '../controllers/admin/admin-roles.controller';
@@ -95,5 +96,13 @@ router.get('/roles', adminRolesController.getRoles.bind(adminRolesController));
 router.post('/roles', adminRolesController.createRole.bind(adminRolesController));
 router.put('/roles/:roleId/permissions', adminRolesController.updateRolePermissions.bind(adminRolesController));
 router.delete('/roles/:roleId', adminRolesController.deleteRole.bind(adminRolesController));
+
+// ===== ADMIN SETTINGS MANAGEMENT =====
+router.get('/settings', adminSettingsController.getAdminSettings);
+router.put('/settings/api-keys', adminSettingsController.updateApiKeys);
+router.put('/settings/preferences', adminSettingsController.updatePreferences);
+router.put('/settings/profile', adminSettingsController.updateProfile);
+router.post('/settings/change-password', adminSettingsController.changePassword);
+router.post('/settings/2fa', adminSettingsController.toggle2FA);
 
 export default router;

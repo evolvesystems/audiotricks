@@ -51,41 +51,17 @@ export class AdminSettingsService {
    */
   static async getSettings(token: string): Promise<AdminSettingsResponse> {
     try {
-      // For now, fetch user API keys from the existing endpoint
-      const apiKeysResponse = await this.request('GET', '/api-keys', token);
+      const response = await this.request('GET', '/admin/settings', token);
       
-      // Map the response to our settings format
-      const apiKeys: Partial<ApiKeySettings> = {};
-      
-      if (apiKeysResponse.keys) {
-        apiKeysResponse.keys.forEach((key: any) => {
-          if (key.provider === 'openai' && key.isActive) {
-            apiKeys.openaiApiKey = '••••••••' + key.keyPrefix;
-          }
-          if (key.provider === 'elevenlabs' && key.isActive) {
-            apiKeys.elevenlabsApiKey = '••••••••' + key.keyPrefix;
-          }
-        });
+      if (response.success && response.settings) {
+        return {
+          apiKeys: response.settings.apiKeys || {},
+          preferences: response.settings.preferences || {},
+          profile: response.settings.profile || {}
+        };
       }
       
-      // Load other keys from localStorage (temporary solution)
-      const sendgrid = localStorage.getItem('admin_sendgrid_key');
-      const doKey = localStorage.getItem('admin_do_key');
-      const doSecret = localStorage.getItem('admin_do_secret');
-      const stripePub = localStorage.getItem('admin_stripe_pub');
-      const stripeSecret = localStorage.getItem('admin_stripe_secret');
-      const ewayKey = localStorage.getItem('admin_eway_key');
-      const ewayPassword = localStorage.getItem('admin_eway_password');
-      
-      if (sendgrid) apiKeys.sendgridApiKey = sendgrid;
-      if (doKey) apiKeys.digitaloceanSpacesKey = doKey;
-      if (doSecret) apiKeys.digitaloceanSpacesSecret = doSecret;
-      if (stripePub) apiKeys.stripePublishableKey = stripePub;
-      if (stripeSecret) apiKeys.stripeSecretKey = stripeSecret;
-      if (ewayKey) apiKeys.ewayApiKey = ewayKey;
-      if (ewayPassword) apiKeys.ewayApiPassword = ewayPassword;
-      
-      return { apiKeys };
+      return {};
     } catch (error) {
       logger.error('Failed to fetch admin settings:', error);
       // Return empty object if settings don't exist yet
@@ -94,44 +70,10 @@ export class AdminSettingsService {
   }
 
   /**
-   * Update API keys - Using the existing API key endpoint for now
+   * Update API keys
    */
   static async updateApiKeys(token: string, apiKeys: Partial<ApiKeySettings>): Promise<void> {
-    // For now, we'll only store OpenAI and ElevenLabs keys which are supported by the backend
-    // Other keys would need a proper admin settings endpoint
-    const promises: Promise<any>[] = [];
-    
-    if (apiKeys.openaiApiKey) {
-      promises.push(
-        this.request('POST', '/api-keys', token, {
-          provider: 'openai',
-          apiKey: apiKeys.openaiApiKey
-        })
-      );
-    }
-    
-    if (apiKeys.elevenlabsApiKey) {
-      promises.push(
-        this.request('POST', '/api-keys', token, {
-          provider: 'elevenlabs',
-          apiKey: apiKeys.elevenlabsApiKey
-        })
-      );
-    }
-    
-    // For now, we'll store other keys in localStorage as a temporary solution
-    // TODO: Implement proper admin settings endpoint for system-wide API keys
-    if (apiKeys.sendgridApiKey) localStorage.setItem('admin_sendgrid_key', apiKeys.sendgridApiKey);
-    if (apiKeys.digitaloceanSpacesKey) localStorage.setItem('admin_do_key', apiKeys.digitaloceanSpacesKey);
-    if (apiKeys.digitaloceanSpacesSecret) localStorage.setItem('admin_do_secret', apiKeys.digitaloceanSpacesSecret);
-    if (apiKeys.stripePublishableKey) localStorage.setItem('admin_stripe_pub', apiKeys.stripePublishableKey);
-    if (apiKeys.stripeSecretKey) localStorage.setItem('admin_stripe_secret', apiKeys.stripeSecretKey);
-    if (apiKeys.ewayApiKey) localStorage.setItem('admin_eway_key', apiKeys.ewayApiKey);
-    if (apiKeys.ewayApiPassword) localStorage.setItem('admin_eway_password', apiKeys.ewayApiPassword);
-    
-    if (promises.length > 0) {
-      await Promise.all(promises);
-    }
+    return this.request('PUT', '/admin/settings/api-keys', token, { apiKeys });
   }
 
   /**
