@@ -58,6 +58,47 @@ export function useApiKeys(token: string | null) {
     }
   };
 
+  const getApiKeys = async () => {
+    if (!token) {
+      // Fall back to localStorage if no token
+      return {
+        openai: localStorage.getItem('openai_api_key') || '',
+        elevenLabs: localStorage.getItem('elevenlabs_api_key') || ''
+      };
+    }
+
+    try {
+      const response = await fetch('/api/settings/api-keys/get', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          openai: data.openaiKey || '',
+          elevenLabs: data.elevenLabsKey || ''
+        };
+      } else if (response.status === 404) {
+        // API endpoint not yet implemented, fall back to localStorage
+        return {
+          openai: localStorage.getItem('openai_api_key') || '',
+          elevenLabs: localStorage.getItem('elevenlabs_api_key') || ''
+        };
+      } else {
+        throw new Error('Failed to fetch API keys');
+      }
+    } catch (error) {
+      logger.error('Failed to get API keys:', error);
+      // Fall back to localStorage
+      return {
+        openai: localStorage.getItem('openai_api_key') || '',
+        elevenLabs: localStorage.getItem('elevenlabs_api_key') || ''
+      };
+    }
+  };
+
   const saveApiKeys = async (keys: SaveApiKeysParams) => {
     if (!token) {
       setError('Authentication required');
@@ -129,6 +170,7 @@ export function useApiKeys(token: string | null) {
 
   return { 
     hasKeys, 
+    getApiKeys,
     saveApiKeys, 
     checkKeys, 
     loading, 

@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T06:55:55.479Z",
+  "buildDate": "2025-07-25T07:02:25.881Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "fd79d051",
+    "commitHash": "9ee159ea",
     "branch": "main",
-    "commitDate": "2025-07-24 23:21:51 +1000",
-    "commitMessage": "chore: update Netlify functions manifest timestamp"
+    "commitDate": "2025-07-25 16:58:07 +1000",
+    "commitMessage": "feat: complete comprehensive refactoring and modernization"
   },
   "environment": "development"
 }

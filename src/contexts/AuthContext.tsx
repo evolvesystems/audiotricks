@@ -26,24 +26,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    // Defensive fallback to prevent app crash during initialization
-    console.warn('useAuth called before AuthProvider is ready, using fallback values');
-    return {
-      user: null,
-      token: null,
-      loading: true,
-      isAuthenticated: false,
-      login: async () => { throw new Error('AuthProvider not ready'); },
-      register: async () => { throw new Error('AuthProvider not ready'); },
-      logout: async () => { throw new Error('AuthProvider not ready'); },
-      checkAuth: async () => { throw new Error('AuthProvider not ready'); },
-      updateProfile: async () => { throw new Error('AuthProvider not ready'); },
-      changePassword: async () => { throw new Error('AuthProvider not ready'); },
-      setUser: () => { console.warn('AuthProvider not ready'); },
-      setToken: () => { console.warn('AuthProvider not ready'); },
-      error: 'AuthProvider not initialized',
-      clearError: () => { console.warn('AuthProvider not ready'); }
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
@@ -207,25 +190,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     clearError
   };
 
-  // Don't render children until AuthProvider is initialized
-  if (!isInitialized) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        fontSize: '18px',
-        color: '#666'
-      }}>
-        Initializing...
-      </div>
-    );
-  }
-
+  // Always render AuthContext.Provider to prevent useAuth warnings
+  // Show loading screen until initialized
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!isInitialized ? (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          fontSize: '18px',
+          color: '#666'
+        }}>
+          Initializing...
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
