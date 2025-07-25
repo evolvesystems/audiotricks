@@ -10,19 +10,13 @@ declare global {
  * @returns Configured Prisma client
  */
 function createPrismaClient(): PrismaClient {
-  // Build DATABASE_URL with connection pooling parameters
-  const databaseUrl = process.env.DATABASE_URL || '';
-  const pooledUrl = databaseUrl.includes('?') 
-    ? `${databaseUrl}&connection_limit=10&pool_timeout=10s&pgbouncer=true`
-    : `${databaseUrl}?connection_limit=10&pool_timeout=10s&pgbouncer=true`;
-
   const prisma = new PrismaClient({
     log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'info', 'warn', 'error']
+      ? ['error', 'warn']
       : ['error'],
     datasources: {
       db: {
-        url: pooledUrl,
+        url: process.env.DATABASE_URL,
       },
     },
   });

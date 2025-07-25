@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T10:03:46.433Z",
+  "buildDate": "2025-07-25T10:12:40.929Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "dfc4456a",
+    "commitHash": "7eb02511",
     "branch": "main",
-    "commitDate": "2025-07-25 20:00:46 +1000",
-    "commitMessage": "fix: adapt admin settings to use existing API key endpoints"
+    "commitDate": "2025-07-25 20:04:55 +1000",
+    "commitMessage": "feat: implement proper database-driven admin settings API"
   },
   "environment": "development"
 }

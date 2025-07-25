@@ -3,7 +3,8 @@
  */
 export { authSettings } from './config.js';
 export { auth, AuthDependencies } from './dependencies.ts';
-export { JWTManager, JWTPayload } from './jwt.js';
+export { JWTManager } from './jwt.js';
+export type { JWTPayload } from './jwt.js';
 export { APIKeyManager } from './api-keys.js';
 
 // Re-export types
