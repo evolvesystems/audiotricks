@@ -10,9 +10,9 @@ const prisma = new PrismaClient({
       url: process.env.DATABASE_URL
     }
   },
-  // Optimize for serverless/PgBouncer
+  // Optimize for serverless/PgBouncer with longer timeouts
   transactionOptions: {
-    timeout: 5000, // 5 second timeout for serverless
+    timeout: 20000, // 20 second timeout for serverless
   },
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
 });
