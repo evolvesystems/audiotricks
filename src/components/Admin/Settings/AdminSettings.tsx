@@ -19,9 +19,10 @@ import {
   AdminProfile 
 } from './types';
 import { logger } from '../../../utils/logger';
+import AdminSettingsService from '../../../services/adminSettings.service';
 
 export default function AdminSettings() {
-  const { user } = useAdminAuthContext();
+  const { user, token } = useAdminAuthContext();
   const [activeTab, setActiveTab] = useState<TabType>('preferences');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -92,9 +93,25 @@ export default function AdminSettings() {
   }, []);
 
   const fetchSettings = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     try {
-      // Mock data for now - these endpoints would need to be implemented
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const settings = await AdminSettingsService.getSettings(token);
+      
+      // Update state with fetched settings
+      if (settings.apiKeys) {
+        setApiKeys(prev => ({ ...prev, ...settings.apiKeys }));
+      }
+      if (settings.preferences) {
+        setPreferences(prev => ({ ...prev, ...settings.preferences }));
+      }
+      if (settings.profile) {
+        setProfile(prev => ({ ...prev, ...settings.profile }));
+      }
+      
       setLoading(false);
     } catch (error) {
       logger.error('Error fetching admin settings:', error);
@@ -103,18 +120,21 @@ export default function AdminSettings() {
   };
 
   const handleSavePreferences = async () => {
+    if (!token) return;
     setSaving(true);
     try {
-      logger.log('Saving preferences:', preferences);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await AdminSettingsService.updatePreferences(token, preferences);
+      logger.log('Preferences saved successfully');
       setSaving(false);
     } catch (error) {
       logger.error('Error saving preferences:', error);
+      alert('Failed to save preferences. Please try again.');
       setSaving(false);
     }
   };
 
   const handlePasswordChange = async () => {
+    if (!token) return;
     if (security.newPassword !== security.confirmPassword) {
       alert('New passwords do not match');
       return;
@@ -122,55 +142,73 @@ export default function AdminSettings() {
     
     setSaving(true);
     try {
-      logger.log('Changing password...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await AdminSettingsService.changePassword(token, security.currentPassword, security.newPassword);
       setSecurity({
         ...security,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
+      logger.log('Password changed successfully');
+      alert('Password changed successfully');
       setSaving(false);
     } catch (error) {
       logger.error('Error changing password:', error);
+      alert('Failed to change password. Please check your current password and try again.');
       setSaving(false);
     }
   };
 
   const handleToggle2FA = async () => {
+    if (!token) return;
     setSaving(true);
     try {
-      logger.log('Toggling 2FA...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSecurity({ ...security, twoFactorEnabled: !security.twoFactorEnabled });
+      const newState = !security.twoFactorEnabled;
+      await AdminSettingsService.toggle2FA(token, newState);
+      setSecurity({ ...security, twoFactorEnabled: newState });
+      logger.log(`2FA ${newState ? 'enabled' : 'disabled'} successfully`);
       setSaving(false);
     } catch (error) {
       logger.error('Error toggling 2FA:', error);
+      alert('Failed to update 2FA settings. Please try again.');
       setSaving(false);
     }
   };
 
   const handleSaveProfile = async () => {
+    if (!token) return;
     setSaving(true);
     try {
-      logger.log('Saving profile:', profile);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await AdminSettingsService.updateProfile(token, profile);
+      logger.log('Profile saved successfully');
       setEditingProfile(false);
       setSaving(false);
     } catch (error) {
       logger.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
       setSaving(false);
     }
   };
 
   const handleSaveApiKeys = async () => {
+    if (!token) return;
     setSaving(true);
     try {
-      logger.log('Saving API keys...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Only send non-empty API keys to avoid overwriting with empty values
+      const keysToSave: Partial<ApiKeySettings> = {};
+      Object.entries(apiKeys).forEach(([key, value]) => {
+        if (value && value.trim() !== '') {
+          keysToSave[key as keyof ApiKeySettings] = value;
+        }
+      });
+      
+      await AdminSettingsService.updateApiKeys(token, keysToSave);
+      logger.log('API keys saved successfully');
+      alert('API keys saved successfully');
       setSaving(false);
     } catch (error) {
       logger.error('Error saving API keys:', error);
+      alert('Failed to save API keys. Please try again.');
       setSaving(false);
     }
   };

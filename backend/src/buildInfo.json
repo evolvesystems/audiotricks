@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T09:34:36.984Z",
+  "buildDate": "2025-07-25T09:45:15.646Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "f35f2dc1",
+    "commitHash": "b9f5c604",
     "branch": "main",
-    "commitDate": "2025-07-25 17:18:28 +1000",
-    "commitMessage": "fix: definitive solution for useAuth outside AuthProvider errors"
+    "commitDate": "2025-07-25 19:35:13 +1000",
+    "commitMessage": "fix: implement proper user authentication flow with login/register pages"
   },
   "environment": "development"
 }
