@@ -6,20 +6,39 @@ declare global {
 }
 
 /**
- * Creates and configures a Prisma client instance with connection pooling
- * @returns Configured Prisma client
+ * Creates and configures a Prisma client instance with DigitalOcean connection pooling
+ * @returns Configured Prisma client optimized for PgBouncer
  */
 function createPrismaClient(): PrismaClient {
+  // Use connection pooled URL for better connection management
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is required');
+  }
+
   const prisma = new PrismaClient({
     log: process.env.NODE_ENV === 'development' 
       ? ['error', 'warn']
       : ['error'],
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: databaseUrl,
       },
     },
+    // Optimize for connection pooling
+    transactionOptions: {
+      timeout: 10000, // 10 second timeout
+    },
   });
+
+  // Add connection lifecycle logging using process events
+  if (process.env.NODE_ENV === 'development') {
+    process.on('beforeExit', async () => {
+      logger.info('Process exiting, disconnecting Prisma client...');
+      await closeDatabaseConnection();
+    });
+  }
 
   return prisma;
 }

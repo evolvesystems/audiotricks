@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T10:12:40.929Z",
+  "buildDate": "2025-07-25T10:18:02.468Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "7eb02511",
+    "commitHash": "d878295a",
     "branch": "main",
-    "commitDate": "2025-07-25 20:04:55 +1000",
-    "commitMessage": "feat: implement proper database-driven admin settings API"
+    "commitDate": "2025-07-25 20:13:13 +1000",
+    "commitMessage": "fix: resolve JWT export issue and improve database connection handling"
   },
   "environment": "development"
 }
