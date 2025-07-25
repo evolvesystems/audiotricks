@@ -31,11 +31,12 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const colorClasses = spinnerColors[color];
 
   return (
-    <div className={`inline-flex items-center justify-center ${className}`}>
+    <div className={`inline-flex items-center justify-center ${className}`} role="status" aria-label="Loading">
       <svg
         className={`animate-spin ${sizeClasses} ${colorClasses}`}
         fill="none"
         viewBox="0 0 24 24"
+        aria-hidden="true"
       >
         <circle
           className="opacity-25"

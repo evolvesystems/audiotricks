@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { User, Stats } from './types';
 import { apiRequest } from '../../../utils/api';
 import { logger } from '../../../utils/logger';
+import { apiClient } from '../../../services/api';
 
 interface UseAdminDashboardProps {
   token: string;
@@ -34,25 +35,13 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
 
   const fetchUsers = async () => {
     try {
-      const params = new URLSearchParams({
+      const params = {
         page: page.toString(),
         limit: '20',
         ...(searchTerm && { search: searchTerm })
-      });
+      };
 
-      const response = await fetch(`/api/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        logger.error('Failed to fetch users - Status:', response.status);
-        await handleApiError(response, 'Failed to fetch users');
-        return;
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get('/admin/users', params);
       logger.debug('Fetched users:', data);
       logger.debug('Users array:', data.users);
       logger.debug('Setting users state to:', data.users || []);
@@ -60,53 +49,36 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
       setTotalPages(data.pagination?.pages || 1);
     } catch (error) {
       logger.error('Error fetching users:', error);
+      if (error.isAuthError && onSessionExpired) {
+        onSessionExpired();
+      }
       setUsers([]);
     }
   };
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        logger.error('Failed to fetch stats - Status:', response.status);
-        await handleApiError(response, 'Failed to fetch stats');
-        return;
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get('/admin/stats');
       logger.debug('Fetched stats:', data);
       setStats(data.stats || null);
     } catch (error) {
       logger.error('Error fetching stats:', error);
+      if (error.isAuthError && onSessionExpired) {
+        onSessionExpired();
+      }
       setStats(null);
     }
   };
 
   const fetchUsersWithToken = async (authToken: string) => {
     try {
-      const params = new URLSearchParams({
+      const params = {
         page: page.toString(),
         limit: '20',
         ...(searchTerm && { search: searchTerm })
-      });
+      };
 
-      const response = await fetch(`/api/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
-        }
-      });
-
-      if (!response.ok) {
-        logger.error('Failed to fetch users - Status:', response.status);
-        return;
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get('/admin/users', params);
       logger.debug('Fetched users with stored token:', data);
       logger.debug('Users array from stored token:', data.users);
       logger.debug('Setting users state from stored token to:', data.users || []);
@@ -120,18 +92,7 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
 
   const fetchStatsWithToken = async (authToken: string) => {
     try {
-      const response = await fetch('/api/admin/stats', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
-        }
-      });
-
-      if (!response.ok) {
-        logger.error('Failed to fetch stats - Status:', response.status);
-        return;
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get('/admin/stats');
       logger.debug('Fetched stats with stored token:', data);
       setStats(data.stats || null);
     } catch (error) {
@@ -182,16 +143,8 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
 
   const toggleUserStatus = async (userId: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/toggle-status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        fetchUsers();
-      }
+      await apiClient.put(`/admin/users/${userId}/toggle-status`);
+      fetchUsers();
     } catch (error) {
       // Silent error handling
     }
@@ -199,18 +152,8 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}/role`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ role })
-      });
-
-      if (response.ok) {
-        fetchUsers();
-      }
+      await apiClient.put(`/admin/users/${userId}/role`, { role });
+      fetchUsers();
     } catch (error) {
       // Silent error handling
     }
@@ -220,22 +163,11 @@ export function useAdminDashboard({ token, onSessionExpired }: UseAdminDashboard
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        fetchUsers();
-        fetchStats();
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to delete user');
-      }
+      await apiClient.delete(`/admin/users/${userId}`);
+      fetchUsers();
+      fetchStats();
     } catch (error) {
-      alert('Failed to delete user');
+      alert(error.message || 'Failed to delete user');
     }
   };
 

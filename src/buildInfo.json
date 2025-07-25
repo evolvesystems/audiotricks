@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-24T13:21:25.459Z",
+  "buildDate": "2025-07-25T06:55:55.479Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "76abc740",
+    "commitHash": "fd79d051",
     "branch": "main",
-    "commitDate": "2025-07-24 23:10:47 +1000",
-    "commitMessage": "chore: update build timestamps and switch environment to production mode"
+    "commitDate": "2025-07-24 23:21:51 +1000",
+    "commitMessage": "chore: update Netlify functions manifest timestamp"
   },
-  "environment": "production"
+  "environment": "development"
 }

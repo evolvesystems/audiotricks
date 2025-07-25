@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { Key, Eye, EyeOff, Check, X, AlertCircle, TestTube, BarChart3, Trash2 } from 'lucide-react';
+import React from 'react';
+import { Key, AlertCircle, TestTube, BarChart3, Trash2 } from 'lucide-react';
 import { ApiKeyInfo, ApiKeyUsageStats } from '../../services/apikey.service';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { ApiKeyEditForm } from './ApiKeyEditForm';
+import { ApiKeyUsageStats as UsageStatsDisplay } from './ApiKeyUsageStats';
+import { getProviderName, getProviderDescription, getProviderUrl } from './providerUtils';
 
 interface ApiKeyCardProps {
   provider: string;
@@ -46,30 +49,6 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({
   onKeyChange,
   onToggleShow
 }) => {
-  const getProviderName = (provider: string) => {
-    switch (provider) {
-      case 'openai': return 'OpenAI';
-      case 'elevenlabs': return 'ElevenLabs';
-      default: return provider;
-    }
-  };
-
-  const getProviderDescription = (provider: string) => {
-    switch (provider) {
-      case 'openai': return 'Used for audio transcription and text analysis';
-      case 'elevenlabs': return 'Used for voice synthesis and audio generation';
-      default: return 'API key for external service';
-    }
-  };
-
-  const getProviderUrl = (provider: string) => {
-    switch (provider) {
-      case 'openai': return 'https://platform.openai.com/api-keys';
-      case 'elevenlabs': return 'https://elevenlabs.io/app/settings/api';
-      default: return '#';
-    }
-  };
-
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
@@ -144,34 +123,14 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({
 
           {/* Key Value */}
           {editing ? (
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                API Key
-              </label>
-              <div className="flex space-x-2">
-                <div className="flex-1 relative">
-                  <input
-                    type={showKey ? 'text' : 'password'}
-                    value={newKey}
-                    onChange={(e) => onKeyChange(e.target.value)}
-                    placeholder="Enter your API key..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    onClick={onToggleShow}
-                    className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <Button onClick={onSave} variant="primary" size="sm">
-                  <Check className="h-4 w-4" />
-                </Button>
-                <Button onClick={() => onEdit(false)} variant="outline" size="sm">
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <ApiKeyEditForm
+              newKey={newKey}
+              showKey={showKey}
+              onKeyChange={onKeyChange}
+              onToggleShow={onToggleShow}
+              onSave={onSave}
+              onCancel={() => onEdit(false)}
+            />
           ) : (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -192,45 +151,10 @@ export const ApiKeyCard: React.FC<ApiKeyCardProps> = ({
 
           {/* Usage Statistics */}
           {showUsage && (
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium text-gray-900">Usage Statistics</h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onLoadUsage}
-                  disabled={!usage}
-                >
-                  Refresh
-                </Button>
-              </div>
-              {usage ? (
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Total Requests:</span>
-                    <div className="font-semibold">{usage.totalRequests.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Total Tokens:</span>
-                    <div className="font-semibold">{usage.totalTokens?.toLocaleString() || 'N/A'}</div>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">This Month:</span>
-                    <div className="font-semibold">{usage.currentMonthRequests.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Last Used:</span>
-                    <div className="font-semibold">
-                      {usage.lastUsed ? new Date(usage.lastUsed).toLocaleDateString() : 'Never'}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <LoadingSpinner size="sm" />
-                </div>
-              )}
-            </div>
+            <UsageStatsDisplay
+              usage={usage}
+              onRefresh={onLoadUsage}
+            />
           )}
 
           {/* Last Updated */}

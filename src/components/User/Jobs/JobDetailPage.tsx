@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { JobHeader } from './Detail/JobHeader';
 import { JobStats } from './Detail/JobStats';
 import { JobContent } from './Detail/JobContent';
+import { apiClient } from '../../../services/api';
 
 interface KeyMoment {
   timestamp: number;
@@ -53,19 +54,12 @@ export default function JobDetailPage() {
       setLoading(true);
       setError(null);
 
-      const authToken = localStorage.getItem('authToken');
-      const headers = authToken ? {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json'
-      } : {};
-
       // Try to fetch from API
-      const response = await fetch(`/api/jobs/${id}`, { headers });
-      
-      if (response.ok) {
-        const jobData = await response.json();
-        setJob(jobData);
-      } else {
+      const jobData = await apiClient.get(`/jobs/${id}`);
+      setJob(jobData);
+    } catch (error: any) {
+      // Fallback mock data for development on API error
+      if (error?.isNotFoundError) {
         // Fallback mock data for development
         setJob({
           id: id!,
@@ -133,9 +127,9 @@ export default function JobDetailPage() {
           ],
           audioUrl: '/api/audio/sample-meeting.mp3'
         });
+      } else {
+        setError('Failed to load job details. Please try again.');
       }
-    } catch (err) {
-      setError('Failed to load job details. Please try again.');
     } finally {
       setLoading(false);
     }

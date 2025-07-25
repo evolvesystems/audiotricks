@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { DashboardStats } from './Dashboard/DashboardStats';
 import { RecentProjects } from './Dashboard/RecentProjects';
 import { RecentJobs } from './Dashboard/RecentJobs';
+import { apiClient } from '../../services/api';
+import { logger } from '../../utils/logger';
 
 interface Project {
   id: string;
@@ -66,38 +68,30 @@ export const UserDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       
-      // Load dashboard statistics
-      const statsResponse = await fetch('/api/dashboard/stats', { headers });
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        // Ensure data structure is complete
-        const safeStatsData = {
-          totalProjects: statsData.totalProjects || 0,
-          totalJobs: statsData.totalJobs || 0,
-          completedJobs: statsData.completedJobs || 0,
-          processingJobs: statsData.processingJobs || 0,
-          failedJobs: statsData.failedJobs || 0,
-          usageThisMonth: {
-            audioFiles: statsData.usageThisMonth?.audioFiles || 0,
-            storageUsed: statsData.usageThisMonth?.storageUsed || 0,
-            apiCalls: statsData.usageThisMonth?.apiCalls || 0
-          }
-        };
-        setStats(safeStatsData);
-      } else {
-        logger.error('Dashboard stats API returned error:', statsResponse.status);
-      }
-
-      // Load recent activity (projects and jobs)
-      const recentResponse = await fetch('/api/dashboard/recent', { headers });
-      if (recentResponse.ok) {
-        const recentData = await recentResponse.json();
-        setRecentProjects(recentData.projects || []);
-        setRecentJobs(recentData.jobs || []);
-      }
+      // Load dashboard statistics and recent activity in parallel
+      const [statsData, recentData] = await Promise.all([
+        apiClient.get('/dashboard/stats'),
+        apiClient.get('/dashboard/recent')
+      ]);
+      
+      // Ensure data structure is complete
+      const safeStatsData = {
+        totalProjects: statsData.totalProjects || 0,
+        totalJobs: statsData.totalJobs || 0,
+        completedJobs: statsData.completedJobs || 0,
+        processingJobs: statsData.processingJobs || 0,
+        failedJobs: statsData.failedJobs || 0,
+        usageThisMonth: {
+          audioFiles: statsData.usageThisMonth?.audioFiles || 0,
+          storageUsed: statsData.usageThisMonth?.storageUsed || 0,
+          apiCalls: statsData.usageThisMonth?.apiCalls || 0
+        }
+      };
+      setStats(safeStatsData);
+      
+      setRecentProjects(recentData.projects || []);
+      setRecentJobs(recentData.jobs || []);
 
     } catch (error) {
       // Failed to load dashboard data - using fallback data

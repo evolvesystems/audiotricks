@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { uploadService, UploadProgress as UploadProgressType } from '../../services/upload';
-import { processingService } from '../../services/processing';
-import { ApiError } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { UploadDropzone } from './UploadDropzone';
 import { UploadProgress } from './UploadProgress';
 import { ApiKeyValidator } from './ApiKeyValidator';
 import ProcessingOptions from './ProcessingOptions';
 import ErrorDisplay from './ErrorDisplay';
+import { useUploadOrchestrator } from './UploadOrchestrator';
+import { useProcessingStatus } from './ProcessingStatus';
 
 interface BackendAudioUploaderProps {
   onUploadComplete?: (upload: any) => void;
@@ -88,166 +87,23 @@ export const BackendAudioUploader: React.FC<BackendAudioUploaderProps> = ({
     });
   }, []);
 
-  const handleError = useCallback((error: string | ApiError) => {
-    const errorMessage = typeof error === 'string' ? error : error.message;
-    setUploadState(prev => ({
-      ...prev,
-      status: 'error',
-      error: errorMessage
-    }));
-    onError(errorMessage);
-  }, [onError]);
+  const { startProcessingPolling } = useProcessingStatus({
+    setUploadState,
+    onProcessingComplete,
+    onError
+  });
 
-  const handleFileDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (!isAuthenticated) {
-      handleError('Authentication required for uploads');
-      return;
-    }
-
-    if (!apiKeysValid) {
-      handleError('Please configure required API keys before uploading');
-      return;
-    }
-
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    // Validate file
-    if (file.size > 25 * 1024 * 1024) { // 25MB
-      handleError('File size must be less than 25MB');
-      return;
-    }
-
-    try {
-      setUploadState({
-        status: 'uploading',
-        progress: 0,
-        stage: 'Starting upload...',
-        file,
-        uploadId: null,
-        jobId: null,
-        error: null
-      });
-
-      // Upload file
-      const uploadResult = await uploadService.uploadFile(
-        file,
-        workspaceId,
-        (progress: number) => {
-          setUploadState(prev => ({
-            ...prev,
-            progress: progress,
-            stage: `Uploading... ${Math.round(progress)}%`
-          }));
-        }
-      );
-
-      setUploadState(prev => ({
-        ...prev,
-        uploadId: uploadResult, // uploadResult is a string (upload ID)
-        stage: 'Upload complete!',
-        status: 'completed',
-        progress: 100
-      }));
-
-      // Call the upload complete callback if provided
-      if (onUploadComplete) {
-        onUploadComplete({
-          id: uploadResult, // uploadResult is a string (upload ID)
-          filename: file.name,
-          fileSize: file.size,
-          storageUrl: '', // Will be set after processing
-          cdnUrl: '', // Will be set after processing
-          duration: 0 // Will be calculated during processing
-        });
-      }
-
-      // If processing is also requested, start it
-      if (onProcessingComplete && (processingOptions.transcribe || processingOptions.summarize || processingOptions.analyze)) {
-        setUploadState(prev => ({
-          ...prev,
-          stage: 'Starting processing...',
-          status: 'processing',
-          progress: 0
-        }));
-
-        // Start processing
-        const operations = [];
-        if (processingOptions.transcribe) operations.push('transcribe');
-        if (processingOptions.summarize) operations.push('summarize');
-        if (processingOptions.analyze) operations.push('analyze');
-
-        const processingResult = await processingService.audio.startProcessing({
-          audioUploadId: uploadResult, // uploadResult is a string (upload ID)
-          workspaceId,
-          operations,
-          config: {
-            language: processingOptions.language,
-            model: processingOptions.model,
-            temperature: processingOptions.temperature,
-            maxTokens: processingOptions.maxTokens
-          }
-        });
-
-        setUploadState(prev => ({
-          ...prev,
-          jobId: processingResult.job.jobId,
-          stage: 'Processing audio...'
-        }));
-
-        // Poll for completion
-        await pollForCompletion(processingResult.job.jobId);
-      }
-
-    } catch (error) {
-      handleError(error instanceof Error ? error.message : String(error));
-    }
-  }, [isAuthenticated, apiKeysValid, processingOptions, workspaceId, handleError]);
-
-  const pollForCompletion = async (jobId: string) => {
-    const maxAttempts = 60; // 5 minutes max
-    let attempts = 0;
-
-    const poll = async (): Promise<void> => {
-      try {
-        const result = await processingService.jobs.getJob(jobId);
-        
-        setUploadState(prev => ({
-          ...prev,
-          progress: result.progress || 0,
-          stage: `Processing... ${Math.round(result.progress || 0)}%`
-        }));
-
-        if (result.status === 'completed') {
-          setUploadState(prev => ({
-            ...prev,
-            status: 'completed',
-            progress: 100,
-            stage: 'Processing complete!'
-          }));
-          if (onProcessingComplete) {
-            onProcessingComplete(result.result);
-          }
-          return;
-        }
-
-        if (result.status === 'failed') {
-          throw new Error(result.error || 'Processing failed');
-        }
-
-        if (attempts < maxAttempts && (result.status === 'queued' || result.status === 'processing')) {
-          attempts++;
-          setTimeout(poll, 5000); // Poll every 5 seconds
-        } else if (attempts >= maxAttempts) {
-          throw new Error('Processing timeout - please try again');
-        }
-      } catch (error) {
-        handleError(error instanceof Error ? error.message : String(error));
-      }
-    };
-
-    await poll();
-  };
+  const { handleFileDrop } = useUploadOrchestrator({
+    isAuthenticated,
+    apiKeysValid,
+    processingOptions,
+    workspaceId,
+    setUploadState,
+    onUploadComplete,
+    onProcessingComplete,
+    onError,
+    startProcessingPolling
+  });
 
   const cancelUpload = async () => {
     // Cancel logic would go here

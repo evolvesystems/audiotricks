@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { logger } from '../../utils/logger';
+import UserFormFields from './UserFormFields';
+import { validateUserForm, parseErrorMessage } from './UserValidation';
 
 interface User {
   id?: string;
@@ -61,26 +63,7 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
   }, [user, mode, isOpen]);
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    if (!formData.username) {
-      newErrors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    }
-
-    if (mode === 'create' && !formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password && formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-
+    const newErrors = validateUserForm(formData, mode);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -96,26 +79,7 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
       onClose();
     } catch (error) {
       logger.error('Failed to save user:', error);
-      
-      // Enhanced error handling
-      let errorMessage = 'Failed to save user';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        
-        // Parse validation errors if they exist
-        if (error.message.includes('validation') || error.message.includes('required')) {
-          try {
-            const errorData = JSON.parse(error.message);
-            if (errorData.errors && Array.isArray(errorData.errors)) {
-              errorMessage = errorData.errors.map((err: any) => err.msg).join(', ');
-            }
-          } catch {
-            // If parsing fails, use the original message
-          }
-        }
-      }
-      
+      const errorMessage = parseErrorMessage(error);
       setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
@@ -139,159 +103,13 @@ export default function UserModal({ user, isOpen, onClose, onSave, mode }: UserM
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.username ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password {mode === 'edit' && '(leave empty to keep current)'}
-            </label>
-            <input
-              type="password"
-              value={formData.password || ''}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
-            </label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Business Name
-            </label>
-            <input
-              type="text"
-              value={formData.businessName || ''}
-              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Optional"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mobile
-            </label>
-            <input
-              type="tel"
-              value={formData.mobile || ''}
-              onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="+1 234 567 8900"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country
-              </label>
-              <select
-                value={formData.country || 'US'}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="GB">United Kingdom</option>
-                <option value="AU">Australia</option>
-                <option value="DE">Germany</option>
-                <option value="FR">France</option>
-                <option value="JP">Japan</option>
-                <option value="CN">China</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Currency
-              </label>
-              <select
-                value={formData.currency || 'USD'}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="AUD">AUD</option>
-                <option value="CAD">CAD</option>
-                <option value="JPY">JPY</option>
-                <option value="CNY">CNY</option>
-              </select>
-            </div>
-          </div>
-
-          {mode === 'edit' && (
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
-                Account is active
-              </label>
-            </div>
-          )}
-
-          {errors.submit && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-sm text-red-800">{errors.submit}</p>
-            </div>
-          )}
+        <form onSubmit={handleSubmit}>
+          <UserFormFields
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            mode={mode}
+          />
 
           <div className="flex gap-2 pt-4">
             <button

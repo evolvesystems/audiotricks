@@ -8,6 +8,7 @@ import { CurrentSubscription } from './Subscription/CurrentSubscription';
 import { PlanChangeModal } from './Subscription/PlanChangeModal';
 import { mockCurrentPlan, mockPlans, SubscriptionPlan } from './Subscription/mockData';
 import { logger } from '../../../utils/logger';
+import { apiClient } from '../../../services/api';
 
 interface SubscriptionSectionProps {
   subscription: any;
@@ -25,19 +26,8 @@ export default function SubscriptionSection({ subscription, onUpdate }: Subscrip
 
   const fetchAvailablePlans = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/subscription-plans', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setAvailablePlans(data.plans || mockPlans);
-      } else {
-        setAvailablePlans(mockPlans);
-      }
+      const data = await apiClient.get('/subscription-plans');
+      setAvailablePlans(data.plans || mockPlans);
     } catch (error) {
       logger.error('Error fetching plans:', error);
       setAvailablePlans(mockPlans);
@@ -51,17 +41,8 @@ export default function SubscriptionSection({ subscription, onUpdate }: Subscrip
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/user/subscription/cancel', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        onUpdate();
-      }
+      await apiClient.post('/user/subscription/cancel');
+      onUpdate();
     } catch (error) {
       logger.error('Error canceling subscription:', error);
     } finally {
@@ -72,20 +53,9 @@ export default function SubscriptionSection({ subscription, onUpdate }: Subscrip
   const handleChangePlan = async (planId: string) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/user/subscription/change', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ planId })
-      });
-
-      if (response.ok) {
-        setChangingPlan(false);
-        onUpdate();
-      }
+      await apiClient.post('/user/subscription/change', { planId });
+      setChangingPlan(false);
+      onUpdate();
     } catch (error) {
       logger.error('Error changing plan:', error);
     } finally {

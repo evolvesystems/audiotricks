@@ -12,6 +12,7 @@ import {
   XCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { apiClient } from '../../../services/api';
 
 interface BillingRecord {
   id: string;
@@ -33,19 +34,8 @@ export default function BillingHistorySection() {
 
   const fetchBillingHistory = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/user/billing-history', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setBillingHistory(data.records || []);
-      } else {
-        setBillingHistory([]);
-      }
+      const data = await apiClient.get('/user/billing-history');
+      setBillingHistory(data.records || []);
     } catch (error) {
       logger.error('Error fetching billing history:', error);
       setBillingHistory([]);

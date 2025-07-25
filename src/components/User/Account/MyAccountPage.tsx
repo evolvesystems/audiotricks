@@ -18,6 +18,7 @@ import SubscriptionSection from './SubscriptionSection';
 import PaymentMethodsSection from './PaymentMethodsSection';
 import BillingHistorySection from './BillingHistorySection';
 import ProfileSection from './ProfileSection';
+import { apiClient } from '../../../services/api';
 
 type TabType = 'profile' | 'subscription' | 'payment' | 'billing';
 
@@ -54,31 +55,14 @@ export default function MyAccountPage() {
 
   const fetchAccountData = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      // Fetch user profile and subscription in parallel
+      const [profileData, subData] = await Promise.all([
+        apiClient.get('/user/profile'),
+        apiClient.get('/user/subscription')
+      ]);
       
-      // Fetch user profile
-      const profileResponse = await fetch('/api/user/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        setUserProfile(profileData);
-      }
-
-      // Fetch subscription
-      const subResponse = await fetch('/api/user/subscription', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (subResponse.ok) {
-        const subData = await subResponse.json();
-        setSubscription(subData);
-      }
+      setUserProfile(profileData);
+      setSubscription(subData);
     } catch (error) {
       logger.error('Error fetching account data:', error);
     } finally {
