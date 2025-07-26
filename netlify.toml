@@ -4,8 +4,6 @@
 
 [functions]
   directory = "netlify/functions"
-  # Extend function timeout to 30 seconds for database connections
-  timeout = 30
   
 # Environment settings for functions
 [build.environment]

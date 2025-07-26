@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-25T10:18:02.468Z",
+  "buildDate": "2025-07-26T01:58:44.031Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "d878295a",
+    "commitHash": "0094d49a",
     "branch": "main",
-    "commitDate": "2025-07-25 20:13:13 +1000",
-    "commitMessage": "fix: resolve JWT export issue and improve database connection handling"
+    "commitDate": "2025-07-26 00:22:59 +1000",
+    "commitMessage": "fix: implement PgBouncer connection retry logic and extend timeouts"
   },
   "environment": "development"
 }

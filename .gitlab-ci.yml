@@ -1,0 +1,271 @@
+# GitLab CI/CD Pipeline for AudioTricks
+# Automatically builds, tests, and deploys to DigitalOcean
+
+stages:
+  - build
+  - test
+  - deploy
+  - notify
+
+variables:
+  NODE_IMAGE: node:20-alpine
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+# Cache dependencies across jobs
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - frontend/node_modules/
+    - backend/node_modules/
+    - .npm/
+
+# Build stage - compile frontend and check backend
+build:frontend:
+  stage: build
+  image: $NODE_IMAGE
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run build:frontend
+  artifacts:
+    paths:
+      - frontend/dist/
+    expire_in: 1 day
+  only:
+    - main
+    - develop
+    - merge_requests
+
+build:backend:
+  stage: build
+  image: $NODE_IMAGE
+  script:
+    - cd backend
+    - npm ci --cache .npm --prefer-offline
+    - npx prisma generate
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Test stage - run tests and linting
+test:frontend:
+  stage: test
+  image: $NODE_IMAGE
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run test:frontend -- --coverage
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+  only:
+    - merge_requests
+
+test:backend:
+  stage: test
+  image: $NODE_IMAGE
+  services:
+    - postgres:15-alpine
+  variables:
+    POSTGRES_DB: audiotricks_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: testpass
+    DATABASE_URL: "postgresql://postgres:testpass@postgres:5432/audiotricks_test"
+  script:
+    - cd backend
+    - npm ci --cache .npm --prefer-offline
+    - npx prisma migrate deploy
+    - npm test -- --coverage
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
+  only:
+    - merge_requests
+
+lint:
+  stage: test
+  image: $NODE_IMAGE
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run lint
+  only:
+    - merge_requests
+
+# Security scanning
+security:dependencies:
+  stage: test
+  image: $NODE_IMAGE
+  script:
+    - npm audit --production
+    - cd backend && npm audit --production
+  allow_failure: true
+  only:
+    - main
+    - develop
+
+# Deploy to staging (automatic for develop branch)
+deploy:staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $STAGING_USER@$STAGING_HOST << 'EOF'
+        cd /var/www/audiotricks
+        git pull origin develop
+        npm install
+        cd backend && npm install
+        cd ..
+        npm run build:frontend
+        cd backend
+        npx prisma migrate deploy
+        pm2 restart audiotricks-staging
+      EOF
+  environment:
+    name: staging
+    url: https://staging.audiotricks.com
+  only:
+    - develop
+
+# Deploy to production (manual for main branch)
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$PRODUCTION_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
+  script:
+    # Create backup before deployment
+    - |
+      ssh $PRODUCTION_USER@$PRODUCTION_HOST << 'EOF'
+        # Backup current version
+        cd /var/www
+        tar -czf audiotricks-backup-$(date +%Y%m%d-%H%M%S).tar.gz audiotricks/
+        
+        # Deploy new version
+        cd /var/www/audiotricks
+        git pull origin main
+        npm install
+        cd backend && npm install
+        cd ..
+        npm run build:frontend
+        
+        # Run migrations with backup
+        cd backend
+        npx prisma migrate deploy
+        
+        # Restart with zero downtime
+        pm2 reload audiotricks --update-env
+        
+        # Health check
+        sleep 5
+        curl -f http://localhost:3000/api/health || exit 1
+      EOF
+  environment:
+    name: production
+    url: https://audiotricks.com
+  when: manual
+  only:
+    - main
+
+# Rollback job (manual trigger)
+rollback:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$PRODUCTION_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $PRODUCTION_USER@$PRODUCTION_HOST << 'EOF'
+        cd /var/www
+        # Find latest backup
+        LATEST_BACKUP=$(ls -t audiotricks-backup-*.tar.gz | head -1)
+        if [ -z "$LATEST_BACKUP" ]; then
+          echo "No backup found!"
+          exit 1
+        fi
+        
+        # Restore from backup
+        rm -rf audiotricks-rollback
+        mv audiotricks audiotricks-rollback
+        tar -xzf $LATEST_BACKUP
+        
+        # Restart application
+        cd audiotricks/backend
+        pm2 restart audiotricks
+      EOF
+  environment:
+    name: production
+    url: https://audiotricks.com
+  when: manual
+  only:
+    - main
+
+# Notification stage
+notify:slack:
+  stage: notify
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        ENV="Production"
+        URL="https://audiotricks.com"
+      else
+        ENV="Staging"
+        URL="https://staging.audiotricks.com"
+      fi
+      
+      curl -X POST $SLACK_WEBHOOK_URL \
+        -H 'Content-type: application/json' \
+        -d "{
+          \"text\": \"Deployment Successful! 🚀\",
+          \"blocks\": [{
+            \"type\": \"section\",
+            \"text\": {
+              \"type\": \"mrkdwn\",
+              \"text\": \"*AudioTricks Deployment Complete*\n*Environment:* $ENV\n*Branch:* $CI_COMMIT_BRANCH\n*Commit:* $CI_COMMIT_SHORT_SHA\n*Author:* $CI_COMMIT_AUTHOR\n*URL:* $URL\"
+            }
+          }]
+        }"
+  only:
+    - main
+    - develop
+  when: on_success
+
+notify:email:
+  stage: notify
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      echo "Deployment failed for AudioTricks" | \
+      curl -s --url 'smtp://smtp.gmail.com:587' \
+        --ssl-reqd \
+        --mail-from "$GMAIL_USER" \
+        --mail-rcpt "$ALERT_EMAIL" \
+        --user "$GMAIL_USER:$GMAIL_APP_PASSWORD" \
+        -T -
+  only:
+    - main
+    - develop
+  when: on_failure
