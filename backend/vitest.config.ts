@@ -12,12 +12,12 @@ export default defineConfig({
     environment: 'node',
     
     // Setup files for tests
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['./src/tests/setup.ts'],
     
     // Test file patterns
     include: [
-      'tests/**/*.test.ts',
-      'tests/**/*.spec.ts'
+      'src/tests/**/*.test.ts',
+      'src/tests/**/*.spec.ts'
     ],
     
     // Exclude patterns

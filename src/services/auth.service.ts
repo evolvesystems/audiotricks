@@ -24,17 +24,13 @@ export class AuthService {
    */
   static async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      console.log('📡 Making login API request...');
       const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-      console.log('📡 Login API response received:', response);
       
       // Store token
       tokenManager.setToken(response.token);
-      console.log('🔑 Token stored successfully');
       
       return response;
     } catch (error) {
-      console.error('📡 Login API error:', error);
       if (error instanceof ApiError) {
         // Enhance login-specific error messages
         if (error.status === 401) {
