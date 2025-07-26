@@ -6,11 +6,18 @@ import Footer from '../Footer';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, error: authError, clearError } = useAuth();
+  const { login, error: authError, clearError, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Handle navigation after successful authentication
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   React.useEffect(() => {
     if (authError) {
@@ -26,7 +33,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      navigate('/dashboard');
+      // Navigation will be handled by useEffect when isAuthenticated becomes true
     } catch (err: any) {
       console.error('❌ Login failed:', err);
       setError(err.message || 'Login failed. Please try again.');
