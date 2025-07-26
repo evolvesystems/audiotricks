@@ -82,3 +82,7 @@ coverage/
 # Misc
 *.local
 .cache
+
+# Debug logs
+debug-logs/
+*.debug.log
