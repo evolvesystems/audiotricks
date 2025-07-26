@@ -92,18 +92,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const login = async (email: string, password: string) => {
+    console.log('🔐 AuthContext: Starting login...');
     setLoading(true);
     setError(null);
 
     try {
       const response: AuthResponse = await AuthService.login({ email, password });
+      console.log('🔐 AuthContext: Login response received, setting user and token...');
       setUser(response.user);
       setToken(response.token);
+      console.log('🔐 AuthContext: User and token set successfully');
     } catch (error) {
+      console.error('🔐 AuthContext: Login error:', error);
       handleAuthError(error);
       throw error;
     } finally {
       setLoading(false);
+      console.log('🔐 AuthContext: Login process completed');
     }
   };
 

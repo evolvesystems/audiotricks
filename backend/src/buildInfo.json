@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-26T02:19:41.250Z",
+  "buildDate": "2025-07-26T03:39:42.451Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "c6b025b6",
+    "commitHash": "5ab9d16f",
     "branch": "main",
-    "commitDate": "2025-07-26 11:59:10 +1000",
-    "commitMessage": "fix: resolve Netlify deployment issues with configuration and connection pooling"
+    "commitDate": "2025-07-26 12:20:20 +1000",
+    "commitMessage": "fix: optimize Netlify deployment to resolve complete site failure"
   },
   "environment": "development"
 }

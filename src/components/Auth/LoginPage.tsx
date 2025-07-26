@@ -25,9 +25,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('🔐 Starting login process...');
       await login(email, password);
+      console.log('✅ Login successful, navigating to dashboard...');
       navigate('/dashboard');
     } catch (err: any) {
+      console.error('❌ Login failed:', err);
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
