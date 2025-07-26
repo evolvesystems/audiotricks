@@ -1,6 +1,7 @@
 [build]
-  command = "npm run build:production"
+  command = "npm run build && cd netlify/functions && npm ci --production"
   publish = "dist"
+  command_origin = "config"
 
 [functions]
   directory = "netlify/functions"
@@ -10,7 +11,7 @@
   # Ensure Prisma uses the correct engines
   PRISMA_ENGINES_MIRROR = "https://binaries.prisma.sh"
   # Force function rebuild
-  NETLIFY_FUNCTIONS_CACHE_BUST = "1738330641"
+  NETLIFY_FUNCTIONS_CACHE_BUST = "1738331200"
 
 # Static assets must be served first (before API redirects)
 [[redirects]]

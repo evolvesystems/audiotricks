@@ -35,7 +35,7 @@ const puppeteer = require('puppeteer');
     const currentUrl = page.url();
     console.log('📍 Current URL:', currentUrl);
     
-    if (currentUrl.includes('/admin') && \!currentUrl.includes('/login')) {
+    if (currentUrl.includes('/admin') && !currentUrl.includes('/login')) {
       console.log('✅ Login successful - redirected to admin area');
     } else {
       console.log('⚠️  Login may have failed or redirect pending');

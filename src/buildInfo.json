@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "buildDate": "2025-07-26T01:58:44.031Z",
+  "buildDate": "2025-07-26T02:19:41.250Z",
   "buildNumber": "local",
   "git": {
-    "commitHash": "0094d49a",
+    "commitHash": "c6b025b6",
     "branch": "main",
-    "commitDate": "2025-07-26 00:22:59 +1000",
-    "commitMessage": "fix: implement PgBouncer connection retry logic and extend timeouts"
+    "commitDate": "2025-07-26 11:59:10 +1000",
+    "commitMessage": "fix: resolve Netlify deployment issues with configuration and connection pooling"
   },
   "environment": "development"
 }
